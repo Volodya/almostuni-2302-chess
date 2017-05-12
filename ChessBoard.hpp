@@ -2,11 +2,22 @@
 #define CHESSBOARD__
 
 #include <iterator>
+#include <vector>
+#include <memory>
 
 enum PlayerColour
 {
-	WHITE, BLACK
+	WHITE=1, BLACK=-1
 };
+
+constexpr double
+	CHECKMATE_WEIGHT=-100000000, // mate is always more important
+	BOARD_PAWN_WEIGHT=100,
+	BOARD_KNIGHT_WEIGHT=300,
+	BOARD_BISHOP_WEIGHT=300,
+	BOARD_ROOK_WEIGHT=500,
+	BOARD_QUEEN_WEIGHT=700
+	;
 
 typedef char ChessPiece;
 
@@ -34,18 +45,24 @@ private:
 
 class ChessBoard
 {
+	std::vector<std::shared_ptr<ChessBoard>> possibleMoves;
+	bool possibleMovesCalculated;
+	
 	ChessPiece board[8][8];
 	PlayerColour turn;
 public:
 	ChessBoard();
-	bool isCheckMate();
-	bool isCheck();
-	bool isEmpty(char file, int rank);
+	bool isCheckMate() /*const*/;
+	bool isCheck() const;
+	bool isEmpty(char file, int rank) const;
 	void placePiece(char file, int rank, ChessPiece piece);
 	ChessPiece getPiece(char file, int rank) const;
-	ChessBoard move(char fileFrom, int rankFrom, char fileTo, int rankTo);
-	PlayerColour getTurn();
-	void debugPrint();
+	ChessBoard move(char fileFrom, int rankFrom, char fileTo, int rankTo) const;
+	PlayerColour getTurn() const;
+	
+	double weight() /*const*/; // analise the position
+	
+	void debugPrint() const;
 	
 	ChessBoardIterator begin();
 	ChessBoardIterator end();

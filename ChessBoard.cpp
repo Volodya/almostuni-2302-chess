@@ -1,8 +1,10 @@
 #include "ChessBoard.hpp"
 #include <iostream>
 
+#include "chessfunctions.hpp"
 
 ChessBoard::ChessBoard()
+	: turn(WHITE), possibleMoves(0), possibleMovesCalculated(false)
 {
 	for(int i=0; i<8; ++i)
 	{
@@ -13,7 +15,7 @@ ChessBoard::ChessBoard()
 	}
 }
 
-void ChessBoard::debugPrint()
+void ChessBoard::debugPrint() const
 {
 	std::cout << ' ';
 	for(int i=0; i<8; ++i)
@@ -32,7 +34,7 @@ void ChessBoard::debugPrint()
 	}
 }
 
-PlayerColour ChessBoard::getTurn()
+PlayerColour ChessBoard::getTurn() const
 {
 	return turn;
 }
@@ -41,12 +43,14 @@ void ChessBoard::placePiece(char file, int rank, ChessPiece piece)
 {
 	board[rank-1][file-'A'] = piece;
 }
-ChessBoard ChessBoard::move(char fileFrom, int rankFrom, char fileTo, int rankTo)
+ChessBoard ChessBoard::move(char fileFrom, int rankFrom, char fileTo, int rankTo) const
 {
 	ChessBoard result(*this);
 	
 	result.placePiece(fileTo, rankTo, this->getPiece(fileFrom, rankFrom));
-	this->placePiece(fileFrom, rankFrom, ' ');
+	result.placePiece(fileFrom, rankFrom, ' ');
+	
+	result.turn = (this->turn==WHITE) ? BLACK : WHITE;
 	
 	return result;
 }
@@ -54,9 +58,77 @@ ChessPiece ChessBoard::getPiece(char file, int rank) const
 {
 	return board[rank-1][file-'A'];
 }
-bool ChessBoard::isEmpty(char file, int rank)
+bool ChessBoard::isEmpty(char file, int rank) const
 {
 	return (board[rank-1][file-'A'] == ' ');
+}
+
+double ChessBoard::weight() /*const*/
+{
+	return
+		(isCheckMate() ? (double)turn * CHECKMATE_WEIGHT : 0) // Check Mate
+
+		+
+			// count pieces
+		(ChessFunctions::countPieces(*this, 'p') - ChessFunctions::countPieces(*this, 'P')) * BOARD_PAWN_WEIGHT
+		+
+		(ChessFunctions::countPieces(*this, 'k') - ChessFunctions::countPieces(*this, 'K')) * BOARD_KNIGHT_WEIGHT
+		+
+		(ChessFunctions::countPieces(*this, 'b') - ChessFunctions::countPieces(*this, 'B')) * BOARD_BISHOP_WEIGHT
+		+
+		(ChessFunctions::countPieces(*this, 'r') - ChessFunctions::countPieces(*this, 'R')) * BOARD_ROOK_WEIGHT
+		+
+		(ChessFunctions::countPieces(*this, 'q') - ChessFunctions::countPieces(*this, 'Q')) * BOARD_QUEEN_WEIGHT
+		/*
+			// todo: create more metrics
+		+
+		
+			// count attacked pieces
+			
+		+
+		
+			// count attacked empty positions
+		
+		*/
+		;
+}
+
+bool ChessBoard::isCheckMate() /*const*/
+{
+	int count=0;
+	if(turn==WHITE)
+	{
+		// count white pieces
+		count=ChessFunctions::countPieces(*this, [](ChessPiece onBoard) {
+			return onBoard=='p' || onBoard=='n' || onBoard=='b' || onBoard=='r' || onBoard=='q' || onBoard=='k';
+		});
+	}
+	else
+	{
+		// count black pieces
+		count=ChessFunctions::countPieces(*this, [](ChessPiece onBoard) {
+			return onBoard=='P' || onBoard=='N' || onBoard=='B' || onBoard=='R' || onBoard=='Q' || onBoard=='K';
+		});
+	}
+	
+	if(count==0)
+	{
+		return true;
+	}
+	
+	if(isCheck())
+	{
+		// if we cannot get out of check
+		return true;
+	}
+	
+	return false;
+}
+
+bool ChessBoard::isCheck() const
+{
+	// todo: implement!
+	return false;
 }
 
 ChessBoardIterator ChessBoard::begin()
