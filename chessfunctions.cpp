@@ -66,7 +66,25 @@ std::vector<ChessBoard> ChessFunctions::getPossibleMoves(ChessBoard cb)
 				move(result, cb, file, rank, pawnBlackMoveNotTake, false, true);
 				move(result, cb, file, rank, pawnBlackMoveTake,    true, false);
 				break;
+			case 'r':
+			case 'R':
+				move(result, cb, file, rank, rookMove);
+				break;
+			case 'n':
+			case 'N':
+				move(result, cb, file, rank, knightMove);
+				break;
 			case 'b':
+			case 'B':
+				move(result, cb, file, rank, bishopMove);
+				break;
+			case 'q':
+			case 'Q':
+				move(result, cb, file, rank, queenMove);
+				break;
+			case 'k':
+			case 'K':
+				move(result, cb, file, rank, kingMove);
 				break;
 		}
 	}
