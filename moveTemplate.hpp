@@ -18,7 +18,8 @@ const MoveTemplate pawnWhiteMoveNotTake =
 };
 const MoveTemplate pawnWhiteMoveTake =
 {
-	{ std::pair<int, int>(1,1), std::pair<int, int>(-1,1) }
+	{ std::pair<int, int>(1,1) },
+	{ std::pair<int, int>(-1,1) }
 };
 const MoveTemplate pawnBlackMoveNotTake =
 {
@@ -26,7 +27,8 @@ const MoveTemplate pawnBlackMoveNotTake =
 };
 const MoveTemplate pawnBlackMoveTake =
 {
-	{ std::pair<int, int>(1,-1), std::pair<int, int>(-1,-1) }
+	{ std::pair<int, int>(1,-1) },
+	{ std::pair<int, int>(-1,-1) }
 };
 
 const MoveTemplate knightMove =

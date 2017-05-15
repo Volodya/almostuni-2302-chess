@@ -1,12 +1,12 @@
 #include "chessfunctions.hpp"
 
-#include "moveTemplate.hpp"
-
 #include <iostream>
 
 
-void move(std::vector<ChessBoard> &result, const ChessBoard &cb, char file, int rank,
-	const MoveTemplate& mt, bool canTake=true, bool canNotTake=true)
+
+void ChessFunctions::move(MoveRecordingFunction resFunction,
+	const ChessBoard &cb, char file, int rank,
+	const MoveTemplate& mt, bool canTake, bool canNotTake)
 {
 	char newFile;
 	int newRank;
@@ -23,72 +23,32 @@ void move(std::vector<ChessBoard> &result, const ChessBoard &cb, char file, int 
 			
 			if(!cb.isEmpty(newFile, newRank))
 			{
-				if(canTake && !ChessFunctions::ownPiece(cb.getPiece(newFile, newRank), cb.getTurn()))
+				if(canTake)
 				{
-					result.push_back(cb.move(file, rank, newFile, newRank));
+					if(ChessFunctions::ownPiece(cb.getPiece(newFile, newRank), cb.getTurn()))
+					{
+						resFunction(file, rank, newFile, newRank, false);
+					}
+					else
+					{
+						resFunction(file, rank, newFile, newRank, true);
+					}
 				}
+				break; // stop if a cell isn't empty
 			}
-			else // from: if(!cb.isEmpty(newFile, newRank))
+			else // if empty
 			{
-				if(canNotTake)
+				if(canTake)
 				{
-					result.push_back(cb.move(file, rank, newFile, newRank));
+					resFunction(file, rank, newFile, newRank, true);
+				}
+				else if(canNotTake)
+				{
+					resFunction(file, rank, newFile, newRank, false);
 				}
 			}
 		}
 	}
-}
-
-// Regular function
-
-std::vector<ChessBoard> ChessFunctions::getPossibleMoves(ChessBoard cb)
-{
-	std::vector<ChessBoard> result;
-	
-	PlayerColour turn = cb.getTurn();
-
-	for(auto it = cb.begin(); it != cb.end(); ++it)
-	{
-		if(*it == ' ') continue;
-		
-		if(!ownPiece(*it, turn)) continue;
-				
-		int rank = it.getRank();
-		char file = it.getFile();
-
-		switch(*it)
-		{
-			case 'p':
-				move(result, cb, file, rank, pawnWhiteMoveNotTake, false, true);
-				move(result, cb, file, rank, pawnWhiteMoveTake,    true, false);
-				break;
-			case 'P':
-				move(result, cb, file, rank, pawnBlackMoveNotTake, false, true);
-				move(result, cb, file, rank, pawnBlackMoveTake,    true, false);
-				break;
-			case 'r':
-			case 'R':
-				move(result, cb, file, rank, rookMove);
-				break;
-			case 'n':
-			case 'N':
-				move(result, cb, file, rank, knightMove);
-				break;
-			case 'b':
-			case 'B':
-				move(result, cb, file, rank, bishopMove);
-				break;
-			case 'q':
-			case 'Q':
-				move(result, cb, file, rank, queenMove);
-				break;
-			case 'k':
-			case 'K':
-				move(result, cb, file, rank, kingMove);
-				break;
-		}
-	}
-	return result;
 }
 
 // todo: reimplement iterator for const

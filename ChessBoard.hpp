@@ -4,6 +4,7 @@
 #include <iterator>
 #include <vector>
 #include <memory>
+#include <cstdint>
 
 enum PlayerColour
 {
@@ -49,6 +50,9 @@ class ChessBoard
 	bool possibleMovesCalculated;
 	
 	ChessPiece board[8][8];
+	int8_t underAttackByWhite[8][8];
+	int8_t underAttackByBlack[8][8];
+	
 	PlayerColour turn;
 public:
 	ChessBoard();
@@ -57,10 +61,13 @@ public:
 	bool isEmpty(char file, int rank) const;
 	void placePiece(char file, int rank, ChessPiece piece);
 	ChessPiece getPiece(char file, int rank) const;
-	ChessBoard move(char fileFrom, int rankFrom, char fileTo, int rankTo) const;
+	std::shared_ptr<ChessBoard> move(char fileFrom, int rankFrom, char fileTo, int rankTo) const;
 	PlayerColour getTurn() const;
 	
 	double weight() /*const*/; // analise the position
+	
+	void calculatePossibleMoves();
+	std::vector<std::shared_ptr<ChessBoard>> getPossibleMoves() const;
 	
 	void debugPrint() const;
 	

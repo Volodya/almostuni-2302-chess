@@ -7,6 +7,7 @@ int main()
 {
 	ChessBoard cb;
 	// standard chess board
+	cb.placePiece('A', 3, 'Q');
 	cb.placePiece('A', 2, 'p');
 	cb.placePiece('B', 2, 'p');
 	cb.placePiece('C', 2, 'p');
@@ -39,18 +40,21 @@ int main()
 	cb.placePiece('F', 8, 'B');
 	cb.placePiece('G', 8, 'N');
 	cb.placePiece('H', 8, 'R');
+
+	cb.calculatePossibleMoves();
 	
 	cb.debugPrint();
 	std::cout << "Weight: " << cb.weight() << std::endl;
 	
-	auto tmp = ChessFunctions::getPossibleMoves(cb);
+	auto tmp = cb.getPossibleMoves();
 	
 	std::cout << "Number of possible moves: " << tmp.size() << std::endl;
-	
+	/*
 	for(auto it=tmp.begin(); it!=tmp.end(); ++it)
 	{
-		it->debugPrint();
-		std::cout << "Weight: " << it->weight() << std::endl;
+		(*it)->debugPrint();
+		std::cout << "Weight: " << (*it)->weight() << std::endl;
 	}
+	*/
 	return 0;
 }
