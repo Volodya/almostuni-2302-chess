@@ -72,5 +72,5 @@ int ChessFunctions::countPieces(/*const*/ ChessBoard &cb, ChessPiece cp)
 
 bool ChessFunctions::ownPiece(ChessPiece cp, PlayerColour turn)
 {
-	return (cp>='a' && cp<='z' && turn == WHITE);
+	return (cp>='a' && cp<='z' && turn == BLACK);
 }

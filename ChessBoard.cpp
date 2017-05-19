@@ -234,46 +234,46 @@ void ChessBoard::calculatePossibleMoves()
 
 		switch(*it)
 		{
-			case 'p':
+			case 'P':
 				ChessFunctions::move(whiteTurnFunctionNoTake, *this, file, rank,
 					pawnWhiteMoveNotTake, false, true);
 				ChessFunctions::move(whiteTurnFunction, *this, file, rank,
 					pawnWhiteMoveTake,    true, false);
 				break;
-			case 'P':
+			case 'p':
 				ChessFunctions::move(blackTurnFunctionNoTake, *this, file, rank,
 					pawnBlackMoveNotTake, false, true);
 				ChessFunctions::move(blackTurnFunction, *this, file, rank,
 					pawnBlackMoveTake,    true, false);
 				break;
-			case 'r':
+			case 'R':
 				ChessFunctions::move(whiteTurnFunction, *this, file, rank, rookMove);
 				break;
-			case 'R':
+			case 'r':
 				ChessFunctions::move(blackTurnFunction, *this, file, rank, rookMove);
 				break;
-			case 'n':
+			case 'N':
 				ChessFunctions::move(whiteTurnFunction, *this, file, rank, knightMove);
 				break;
-			case 'N':
+			case 'n':
 				ChessFunctions::move(blackTurnFunction, *this, file, rank, knightMove);
 				break;
-			case 'b':
+			case 'B':
 				ChessFunctions::move(whiteTurnFunction, *this, file, rank, bishopMove);
 				break;
-			case 'B':
+			case 'b':
 				ChessFunctions::move(blackTurnFunction, *this, file, rank, bishopMove);
 				break;
-			case 'q':
+			case 'Q':
 				ChessFunctions::move(whiteTurnFunction, *this, file, rank, queenMove);
 				break;
-			case 'Q':
+			case 'q':
 				ChessFunctions::move(blackTurnFunction, *this, file, rank, queenMove);
 				break;
-			case 'k':
+			case 'K':
 				ChessFunctions::move(whiteTurnFunction, *this, file, rank, kingMove);
 				break;
-			case 'K':
+			case 'k':
 				ChessFunctions::move(blackTurnFunction, *this, file, rank, kingMove);
 				break;
 		}
