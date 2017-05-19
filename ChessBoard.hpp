@@ -49,15 +49,16 @@ class ChessBoard
 	std::vector<std::shared_ptr<ChessBoard>> possibleMoves;
 	bool possibleMovesCalculated;
 	
-	ChessPiece board[8][8];
+	ChessPiece board[8][8]; // [rank][file]
 	int8_t underAttackByWhite[8][8];
 	int8_t underAttackByBlack[8][8];
 	
 	PlayerColour turn;
+	bool check;
 public:
 	ChessBoard();
 	bool isCheckMate() /*const*/;
-	bool isCheck() const;
+	bool isCheck();
 	bool isEmpty(char file, int rank) const;
 	void placePiece(char file, int rank, ChessPiece piece);
 	ChessPiece getPiece(char file, int rank) const;
@@ -68,6 +69,8 @@ public:
 	
 	void calculatePossibleMoves();
 	std::vector<std::shared_ptr<ChessBoard>> getPossibleMoves() const;
+	
+	bool isPositionPossible() const;
 	
 	void debugPrint() const;
 	

@@ -2,9 +2,10 @@
 #include <iostream>
 
 #include "chessfunctions.hpp"
+#include "moveTemplate.hpp"
 
 ChessBoard::ChessBoard()
-	: possibleMoves(0), possibleMovesCalculated(false), turn(WHITE)
+	: possibleMoves(0), possibleMovesCalculated(false), turn(WHITE), check(false)
 {
 	for(int i=0; i<8; ++i)
 	{
@@ -107,15 +108,15 @@ double ChessBoard::weight() /*const*/
 
 		+
 			// count pieces
-		(ChessFunctions::countPieces(*this, 'p') - ChessFunctions::countPieces(*this, 'P')) * BOARD_PAWN_WEIGHT
+		(ChessFunctions::countPieces(*this, 'P') - ChessFunctions::countPieces(*this, 'p')) * BOARD_PAWN_WEIGHT
 		+
-		(ChessFunctions::countPieces(*this, 'k') - ChessFunctions::countPieces(*this, 'K')) * BOARD_KNIGHT_WEIGHT
+		(ChessFunctions::countPieces(*this, 'K') - ChessFunctions::countPieces(*this, 'k')) * BOARD_KNIGHT_WEIGHT
 		+
-		(ChessFunctions::countPieces(*this, 'b') - ChessFunctions::countPieces(*this, 'B')) * BOARD_BISHOP_WEIGHT
+		(ChessFunctions::countPieces(*this, 'B') - ChessFunctions::countPieces(*this, 'b')) * BOARD_BISHOP_WEIGHT
 		+
-		(ChessFunctions::countPieces(*this, 'r') - ChessFunctions::countPieces(*this, 'R')) * BOARD_ROOK_WEIGHT
+		(ChessFunctions::countPieces(*this, 'R') - ChessFunctions::countPieces(*this, 'r')) * BOARD_ROOK_WEIGHT
 		+
-		(ChessFunctions::countPieces(*this, 'q') - ChessFunctions::countPieces(*this, 'Q')) * BOARD_QUEEN_WEIGHT
+		(ChessFunctions::countPieces(*this, 'Q') - ChessFunctions::countPieces(*this, 'q')) * BOARD_QUEEN_WEIGHT
 		/*
 			// todo: create more metrics
 		+
@@ -133,7 +134,7 @@ double ChessBoard::weight() /*const*/
 bool ChessBoard::isCheckMate() /*const*/
 {
 	int count=0;
-	if(turn==WHITE)
+	if(turn==BLACK)
 	{
 		// count white pieces
 		count=ChessFunctions::countPieces(*this, [](ChessPiece onBoard) {
@@ -155,17 +156,43 @@ bool ChessBoard::isCheckMate() /*const*/
 	
 	if(isCheck())
 	{
-		// if we cannot get out of check
-		return true;
+		if(!possibleMovesCalculated)
+		{
+			calculatePossibleMoves();
+		}
+		std::cout << possibleMoves.size() << std::endl;
+		return possibleMoves.empty();
 	}
 	
 	return false;
 }
 
-bool ChessBoard::isCheck() const
+bool ChessBoard::isCheck()
 {
-	// todo: implement!
+	if(!possibleMovesCalculated)
+	{
+		calculatePossibleMoves();
+	}
+	
+	return check;
+	
+	/*
+	for(int rank=0; rank<8; ++rank)
+	{
+		for(int file=0; file<8; ++file)
+		{
+			if(board[rank][file]=='K' && turn==WHITE)
+			{
+				return underAttackByBlack[rank][file]>0;
+			}
+			if(board[rank][file]=='k' && turn==BLACK)
+			{
+				return underAttackByWhite[rank][file]>0;
+			}
+		}
+	}
 	return false;
+	*/
 }
 
 void ChessBoard::calculatePossibleMoves()
@@ -182,7 +209,12 @@ void ChessBoard::calculatePossibleMoves()
 			[this](char file, int rank, char newFile, int newRank, bool def) {
 				if(!def)
 				{
-					this->possibleMoves.push_back(this->move(file, rank, newFile, newRank));
+				std::cout << "whiteTurnFunction" << std::endl;
+					auto maybeMove = this->move(file, rank, newFile, newRank);
+					if(maybeMove->isPositionPossible())
+					{
+						this->possibleMoves.push_back(maybeMove);
+					}
 				}
 				++this->underAttackByWhite[newRank-1][newFile-'A'];
 			};
@@ -195,6 +227,11 @@ void ChessBoard::calculatePossibleMoves()
 		blackTurnFunction =
 			[this](char file, int rank, char newFile, int newRank, bool def) {
 				++this->underAttackByBlack[newRank-1][newFile-'A'];
+				
+				if(this->board[newRank-1][newFile-'A']=='K')
+				{
+					this->check=true;
+				}
 			};
 		blackTurnFunctionNoTake = 
 			[this](char file, int rank, char newFile, int newRank, bool def) {}; // empty
@@ -205,7 +242,11 @@ void ChessBoard::calculatePossibleMoves()
 			[this](char file, int rank, char newFile, int newRank, bool def) {
 				if(!def)
 				{
-					this->possibleMoves.push_back(this->move(file, rank, newFile, newRank));
+					auto maybeMove = this->move(file, rank, newFile, newRank);
+					if(maybeMove->isPositionPossible())
+					{
+						this->possibleMoves.push_back(maybeMove);
+					}
 				}
 				++this->underAttackByBlack[newRank-1][newFile-'A'];
 			};
@@ -218,6 +259,11 @@ void ChessBoard::calculatePossibleMoves()
 		whiteTurnFunction =
 			[this](char file, int rank, char newFile, int newRank, bool def) {
 				++this->underAttackByWhite[newRank-1][newFile-'A'];
+				
+				if(this->board[newRank-1][newFile-'A']=='k')
+				{
+					this->check=true;
+				}
 			};
 		whiteTurnFunctionNoTake = 
 			[this](char file, int rank, char newFile, int newRank, bool def) {}; // empty
@@ -286,6 +332,65 @@ std::vector<std::shared_ptr<ChessBoard>> ChessBoard::getPossibleMoves() const
 	return possibleMoves;
 }
 
+bool ChessBoard::isPositionPossible() const
+{
+	int king[2]={};
+	bool found=false;
+	for(int rank=0; !found && rank<8; ++rank)
+	{
+		for(int file=0; file<8; ++file)
+		{
+			if(
+				(board[rank][file]=='K' && turn==WHITE) || 
+				(board[rank][file]=='k' && turn==BLACK)
+			  )
+			{
+				found = true;
+				king[0] = file;
+				king[1] = rank;
+				break;
+			}
+		}
+	}
+			std::cout << "Hello, i am here!!!" << std::endl;
+
+	if(turn==BLACK)
+	{
+		std::cout << "Hello, i am here!!!" << std::endl;
+		// checking pawns
+		for(auto dir=pawnBlackMoveTake.begin(); dir!=pawnBlackMoveTake.end(); ++dir)
+		{
+			for(auto pos=dir->begin(); pos!=dir->end(); ++pos)
+			{
+				if(board[king[0]-pos->first][king[0]-pos->second]=='p')
+				{
+					return false;
+				}
+				else if(board[king[0]-pos->first][king[0]-pos->second]!=' ')
+				{
+					break;
+				}
+			}
+		}
+		// checking queen
+		for(auto dir=queenMove.begin(); dir!=queenMove.end(); ++dir)
+		{
+			for(auto pos=dir->begin(); pos!=dir->end(); ++pos)
+			{
+				if(board[king[0]-pos->first][king[0]-pos->second]=='q')
+				{
+					return false;
+				}
+				else if(board[king[0]-pos->first][king[0]-pos->second]!=' ')
+				{
+					break;
+				}
+			}
+		}
+	}
+	
+	return true;
+}
 
 // ITERATOR
 

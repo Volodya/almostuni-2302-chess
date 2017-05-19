@@ -7,7 +7,6 @@ int main()
 {
 	ChessBoard cb;
 	// standard chess board
-	cb.placePiece('A', 3, 'q');
 	cb.placePiece('A', 2, 'P');
 	cb.placePiece('B', 2, 'P');
 	cb.placePiece('C', 2, 'P');
@@ -40,6 +39,9 @@ int main()
 	cb.placePiece('F', 8, 'b');
 	cb.placePiece('G', 8, 'n');
 	cb.placePiece('H', 8, 'r');
+	
+	cb.placePiece('F', 2, 'q');
+	cb.placePiece('D', 1, ' ');
 
 	cb.calculatePossibleMoves();
 	

@@ -101,4 +101,23 @@ const MoveTemplate kingMove =
 	{ std::pair<int, int>(1, -1) }
 };
 
+const std::vector<const MoveTemplate*> standardChessWhiteAttackMoves =
+{
+	&pawnWhiteMoveTake,
+	&knightMove,
+	&bishopMove,
+	&rookMove,
+	&queenMove,
+	&kingMove
+};
+const std::vector<const MoveTemplate*> standardChessBlackAttackMoves =
+{
+	&pawnBlackMoveTake,
+	&knightMove,
+	&bishopMove,
+	&rookMove,
+	&queenMove,
+	&kingMove
+};
+
 #endif
