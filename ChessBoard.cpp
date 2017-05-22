@@ -34,7 +34,7 @@ void ChessBoard::debugPrint() const
 			std::cout << ' ' << board[rank-1][file];
 		}
 		std::cout << std::endl;
-	}
+	}/*
 	if(possibleMovesCalculated)
 	{
 		std::cout << "Under attack by white" << std::endl;
@@ -69,7 +69,7 @@ void ChessBoard::debugPrint() const
 			}
 			std::cout << std::endl;
 		}
-	}
+	}*/
 }
 
 PlayerColour ChessBoard::getTurn() const
@@ -198,75 +198,93 @@ bool ChessBoard::isCheck()
 void ChessBoard::calculatePossibleMoves()
 {
 	using ChessFunctions::MoveRecordingFunction;
-	MoveRecordingFunction whiteTurnFunction;
-	MoveRecordingFunction whiteTurnFunctionNoTake;
-	MoveRecordingFunction blackTurnFunction;
-	MoveRecordingFunction blackTurnFunctionNoTake;
+		// take opponent's piece
+		// or
+		// attack empty space
+	MoveRecordingFunction whiteTurnFunctionTake, blackTurnFunctionTake;
+		// move to empty space
+		// with no possibility of attack
+		// (pawn move forward)
+	MoveRecordingFunction whiteTurnFunctionNoTake, blackTurnFunctionNoTake;
+		// we could recapture on this square	
+	MoveRecordingFunction whiteTurnFunctionDefend, blackTurnFunctionDefend;
+		// empty function
+	MoveRecordingFunction emptyFunction =
+			[this](char file, int rank, char newFile, int newRank) {};
 	
 	if(turn==WHITE)
 	{
-		whiteTurnFunction =
-			[this](char file, int rank, char newFile, int newRank, bool def) {
-				if(!def)
+		whiteTurnFunctionTake =
+			[this](char file, int rank, char newFile, int newRank) {
+				auto maybeMove = this->move(file, rank, newFile, newRank);
+				if(maybeMove->isPositionPossible())
 				{
-				std::cout << "whiteTurnFunction" << std::endl;
-					auto maybeMove = this->move(file, rank, newFile, newRank);
-					if(maybeMove->isPositionPossible())
-					{
-						this->possibleMoves.push_back(maybeMove);
-					}
+					this->possibleMoves.push_back(maybeMove);
 				}
+			};
+		whiteTurnFunctionNoTake =
+			[this](char file, int rank, char newFile, int newRank) {
+				auto maybeMove = this->move(file, rank, newFile, newRank);
+				if(maybeMove->isPositionPossible())
+				{
+					this->possibleMoves.push_back(maybeMove);
+				}
+			};
+		whiteTurnFunctionDefend =
+			[this](char file, int rank, char newFile, int newRank) {
 				++this->underAttackByWhite[newRank-1][newFile-'A'];
 			};
-		
-		whiteTurnFunctionNoTake =
-			[this](char file, int rank, char newFile, int newRank, bool def) {
-				this->possibleMoves.push_back(this->move(file, rank, newFile, newRank));
-			};
 
-		blackTurnFunction =
-			[this](char file, int rank, char newFile, int newRank, bool def) {
-				++this->underAttackByBlack[newRank-1][newFile-'A'];
+		blackTurnFunctionTake =
+			[this](char file, int rank, char newFile, int newRank) {
 				
 				if(this->board[newRank-1][newFile-'A']=='K')
 				{
 					this->check=true;
 				}
 			};
-		blackTurnFunctionNoTake = 
-			[this](char file, int rank, char newFile, int newRank, bool def) {}; // empty
+		blackTurnFunctionNoTake = emptyFunction;
+		blackTurnFunctionDefend =
+			[this](char file, int rank, char newFile, int newRank) {
+				++this->underAttackByBlack[newRank-1][newFile-'A'];
+			};
 	}
 	else // if BLACK
 	{
-		blackTurnFunction =
-			[this](char file, int rank, char newFile, int newRank, bool def) {
-				if(!def)
+		blackTurnFunctionTake =
+			[this](char file, int rank, char newFile, int newRank) {
+				auto maybeMove = this->move(file, rank, newFile, newRank);
+				if(maybeMove->isPositionPossible())
 				{
-					auto maybeMove = this->move(file, rank, newFile, newRank);
-					if(maybeMove->isPositionPossible())
-					{
-						this->possibleMoves.push_back(maybeMove);
-					}
+					this->possibleMoves.push_back(maybeMove);
 				}
+			};
+		blackTurnFunctionNoTake =
+			[this](char file, int rank, char newFile, int newRank) {
+				auto maybeMove = this->move(file, rank, newFile, newRank);
+				if(maybeMove->isPositionPossible())
+				{
+					this->possibleMoves.push_back(maybeMove);
+				}
+			};
+		blackTurnFunctionDefend =
+			[this](char file, int rank, char newFile, int newRank) {
 				++this->underAttackByBlack[newRank-1][newFile-'A'];
 			};
-		
-		blackTurnFunctionNoTake =
-			[this](char file, int rank, char newFile, int newRank, bool def) {
-				this->possibleMoves.push_back(this->move(file, rank, newFile, newRank));
-			};
 
-		whiteTurnFunction =
-			[this](char file, int rank, char newFile, int newRank, bool def) {
-				++this->underAttackByWhite[newRank-1][newFile-'A'];
+		whiteTurnFunctionTake =
+			[this](char file, int rank, char newFile, int newRank) {
 				
 				if(this->board[newRank-1][newFile-'A']=='k')
 				{
 					this->check=true;
 				}
 			};
-		whiteTurnFunctionNoTake = 
-			[this](char file, int rank, char newFile, int newRank, bool def) {}; // empty
+		whiteTurnFunctionNoTake = emptyFunction;
+		whiteTurnFunctionDefend =
+			[this](char file, int rank, char newFile, int newRank) {
+				++this->underAttackByWhite[newRank-1][newFile-'A'];
+			};
 	}
 	
 	for(auto it = this->begin(); it != this->end(); ++it)
@@ -281,46 +299,60 @@ void ChessBoard::calculatePossibleMoves()
 		switch(*it)
 		{
 			case 'P':
-				ChessFunctions::move(whiteTurnFunctionNoTake, *this, file, rank,
-					pawnWhiteMoveNotTake, false, true);
-				ChessFunctions::move(whiteTurnFunction, *this, file, rank,
+				ChessFunctions::move(whiteTurnFunctionNoTake, emptyFunction,
+					*this, file, rank,
+					pawnWhiteMoveNotTake, false);
+				ChessFunctions::move(whiteTurnFunctionTake, whiteTurnFunctionDefend,
+					*this, file, rank,
 					pawnWhiteMoveTake,    true, false);
 				break;
 			case 'p':
-				ChessFunctions::move(blackTurnFunctionNoTake, *this, file, rank,
-					pawnBlackMoveNotTake, false, true);
-				ChessFunctions::move(blackTurnFunction, *this, file, rank,
+				ChessFunctions::move(blackTurnFunctionNoTake, emptyFunction,
+					*this, file, rank,
+					pawnBlackMoveNotTake, false);
+				ChessFunctions::move(blackTurnFunctionTake, blackTurnFunctionDefend,
+					*this, file, rank,
 					pawnBlackMoveTake,    true, false);
 				break;
 			case 'R':
-				ChessFunctions::move(whiteTurnFunction, *this, file, rank, rookMove);
+				ChessFunctions::move(whiteTurnFunctionTake, whiteTurnFunctionDefend,
+					*this, file, rank, rookMove, true);
 				break;
 			case 'r':
-				ChessFunctions::move(blackTurnFunction, *this, file, rank, rookMove);
+				ChessFunctions::move(blackTurnFunctionTake, blackTurnFunctionDefend,
+					*this, file, rank, rookMove, true);
 				break;
 			case 'N':
-				ChessFunctions::move(whiteTurnFunction, *this, file, rank, knightMove);
+				ChessFunctions::move(whiteTurnFunctionTake, whiteTurnFunctionDefend,
+					*this, file, rank, knightMove, true);
 				break;
 			case 'n':
-				ChessFunctions::move(blackTurnFunction, *this, file, rank, knightMove);
+				ChessFunctions::move(blackTurnFunctionTake, blackTurnFunctionDefend,
+					*this, file, rank, knightMove, true);
 				break;
 			case 'B':
-				ChessFunctions::move(whiteTurnFunction, *this, file, rank, bishopMove);
+				ChessFunctions::move(whiteTurnFunctionTake, whiteTurnFunctionDefend,
+					*this, file, rank, bishopMove, true);
 				break;
 			case 'b':
-				ChessFunctions::move(blackTurnFunction, *this, file, rank, bishopMove);
+				ChessFunctions::move(blackTurnFunctionTake, blackTurnFunctionDefend,
+					*this, file, rank, bishopMove, true);
 				break;
 			case 'Q':
-				ChessFunctions::move(whiteTurnFunction, *this, file, rank, queenMove);
+				ChessFunctions::move(whiteTurnFunctionTake, whiteTurnFunctionDefend,
+					*this, file, rank, queenMove, true);
 				break;
 			case 'q':
-				ChessFunctions::move(blackTurnFunction, *this, file, rank, queenMove);
+				ChessFunctions::move(blackTurnFunctionTake, blackTurnFunctionDefend,
+					*this, file, rank, queenMove, true);
 				break;
 			case 'K':
-				ChessFunctions::move(whiteTurnFunction, *this, file, rank, kingMove);
+				ChessFunctions::move(whiteTurnFunctionTake, whiteTurnFunctionDefend,
+					*this, file, rank, kingMove, true);
 				break;
 			case 'k':
-				ChessFunctions::move(blackTurnFunction, *this, file, rank, kingMove);
+				ChessFunctions::move(blackTurnFunctionTake, blackTurnFunctionDefend,
+					*this, file, rank, kingMove, true);
 				break;
 		}
 	}
@@ -340,33 +372,32 @@ bool ChessBoard::isPositionPossible() const
 	{
 		for(int file=0; file<8; ++file)
 		{
+			// if it's white to move, we are looking for a black king
 			if(
-				(board[rank][file]=='K' && turn==WHITE) || 
-				(board[rank][file]=='k' && turn==BLACK)
+				(board[rank][file]=='K' && turn==BLACK) || 
+				(board[rank][file]=='k' && turn==WHITE)
 			  )
 			{
 				found = true;
-				king[0] = file;
-				king[1] = rank;
+				king[0] = rank;
+				king[1] = file;
 				break;
 			}
 		}
 	}
-			std::cout << "Hello, i am here!!!" << std::endl;
 
 	if(turn==BLACK)
 	{
-		std::cout << "Hello, i am here!!!" << std::endl;
 		// checking pawns
 		for(auto dir=pawnBlackMoveTake.begin(); dir!=pawnBlackMoveTake.end(); ++dir)
 		{
 			for(auto pos=dir->begin(); pos!=dir->end(); ++pos)
 			{
-				if(board[king[0]-pos->first][king[0]-pos->second]=='p')
+				if(board[king[0]-pos->first][king[1]-pos->second]=='p')
 				{
 					return false;
 				}
-				else if(board[king[0]-pos->first][king[0]-pos->second]!=' ')
+				else if(board[king[0]-pos->first][king[1]-pos->second]!=' ')
 				{
 					break;
 				}
@@ -377,11 +408,11 @@ bool ChessBoard::isPositionPossible() const
 		{
 			for(auto pos=dir->begin(); pos!=dir->end(); ++pos)
 			{
-				if(board[king[0]-pos->first][king[0]-pos->second]=='q')
+				if(board[king[0]-pos->first][king[1]-pos->second]=='q')
 				{
 					return false;
 				}
-				else if(board[king[0]-pos->first][king[0]-pos->second]!=' ')
+				else if(board[king[0]-pos->first][king[1]-pos->second]!=' ')
 				{
 					break;
 				}

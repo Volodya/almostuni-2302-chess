@@ -8,10 +8,13 @@
 
 namespace ChessFunctions
 {
-	typedef std::function<void(char, int, char, int, bool)> MoveRecordingFunction;
-	void move(MoveRecordingFunction resFunction,
+	typedef std::function<void(char, int, char, int)> MoveRecordingFunction;
+	void move(
+		MoveRecordingFunction recFunTake,
+		MoveRecordingFunction recFunDefend,
 		const ChessBoard &cb, char file, int rank,
-		const MoveTemplate& mt, bool canTake=true, bool canNotTake=true);
+		const MoveTemplate& mt,
+		bool canTake=true, bool canMoveToEmpty=true);
 
 	bool ownPiece(ChessPiece cp, PlayerColour turn);
 	int countPieces(/*const*/ ChessBoard &cb, std::function<bool(ChessPiece)> test);

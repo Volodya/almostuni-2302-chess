@@ -41,7 +41,7 @@ int main()
 	cb.placePiece('H', 8, 'r');
 	
 	cb.placePiece('F', 2, 'q');
-	cb.placePiece('D', 1, ' ');
+	//cb.placePiece('D', 1, ' ');
 
 	cb.calculatePossibleMoves();
 	
@@ -51,12 +51,12 @@ int main()
 	auto tmp = cb.getPossibleMoves();
 	
 	std::cout << "Number of possible moves: " << tmp.size() << std::endl;
-	/*
+	
 	for(auto it=tmp.begin(); it!=tmp.end(); ++it)
 	{
 		(*it)->debugPrint();
 		std::cout << "Weight: " << (*it)->weight() << std::endl;
 	}
-	*/
+	
 	return 0;
 }

@@ -4,9 +4,12 @@
 
 
 
-void ChessFunctions::move(MoveRecordingFunction resFunction,
+void ChessFunctions::move(
+	MoveRecordingFunction recFunTake,
+	MoveRecordingFunction recFunDefend,
 	const ChessBoard &cb, char file, int rank,
-	const MoveTemplate& mt, bool canTake, bool canNotTake)
+	const MoveTemplate& mt,
+	bool canTake, bool canMoveToEmpty)
 {
 	char newFile;
 	int newRank;
@@ -25,27 +28,21 @@ void ChessFunctions::move(MoveRecordingFunction resFunction,
 			{
 				if(canTake)
 				{
-					if(ChessFunctions::ownPiece(cb.getPiece(newFile, newRank), cb.getTurn()))
+					if(!ChessFunctions::ownPiece(cb.getPiece(newFile, newRank), cb.getTurn()))
 					{
-						resFunction(file, rank, newFile, newRank, false);
+						recFunTake(file, rank, newFile, newRank);
 					}
-					else
-					{
-						resFunction(file, rank, newFile, newRank, true);
-					}
+					recFunDefend(file, rank, newFile, newRank);
 				}
 				break; // stop if a cell isn't empty
 			}
 			else // if empty
 			{
-				if(canTake)
+				if(canMoveToEmpty)
 				{
-					resFunction(file, rank, newFile, newRank, true);
+					recFunTake(file, rank, newFile, newRank);
 				}
-				else if(canNotTake)
-				{
-					resFunction(file, rank, newFile, newRank, false);
-				}
+				recFunDefend(file, rank, newFile, newRank);
 			}
 		}
 	}
@@ -72,5 +69,8 @@ int ChessFunctions::countPieces(/*const*/ ChessBoard &cb, ChessPiece cp)
 
 bool ChessFunctions::ownPiece(ChessPiece cp, PlayerColour turn)
 {
-	return (cp>='a' && cp<='z' && turn == BLACK);
+	return
+		(cp>='a' && cp<='z' && turn == BLACK)
+		||
+		(cp>='A' && cp<='Z' && turn == WHITE);
 }
