@@ -49,7 +49,7 @@ void ChessFunctions::move(
 }
 
 // todo: reimplement iterator for const
-int ChessFunctions::countPieces(/*const*/ ChessBoard &cb, std::function<bool(ChessPiece)> test)
+int ChessFunctions::countPieces(const ChessBoard &cb, std::function<bool(ChessPiece)> test)
 {
 	int result=0;
 	for(auto it = cb.begin(); it != cb.end(); ++it)
@@ -61,7 +61,7 @@ int ChessFunctions::countPieces(/*const*/ ChessBoard &cb, std::function<bool(Che
 	}
 	return result;
 }
-int ChessFunctions::countPieces(/*const*/ ChessBoard &cb, ChessPiece cp)
+int ChessFunctions::countPieces(const ChessBoard &cb, ChessPiece cp)
 {
 	return countPieces(cb, [&cp](ChessPiece onBoard) { return cp==onBoard; });
 }

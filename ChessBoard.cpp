@@ -1,5 +1,6 @@
 #include "ChessBoard.hpp"
 #include <iostream>
+#include <cassert>
 
 #include "chessfunctions.hpp"
 #include "moveTemplate.hpp"
@@ -81,14 +82,16 @@ void ChessBoard::placePiece(char file, int rank, ChessPiece piece)
 {
 	board[rank-1][file-'A'] = piece;
 }
-std::shared_ptr<ChessBoard> ChessBoard::move(char fileFrom, int rankFrom, char fileTo, int rankTo) const
+std::shared_ptr<ChessBoard> move(
+	std::shared_ptr<ChessBoard> from, char fileFrom, int rankFrom, char fileTo, int rankTo)
 {
-	auto result = std::make_shared<ChessBoard>(*this);
+	auto result = std::make_shared<ChessBoard>(*from);
 	
-	result->placePiece(fileTo, rankTo, this->getPiece(fileFrom, rankFrom));
+	result->placePiece(fileTo, rankTo, from->getPiece(fileFrom, rankFrom));
 	result->placePiece(fileFrom, rankFrom, ' ');
 	
-	result->turn = (this->turn==WHITE) ? BLACK : WHITE;
+	result->turn = (from->turn==WHITE) ? BLACK : WHITE;
+	result->from = from;
 	
 	return result;
 }
@@ -131,7 +134,7 @@ double ChessBoard::weight() /*const*/
 		;
 }
 
-bool ChessBoard::isCheckMate() /*const*/
+bool ChessBoard::isCheckMate() const
 {
 	int count=0;
 	if(turn==BLACK)
@@ -156,46 +159,19 @@ bool ChessBoard::isCheckMate() /*const*/
 	
 	if(isCheck())
 	{
-		if(!possibleMovesCalculated)
-		{
-			calculatePossibleMoves();
-		}
-		std::cout << possibleMoves.size() << std::endl;
 		return possibleMoves.empty();
 	}
 	
 	return false;
 }
 
-bool ChessBoard::isCheck()
+bool ChessBoard::isCheck() const
 {
-	if(!possibleMovesCalculated)
-	{
-		calculatePossibleMoves();
-	}
-	
+	assert(possibleMovesCalculated);
 	return check;
-	
-	/*
-	for(int rank=0; rank<8; ++rank)
-	{
-		for(int file=0; file<8; ++file)
-		{
-			if(board[rank][file]=='K' && turn==WHITE)
-			{
-				return underAttackByBlack[rank][file]>0;
-			}
-			if(board[rank][file]=='k' && turn==BLACK)
-			{
-				return underAttackByWhite[rank][file]>0;
-			}
-		}
-	}
-	return false;
-	*/
 }
 
-void ChessBoard::calculatePossibleMoves()
+void calculatePossibleMoves(std::shared_ptr<ChessBoard> obj)
 {
 	using ChessFunctions::MoveRecordingFunction;
 		// take opponent's piece
@@ -210,84 +186,84 @@ void ChessBoard::calculatePossibleMoves()
 	MoveRecordingFunction whiteTurnFunctionDefend, blackTurnFunctionDefend;
 		// empty function
 	MoveRecordingFunction emptyFunction =
-			[this](char file, int rank, char newFile, int newRank) {};
+			[obj](char file, int rank, char newFile, int newRank) {};
 	
-	if(turn==WHITE)
+	if(obj->turn==WHITE)
 	{
 		whiteTurnFunctionTake =
-			[this](char file, int rank, char newFile, int newRank) {
-				auto maybeMove = this->move(file, rank, newFile, newRank);
+			[obj](char file, int rank, char newFile, int newRank) {
+				auto maybeMove = move(obj, file, rank, newFile, newRank);
 				if(maybeMove->isPositionPossible())
 				{
-					this->possibleMoves.push_back(maybeMove);
+					obj->possibleMoves.push_back(maybeMove);
 				}
 			};
 		whiteTurnFunctionNoTake =
-			[this](char file, int rank, char newFile, int newRank) {
-				auto maybeMove = this->move(file, rank, newFile, newRank);
+			[obj](char file, int rank, char newFile, int newRank) {
+				auto maybeMove = move(obj, file, rank, newFile, newRank);
 				if(maybeMove->isPositionPossible())
 				{
-					this->possibleMoves.push_back(maybeMove);
+					obj->possibleMoves.push_back(maybeMove);
 				}
 			};
 		whiteTurnFunctionDefend =
-			[this](char file, int rank, char newFile, int newRank) {
-				++this->underAttackByWhite[newRank-1][newFile-'A'];
+			[obj](char file, int rank, char newFile, int newRank) {
+				++obj->underAttackByWhite[newRank-1][newFile-'A'];
 			};
 
 		blackTurnFunctionTake =
-			[this](char file, int rank, char newFile, int newRank) {
+			[obj](char file, int rank, char newFile, int newRank) {
 				
-				if(this->board[newRank-1][newFile-'A']=='K')
+				if(obj->board[newRank-1][newFile-'A']=='K')
 				{
-					this->check=true;
+					obj->check=true;
 				}
 			};
 		blackTurnFunctionNoTake = emptyFunction;
 		blackTurnFunctionDefend =
-			[this](char file, int rank, char newFile, int newRank) {
-				++this->underAttackByBlack[newRank-1][newFile-'A'];
+			[obj](char file, int rank, char newFile, int newRank) {
+				++obj->underAttackByBlack[newRank-1][newFile-'A'];
 			};
 	}
 	else // if BLACK
 	{
 		blackTurnFunctionTake =
-			[this](char file, int rank, char newFile, int newRank) {
-				auto maybeMove = this->move(file, rank, newFile, newRank);
+			[obj](char file, int rank, char newFile, int newRank) {
+				auto maybeMove = move(obj, file, rank, newFile, newRank);
 				if(maybeMove->isPositionPossible())
 				{
-					this->possibleMoves.push_back(maybeMove);
+					obj->possibleMoves.push_back(maybeMove);
 				}
 			};
 		blackTurnFunctionNoTake =
-			[this](char file, int rank, char newFile, int newRank) {
-				auto maybeMove = this->move(file, rank, newFile, newRank);
+			[obj](char file, int rank, char newFile, int newRank) {
+				auto maybeMove = move(obj, file, rank, newFile, newRank);
 				if(maybeMove->isPositionPossible())
 				{
-					this->possibleMoves.push_back(maybeMove);
+					obj->possibleMoves.push_back(maybeMove);
 				}
 			};
 		blackTurnFunctionDefend =
-			[this](char file, int rank, char newFile, int newRank) {
-				++this->underAttackByBlack[newRank-1][newFile-'A'];
+			[obj](char file, int rank, char newFile, int newRank) {
+				++obj->underAttackByBlack[newRank-1][newFile-'A'];
 			};
 
 		whiteTurnFunctionTake =
-			[this](char file, int rank, char newFile, int newRank) {
+			[obj](char file, int rank, char newFile, int newRank) {
 				
-				if(this->board[newRank-1][newFile-'A']=='k')
+				if(obj->board[newRank-1][newFile-'A']=='k')
 				{
-					this->check=true;
+					obj->check=true;
 				}
 			};
 		whiteTurnFunctionNoTake = emptyFunction;
 		whiteTurnFunctionDefend =
-			[this](char file, int rank, char newFile, int newRank) {
-				++this->underAttackByWhite[newRank-1][newFile-'A'];
+			[obj](char file, int rank, char newFile, int newRank) {
+				++obj->underAttackByWhite[newRank-1][newFile-'A'];
 			};
 	}
 	
-	for(auto it = this->begin(); it != this->end(); ++it)
+	for(auto it = obj->begin(); it != obj->end(); ++it)
 	{
 		if(*it == ' ') continue;
 		
@@ -300,63 +276,63 @@ void ChessBoard::calculatePossibleMoves()
 		{
 			case 'P':
 				ChessFunctions::move(whiteTurnFunctionNoTake, emptyFunction,
-					*this, file, rank,
+					*obj, file, rank,
 					pawnWhiteMoveNotTake, false);
 				ChessFunctions::move(whiteTurnFunctionTake, whiteTurnFunctionDefend,
-					*this, file, rank,
+					*obj, file, rank,
 					pawnWhiteMoveTake,    true, false);
 				break;
 			case 'p':
 				ChessFunctions::move(blackTurnFunctionNoTake, emptyFunction,
-					*this, file, rank,
+					*obj, file, rank,
 					pawnBlackMoveNotTake, false);
 				ChessFunctions::move(blackTurnFunctionTake, blackTurnFunctionDefend,
-					*this, file, rank,
+					*obj, file, rank,
 					pawnBlackMoveTake,    true, false);
 				break;
 			case 'R':
 				ChessFunctions::move(whiteTurnFunctionTake, whiteTurnFunctionDefend,
-					*this, file, rank, rookMove, true);
+					*obj, file, rank, rookMove, true);
 				break;
 			case 'r':
 				ChessFunctions::move(blackTurnFunctionTake, blackTurnFunctionDefend,
-					*this, file, rank, rookMove, true);
+					*obj, file, rank, rookMove, true);
 				break;
 			case 'N':
 				ChessFunctions::move(whiteTurnFunctionTake, whiteTurnFunctionDefend,
-					*this, file, rank, knightMove, true);
+					*obj, file, rank, knightMove, true);
 				break;
 			case 'n':
 				ChessFunctions::move(blackTurnFunctionTake, blackTurnFunctionDefend,
-					*this, file, rank, knightMove, true);
+					*obj, file, rank, knightMove, true);
 				break;
 			case 'B':
 				ChessFunctions::move(whiteTurnFunctionTake, whiteTurnFunctionDefend,
-					*this, file, rank, bishopMove, true);
+					*obj, file, rank, bishopMove, true);
 				break;
 			case 'b':
 				ChessFunctions::move(blackTurnFunctionTake, blackTurnFunctionDefend,
-					*this, file, rank, bishopMove, true);
+					*obj, file, rank, bishopMove, true);
 				break;
 			case 'Q':
 				ChessFunctions::move(whiteTurnFunctionTake, whiteTurnFunctionDefend,
-					*this, file, rank, queenMove, true);
+					*obj, file, rank, queenMove, true);
 				break;
 			case 'q':
 				ChessFunctions::move(blackTurnFunctionTake, blackTurnFunctionDefend,
-					*this, file, rank, queenMove, true);
+					*obj, file, rank, queenMove, true);
 				break;
 			case 'K':
 				ChessFunctions::move(whiteTurnFunctionTake, whiteTurnFunctionDefend,
-					*this, file, rank, kingMove, true);
+					*obj, file, rank, kingMove, true);
 				break;
 			case 'k':
 				ChessFunctions::move(blackTurnFunctionTake, blackTurnFunctionDefend,
-					*this, file, rank, kingMove, true);
+					*obj, file, rank, kingMove, true);
 				break;
 		}
 	}
-	possibleMovesCalculated=true;
+	obj->possibleMovesCalculated=true;
 }
 
 std::vector<std::shared_ptr<ChessBoard>> ChessBoard::getPossibleMoves() const
@@ -467,6 +443,55 @@ int ChessBoardIterator::getRank() const
 	return rank+1;
 }
 char ChessBoardIterator::getFile() const
+{
+	return file+'A';
+}
+
+
+// CONST ITERATOR
+
+ChessBoardConstIterator ChessBoard::begin() const
+{
+	return ChessBoardConstIterator(this, 0, 0);
+}
+
+ChessBoardConstIterator ChessBoard::end() const
+{
+	return ChessBoardConstIterator(this, 8, 0);
+}
+
+ChessBoardConstIterator::ChessBoardConstIterator(const ChessBoard* cb_, int rank_, int file_)
+	: rank(rank_), file(file_), cb(cb_)
+{}
+
+bool ChessBoardConstIterator::operator!=(const ChessBoardConstIterator& that)
+{
+	return !operator==(that);
+}
+bool ChessBoardConstIterator::operator==(const ChessBoardConstIterator& that)
+{
+	return this->rank==that.rank && this->file==that.file;
+}
+ChessBoardConstIterator::value_type ChessBoardConstIterator::operator*() const
+{
+	return cb->board[rank][file];
+}
+ChessBoardConstIterator& ChessBoardConstIterator::operator++()
+{
+	++file;
+	if(file>=8)
+	{
+		++rank;
+		file=0;
+	}
+	return *this;
+}
+
+int ChessBoardConstIterator::getRank() const
+{
+	return rank+1;
+}
+char ChessBoardConstIterator::getFile() const
 {
 	return file+'A';
 }

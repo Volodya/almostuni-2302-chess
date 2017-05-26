@@ -43,6 +43,25 @@ private:
 	
 	friend ChessBoard;
 };
+class ChessBoardConstIterator : public std::iterator<std::input_iterator_tag, ChessPiece>
+{
+	int rank, file;
+	const ChessBoard * cb;
+public:
+	ChessBoardConstIterator(const ChessBoardConstIterator& that);
+	
+	bool operator!=(const ChessBoardConstIterator& that);
+	bool operator==(const ChessBoardConstIterator& that);
+	ChessBoardConstIterator::value_type operator*() const;
+	ChessBoardConstIterator& operator++();
+	
+	int getRank() const;
+	char getFile() const;
+private:
+	ChessBoardConstIterator(const ChessBoard* cb_, int rank_, int file_);
+	
+	friend ChessBoard;
+};
 
 class ChessBoard
 {
@@ -55,19 +74,19 @@ class ChessBoard
 	
 	PlayerColour turn;
 	bool check;
+	
+	std::shared_ptr<ChessBoard> from;
 public:
 	ChessBoard();
-	bool isCheckMate() /*const*/;
-	bool isCheck();
+	bool isCheckMate() const;  // call to this function is underfined without calculatePossibleMoves()
+	bool isCheck() const; // call to this function is underfined without calculatePossibleMoves()
 	bool isEmpty(char file, int rank) const;
 	void placePiece(char file, int rank, ChessPiece piece);
 	ChessPiece getPiece(char file, int rank) const;
-	std::shared_ptr<ChessBoard> move(char fileFrom, int rankFrom, char fileTo, int rankTo) const;
 	PlayerColour getTurn() const;
 	
 	double weight() /*const*/; // analise the position
 	
-	void calculatePossibleMoves();
 	std::vector<std::shared_ptr<ChessBoard>> getPossibleMoves() const;
 	
 	bool isPositionPossible() const;
@@ -75,9 +94,15 @@ public:
 	void debugPrint() const;
 	
 	ChessBoardIterator begin();
+	ChessBoardConstIterator begin() const;
 	ChessBoardIterator end();
+	ChessBoardConstIterator end() const;
 	
 	friend class ChessBoardIterator;
+	friend class ChessBoardConstIterator;
+	friend void calculatePossibleMoves(std::shared_ptr<ChessBoard> obj);
+	friend std::shared_ptr<ChessBoard> move(
+		std::shared_ptr<ChessBoard> from, char fileFrom, int rankFrom, char fileTo, int rankTo);
 };
 
 #endif

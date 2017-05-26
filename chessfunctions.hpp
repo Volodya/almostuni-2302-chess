@@ -17,8 +17,8 @@ namespace ChessFunctions
 		bool canTake=true, bool canMoveToEmpty=true);
 
 	bool ownPiece(ChessPiece cp, PlayerColour turn);
-	int countPieces(/*const*/ ChessBoard &cb, std::function<bool(ChessPiece)> test);
-	int countPieces(/*const*/ ChessBoard &cb, ChessPiece cp);
+	int countPieces(const ChessBoard &cb, std::function<bool(ChessPiece)> test);
+	int countPieces(const ChessBoard &cb, ChessPiece cp);
 };
 
 #endif
