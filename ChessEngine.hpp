@@ -9,15 +9,39 @@
 #define CHESSENGINE__
 
 #include "ChessBoard.hpp"
+#include <list>
+#include <thread>
+
+class ChessEngineWorker
+{
+	typedef std::pair<double, ChessBoard::ptr> WeightBoardPair;
+	
+	bool pleaseStop;
+	
+	std::thread thread; // the thread that we run this worker in
+	
+	std::list<WeightBoardPair> positionPreferences;
+	
+	ChessEngineWorker();
+
+	void stop();
+	void operator()(ChessBoard::ptr original);
+};
 
 class ChessEngine
 {
-	std::shared_ptr<ChessBoard> curPos;
+	ChessBoard::ptr curPos;
+	ChessEngineWorker worker;
+	
 public:
-	void setCurPos(std::shared_ptr<ChessBoard> newPos);
-	std::shared_ptr<ChessBoard> getCurPos() const;
+	void setCurPos(ChessBoard::ptr newPos);
+	ChessBoard::ptr getCurPos() const;
 	
 	// TODO: implement calculation of the next move
+	void startNextMoveCalculation();
+	ChessBoard::ptr getNextMove();
+	
+	friend ChessEngineWorker;
 };
 
 #endif

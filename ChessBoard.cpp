@@ -82,8 +82,8 @@ void ChessBoard::placePiece(char file, int rank, ChessPiece piece)
 {
 	board[rank-1][file-'A'] = piece;
 }
-std::shared_ptr<ChessBoard> move(
-	std::shared_ptr<ChessBoard> from, char fileFrom, int rankFrom, char fileTo, int rankTo)
+ChessBoard::ptr move(
+	ChessBoard::ptr from, char fileFrom, int rankFrom, char fileTo, int rankTo)
 {
 	auto result = std::make_shared<ChessBoard>(*from);
 	
@@ -171,8 +171,10 @@ bool ChessBoard::isCheck() const
 	return check;
 }
 
-void calculatePossibleMoves(std::shared_ptr<ChessBoard> obj)
+void calculatePossibleMoves(ChessBoard::ptr obj)
 {
+	if(obj->possibleMovesCalculated) return;
+	
 	using ChessFunctions::MoveRecordingFunction;
 		// take opponent's piece
 		// or
@@ -335,7 +337,7 @@ void calculatePossibleMoves(std::shared_ptr<ChessBoard> obj)
 	obj->possibleMovesCalculated=true;
 }
 
-std::vector<std::shared_ptr<ChessBoard>> ChessBoard::getPossibleMoves() const
+std::vector<ChessBoard::ptr> ChessBoard::getPossibleMoves() const
 {
 	return possibleMoves;
 }

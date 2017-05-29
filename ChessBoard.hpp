@@ -63,9 +63,15 @@ private:
 	friend ChessBoard;
 };
 
+class ChessBoard;
+
 class ChessBoard
 {
-	std::vector<std::shared_ptr<ChessBoard>> possibleMoves;
+public:
+	typedef std::shared_ptr<ChessBoard> ptr;
+
+private:
+	std::vector<ptr> possibleMoves;
 	bool possibleMovesCalculated;
 	
 	ChessPiece board[8][8]; // [rank][file]
@@ -75,7 +81,7 @@ class ChessBoard
 	PlayerColour turn;
 	bool check;
 	
-	std::shared_ptr<ChessBoard> from;
+	ChessBoard::ptr from;
 public:
 	ChessBoard();
 	bool isCheckMate() const;  // call to this function is underfined without calculatePossibleMoves()
@@ -87,7 +93,7 @@ public:
 	
 	double weight() /*const*/; // analise the position
 	
-	std::vector<std::shared_ptr<ChessBoard>> getPossibleMoves() const;
+	std::vector<ChessBoard::ptr> getPossibleMoves() const;
 	
 	bool isPositionPossible() const;
 	
@@ -101,8 +107,8 @@ public:
 	friend class ChessBoardIterator;
 	friend class ChessBoardConstIterator;
 	friend void calculatePossibleMoves(std::shared_ptr<ChessBoard> obj);
-	friend std::shared_ptr<ChessBoard> move(
-		std::shared_ptr<ChessBoard> from, char fileFrom, int rankFrom, char fileTo, int rankTo);
+	friend ChessBoard::ptr move(
+		ChessBoard::ptr from, char fileFrom, int rankFrom, char fileTo, int rankTo);
 };
 
 #endif
