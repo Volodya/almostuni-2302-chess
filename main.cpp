@@ -1,5 +1,6 @@
 #include <iostream>
 #include "ChessBoard.hpp"
+#include "ChessEngine.hpp"
 
 #include "chessfunctions.hpp"
 
@@ -40,7 +41,7 @@ int main()
 	cb->placePiece('G', 8, 'n');
 	cb->placePiece('H', 8, 'r');
 	
-	cb->placePiece('F', 2, 'q');
+	//cb->placePiece('F', 2, 'q');
 	//cb->placePiece('D', 1, ' ');
 
 	calculatePossibleMoves(cb);
@@ -57,6 +58,26 @@ int main()
 		calculatePossibleMoves(*it);
 		(*it)->debugPrint();
 		std::cout << "Weight: " << (*it)->weight() << std::endl;
+	}
+	
+	ChessEngine ce;
+	ce.setCurPos(cb);
+	ce.startNextMoveCalculation();
+	
+	std::cin.get();
+	auto best = ce.getNextMove();
+	if(best)
+	{
+		do
+		{
+			best->debugPrint();
+			std::cout << "Weight: " << best->weight() << std::endl;
+			best=best->getFrom();
+		} while(best);
+	}
+	else
+	{
+		std::cout << "There's no best" << std::endl;
 	}
 	
 	return 0;

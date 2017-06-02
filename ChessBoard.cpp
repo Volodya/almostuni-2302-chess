@@ -21,6 +21,14 @@ ChessBoard::ChessBoard()
 
 void ChessBoard::debugPrint() const
 {
+	if(turn==WHITE)
+	{
+		std::cout << "White's turn" << std::endl;
+	}
+	else
+	{
+		std::cout << "Black's turn" << std::endl;
+	}
 	std::cout << ' ';
 	for(int i=0; i<8; ++i)
 	{
@@ -98,6 +106,10 @@ ChessBoard::ptr move(
 ChessPiece ChessBoard::getPiece(char file, int rank) const
 {
 	return board[rank-1][file-'A'];
+}
+ChessBoard::ptr ChessBoard::getFrom() const
+{
+	return from;
 }
 bool ChessBoard::isEmpty(char file, int rank) const
 {

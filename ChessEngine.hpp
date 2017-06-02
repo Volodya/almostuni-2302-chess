@@ -12,11 +12,15 @@
 #include <list>
 #include <thread>
 
+class ChessEngine;
+
 class ChessEngineWorker
 {
+	friend class ChessEngine;
+	
 	typedef std::pair<double, ChessBoard::ptr> WeightBoardPair;
 	
-	bool pleaseStop;
+	bool pleaseStop; // request to stop received
 	
 	std::thread thread; // the thread that we run this worker in
 	
@@ -25,7 +29,7 @@ class ChessEngineWorker
 	ChessEngineWorker();
 
 	void stop();
-	void operator()(ChessBoard::ptr original);
+	void startNextMoveCalculation(ChessBoard::ptr original); // this is what performs execution
 };
 
 class ChessEngine

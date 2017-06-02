@@ -90,6 +90,7 @@ public:
 	void placePiece(char file, int rank, ChessPiece piece);
 	ChessPiece getPiece(char file, int rank) const;
 	PlayerColour getTurn() const;
+	ChessBoard::ptr getFrom() const;
 	
 	double weight() /*const*/; // analise the position
 	
