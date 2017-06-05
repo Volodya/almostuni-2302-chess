@@ -51,20 +51,20 @@ int main()
 	//cb->placePiece('F', 2, 'q');
 	//cb->placePiece('D', 1, ' ');
 
-	calculatePossibleMoves(cb);
+	//calculatePossibleMoves(cb);
 	
-	cb->debugPrint();
-	std::cout << "Weight: " << cb->weight() << std::endl;
+	//cb->debugPrint();
+	//std::cout << "Weight: " << cb->weight() << std::endl;
 	
-	auto tmp = cb->getPossibleMoves();
+	//auto tmp = cb->getPossibleMoves();
 	
-	std::cout << "Number of possible moves: " << tmp.size() << std::endl;
+	//std::cout << "Number of possible moves: " << tmp.size() << std::endl;
 	
-	for(auto it=tmp.begin(); it!=tmp.end(); ++it)
+	//for(auto it=tmp.begin(); it!=tmp.end(); ++it)
 	{
-		calculatePossibleMoves(*it);
-		(*it)->debugPrint();
-		std::cout << "Weight: " << (*it)->weight() << std::endl;
+		//calculatePossibleMoves(*it);
+		//(*it)->debugPrint();
+		//std::cout << "Weight: " << (*it)->weight() << std::endl;
 	}
 	
 	ChessEngine ce;
@@ -77,9 +77,9 @@ int main()
 	{
 		do
 		{
-			best->debugPrint();
-			std::cout << "Weight: " << best->weight() << std::endl;
-			best=best->getFrom();
+			//best->debugPrint();
+			//std::cout << "Weight: " << best->weight() << std::endl;
+			//best=best->getFrom();
 		} while(best);
 	}
 	else

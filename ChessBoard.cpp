@@ -13,7 +13,7 @@
 #include "moveTemplate.hpp"
 
 ChessBoard::ChessBoard()
-	: possibleMoves(0), possibleMovesCalculated(false), turn(WHITE), check(false)
+	: possibleMoves(), possibleMovesCalculated(false), turn(WHITE), check(false)
 {
 	for(int i=0; i<8; ++i)
 	{
@@ -25,7 +25,19 @@ ChessBoard::ChessBoard()
 		}
 	}
 }
-
+ChessBoard::ChessBoard(const ChessBoard& that)
+	: possibleMoves(), possibleMovesCalculated(false), turn(that.turn), check(false)
+{
+	for(int i=0; i<8; ++i)
+	{
+		for(int j=0; j<8; ++j)
+		{
+			board[i][j] = that.board[i][j];
+			underAttackByWhite[i][j]=0;
+			underAttackByBlack[i][j]=0;
+		}
+	}
+}
 void ChessBoard::debugPrint() const
 {
 	if(turn==WHITE)
@@ -192,9 +204,13 @@ bool ChessBoard::isCheck() const
 
 void calculatePossibleMoves(ChessBoard::ptr obj)
 {
+	std::cout << " [INFO] calculatePossibleMoves (ENTER): " << obj << ' '
+		<< (obj->possibleMovesCalculated?obj->possibleMoves.size():0) << std::endl;
 	if(obj->possibleMovesCalculated) return;
+	//obj->possibleMoves.clear();
 	
 	using ChessFunctions::MoveRecordingFunction;
+	
 		// take opponent's piece
 		// or
 		// attack empty space
@@ -214,6 +230,9 @@ void calculatePossibleMoves(ChessBoard::ptr obj)
 		whiteTurnFunctionTake =
 			[obj](char file, int rank, char newFile, int newRank) {
 				auto maybeMove = move(obj, file, rank, newFile, newRank);
+				
+				assert(maybeMove->getTurn()==BLACK);
+				
 				if(maybeMove->isPositionPossible())
 				{
 					obj->possibleMoves.push_back(maybeMove);
@@ -251,6 +270,9 @@ void calculatePossibleMoves(ChessBoard::ptr obj)
 		blackTurnFunctionTake =
 			[obj](char file, int rank, char newFile, int newRank) {
 				auto maybeMove = move(obj, file, rank, newFile, newRank);
+
+				assert(maybeMove->getTurn()==WHITE);
+				
 				if(maybeMove->isPositionPossible())
 				{
 					obj->possibleMoves.push_back(maybeMove);
@@ -354,6 +376,9 @@ void calculatePossibleMoves(ChessBoard::ptr obj)
 		}
 	}
 	obj->possibleMovesCalculated=true;
+
+	std::cout << " [INFO] calculatePossibleMoves (EXIT): " << obj << ' '
+		<< (obj->possibleMovesCalculated?obj->possibleMoves.size():0) << std::endl;
 }
 
 std::vector<ChessBoard::ptr> ChessBoard::getPossibleMoves() const

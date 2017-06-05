@@ -77,9 +77,9 @@ class ChessBoard
 public:
 	typedef std::shared_ptr<ChessBoard> ptr;
 
+	bool possibleMovesCalculated; // TODO: make private!!!
 private:
 	std::vector<ptr> possibleMoves;
-	bool possibleMovesCalculated;
 	
 	ChessPiece board[8][8]; // [rank][file]
 	int8_t underAttackByWhite[8][8];
@@ -91,6 +91,7 @@ private:
 	ChessBoard::ptr from;
 public:
 	ChessBoard();
+	ChessBoard(const ChessBoard& that);
 	bool isCheckMate() const;  // call to this function is underfined without calculatePossibleMoves()
 	bool isCheck() const; // call to this function is underfined without calculatePossibleMoves()
 	bool isEmpty(char file, int rank) const;
