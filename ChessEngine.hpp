@@ -29,7 +29,7 @@ class ChessEngineWorker
 	ChessEngineWorker();
 
 	void stop();
-	void startNextMoveCalculation(ChessBoard::ptr original); // this is what performs execution
+	void startNextMoveCalculation(ChessBoard::ptr original, int startDepth); // this is what performs execution
 };
 
 class ChessEngine
@@ -37,6 +37,7 @@ class ChessEngine
 	ChessBoard::ptr curPos;
 	ChessEngineWorker worker;
 	
+	int START_DEPTH = 7;
 public:
 	void setCurPos(ChessBoard::ptr newPos);
 	ChessBoard::ptr getCurPos() const;

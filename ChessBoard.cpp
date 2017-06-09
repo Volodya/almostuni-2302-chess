@@ -204,10 +204,7 @@ bool ChessBoard::isCheck() const
 
 void calculatePossibleMoves(ChessBoard::ptr obj)
 {
-	std::cout << " [INFO] calculatePossibleMoves (ENTER): " << obj << ' '
-		<< (obj->possibleMovesCalculated?obj->possibleMoves.size():0) << std::endl;
 	if(obj->possibleMovesCalculated) return;
-	//obj->possibleMoves.clear();
 	
 	using ChessFunctions::MoveRecordingFunction;
 	
@@ -376,9 +373,6 @@ void calculatePossibleMoves(ChessBoard::ptr obj)
 		}
 	}
 	obj->possibleMovesCalculated=true;
-
-	std::cout << " [INFO] calculatePossibleMoves (EXIT): " << obj << ' '
-		<< (obj->possibleMovesCalculated?obj->possibleMoves.size():0) << std::endl;
 }
 
 std::vector<ChessBoard::ptr> ChessBoard::getPossibleMoves() const

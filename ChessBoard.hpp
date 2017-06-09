@@ -77,9 +77,9 @@ class ChessBoard
 public:
 	typedef std::shared_ptr<ChessBoard> ptr;
 
-	bool possibleMovesCalculated; // TODO: make private!!!
 private:
 	std::vector<ptr> possibleMoves;
+	bool possibleMovesCalculated;
 	
 	ChessPiece board[8][8]; // [rank][file]
 	int8_t underAttackByWhite[8][8];
