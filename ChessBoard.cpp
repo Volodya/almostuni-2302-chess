@@ -13,7 +13,8 @@
 #include "moveTemplate.hpp"
 
 ChessBoard::ChessBoard()
-	: possibleMoves(), possibleMovesCalculated(false), turn(WHITE), check(false)
+	: possibleMoves(), possibleMovesCalculated(false), possibleMovesValid(false),
+	 turn(WHITE), check(false)
 {
 	for(int i=0; i<8; ++i)
 	{
@@ -26,7 +27,8 @@ ChessBoard::ChessBoard()
 	}
 }
 ChessBoard::ChessBoard(const ChessBoard& that)
-	: possibleMoves(), possibleMovesCalculated(false), turn(that.turn), check(false)
+	: possibleMoves(), possibleMovesCalculated(false), possibleMovesValid(false),
+	 turn(that.turn), check(false)
 {
 	for(int i=0; i<8; ++i)
 	{
@@ -38,6 +40,10 @@ ChessBoard::ChessBoard(const ChessBoard& that)
 		}
 	}
 }
+ChessBoard::~ChessBoard()
+{
+}
+
 void ChessBoard::debugPrint() const
 {
 	if(turn==WHITE)
@@ -204,7 +210,7 @@ bool ChessBoard::isCheck() const
 
 void calculatePossibleMoves(ChessBoard::ptr obj)
 {
-	if(obj->possibleMovesCalculated) return;
+	if(obj->possibleMovesValid) return;
 	
 	using ChessFunctions::MoveRecordingFunction;
 	
@@ -373,12 +379,20 @@ void calculatePossibleMoves(ChessBoard::ptr obj)
 		}
 	}
 	obj->possibleMovesCalculated=true;
+	obj->possibleMovesValid=true;
 }
 
 std::vector<ChessBoard::ptr> ChessBoard::getPossibleMoves() const
 {
 	return possibleMoves;
 }
+void ChessBoard::dropPossibleMoves()
+{
+	possibleMoves.clear();
+	possibleMoves.shrink_to_fit();
+	possibleMovesValid=false;
+}
+
 
 bool ChessBoard::isPositionPossible() const
 {

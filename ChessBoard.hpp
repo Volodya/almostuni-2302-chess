@@ -80,6 +80,7 @@ public:
 private:
 	std::vector<ptr> possibleMoves;
 	bool possibleMovesCalculated;
+	bool possibleMovesValid;
 	
 	ChessPiece board[8][8]; // [rank][file]
 	int8_t underAttackByWhite[8][8];
@@ -92,6 +93,7 @@ private:
 public:
 	ChessBoard();
 	ChessBoard(const ChessBoard& that);
+	~ChessBoard();
 	bool isCheckMate() const;  // call to this function is underfined without calculatePossibleMoves()
 	bool isCheck() const; // call to this function is underfined without calculatePossibleMoves()
 	bool isEmpty(char file, int rank) const;
@@ -103,6 +105,7 @@ public:
 	double weight() /*const*/; // analise the position
 	
 	std::vector<ChessBoard::ptr> getPossibleMoves() const;
+	void dropPossibleMoves();
 	
 	bool isPositionPossible() const;
 	
