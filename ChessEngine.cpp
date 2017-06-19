@@ -47,30 +47,29 @@ void ChessEngineWorker::stop()
 
 void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int startDepth)
 {
-	std::function<ChessBoard::ptr(ChessBoard::ptr,int,double,double,PlayerColour)> calculation;
-	calculation = [this, &calculation](ChessBoard::ptr node, int depth,
-		double alpha, double beta, PlayerColour maximizingPlayer)
+	std::function<ChessBoardAnalysis(const ChessBoardAnalysis&,int,double,double,PlayerColour)> calculation;
+	calculation = [this, &calculation](const ChessBoardAnalysis &analysis, int depth,
+		double alpha, double beta, ChessPlayerColour maximizingPlayer)
 	{
-		calculatePossibleMoves(node);
-		if(depth==0 || node->isCheckMate() /* || node.isDraw() */)
+		if(depth==0 || analysis.isCheckMate() /* || node.isDraw() */)
 		{
-			return node;
+			return analysis->getBoard();
 		}
 		
-		auto answers = node->getPossibleMoves();
+		auto answers = analysis.getPossibleMoves();
 		ChessBoard::ptr res;
-		if(maximizingPlayer == node->getTurn())
+		if(maximizingPlayer == analysis->getBoard()->getTurn())
 		{
 			double v = -INFINITY;
 			for(auto it=answers.begin(); it!=answers.end(); ++it)
 			{
-				res = calculation(*it, depth-1, alpha, beta, maximizingPlayer);
-				v = std::max(v, res->weight()*maximizingPlayer);
+				ChessBoardAnalysis analysis((*it)->getTo());
+				res = calculation(analysis, depth-1, alpha, beta, maximizingPlayer);
+				v = std::max(v, res->chessPositionWeight()*getWeightMultiplier(maximizingPlayer));
 				alpha = std::max(alpha, v);
 				if(beta <= alpha)
 				{
 					// remove unneeded part of the tree
-					(*it)->dropPossibleMoves();
 					break;
 				}
 			}
@@ -80,13 +79,13 @@ void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int s
 			double v = INFINITY;
 			for(auto it=answers.begin(); it!=answers.end(); ++it)
 			{
-				res = calculation(*it, depth-1, alpha, beta, maximizingPlayer);
-				v = std::min(v, res->weight()*maximizingPlayer);
+				ChessBoardAnalysis analysis((*it)->getTo());
+				res = calculation(analysis, depth-1, alpha, beta, maximizingPlayer);
+				v = std::min(v, res->chessPositionWeight()*getWeightMultiplier(maximizingPlayer));
 				beta = std::min(v, beta);
 				if(beta <= alpha)
 				{
 					// remove unneeded part of the tree
-					(*it)->dropPossibleMoves();
 					break;
 				}
 			}
@@ -101,7 +100,7 @@ void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int s
 		try
 		{
 			auto best = calculation(original, depth, -INFINITY, INFINITY, original->getTurn());
-			positionPreferences.emplace_front(best->weight(), best);
+			positionPreferences.emplace_front(best->chessPositionWeight(), best->getBoard());
 			++depth;
 		}
 		catch(std::bad_alloc& e)

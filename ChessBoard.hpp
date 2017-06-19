@@ -15,11 +15,6 @@
 
 class ChessMove;
 
-enum PlayerColour
-{
-	WHITE=1, BLACK=-1
-};
-
 typedef char ChessPiece;
 
 class ChessBoard;
@@ -75,18 +70,17 @@ private:
 	
 	PlayerColour turn;
 	
-	ChessMove from;
-public:
+	ChessMove::ptr move;
+
 	ChessBoard();
-	ChessBoard(const ChessBoard& that);
+public:
+	ChessBoard(const ChessBoard& that) = default;
 	~ChessBoard();
 	bool isEmpty(char file, int rank) const;
 	void placePiece(char file, int rank, ChessPiece piece);
 	ChessPiece getPiece(char file, int rank) const;
 	PlayerColour getTurn() const;
-	ChessBoard::ptr getFrom() const;
-	
-	double weight() const;
+	ChessMove::ptr getMove() const;
 	
 	void debugPrint() const;
 	
@@ -95,6 +89,7 @@ public:
 	ChessBoardIterator end();
 	ChessBoardConstIterator end() const;
 	
+	friend class ChessBoardFactory;
 	friend class ChessBoardIterator;
 	friend class ChessBoardConstIterator;
 	friend class ChessMove;

@@ -15,26 +15,13 @@
 #include "moveTemplate.hpp"
 
 ChessBoard::ChessBoard()
-	: possibleMoves(), possibleMovesCalculated(false), possibleMovesValid(false),
-	 turn(WHITE), check(false)
+	: turn(WHITE), from(nullptr)
 {
 	for(int i=0; i<8; ++i)
 	{
 		for(int j=0; j<8; ++j)
 		{
 			board[i][j] = ' ';
-		}
-	}
-}
-ChessBoard::ChessBoard(const ChessBoard& that)
-	: possibleMoves(), possibleMovesCalculated(false), possibleMovesValid(false),
-	 turn(that.turn), check(false)
-{
-	for(int i=0; i<8; ++i)
-	{
-		for(int j=0; j<8; ++j)
-		{
-			board[i][j] = that.board[i][j];
 		}
 	}
 }
@@ -82,9 +69,9 @@ ChessPiece ChessBoard::getPiece(char file, int rank) const
 {
 	return board[rank-1][file-'A'];
 }
-ChessBoard::ptr ChessBoard::getFrom() const
+ChessMove::ptr ChessBoard::getMove() const
 {
-	return from;
+	return move;
 }
 bool ChessBoard::isEmpty(char file, int rank) const
 {
@@ -120,83 +107,6 @@ bool ChessBoard::isCheckMate() const
 	}
 	
 	return false;
-}
-
-bool ChessBoard::isCheck() const
-{
-	assert(possibleMovesCalculated);
-	return check;
-}
-
-std::vector<ChessBoard::ptr> ChessBoard::getPossibleMoves() const
-{
-	return possibleMoves;
-}
-void ChessBoard::dropPossibleMoves()
-{
-	possibleMoves.clear();
-	possibleMoves.shrink_to_fit();
-	possibleMovesValid=false;
-}
-
-
-bool ChessBoard::isPositionPossible() const
-{
-	int king[2]={};
-	bool found=false;
-	for(int rank=0; !found && rank<8; ++rank)
-	{
-		for(int file=0; file<8; ++file)
-		{
-			// if it's white to move, we are looking for a black king
-			if(
-				(board[rank][file]=='K' && turn==BLACK) || 
-				(board[rank][file]=='k' && turn==WHITE)
-			  )
-			{
-				found = true;
-				king[0] = rank;
-				king[1] = file;
-				break;
-			}
-		}
-	}
-
-	if(turn==BLACK)
-	{
-		// checking pawns
-		for(auto dir=pawnBlackMoveTake.begin(); dir!=pawnBlackMoveTake.end(); ++dir)
-		{
-			for(auto pos=dir->begin(); pos!=dir->end(); ++pos)
-			{
-				if(board[king[0]-pos->first][king[1]-pos->second]=='p')
-				{
-					return false;
-				}
-				else if(board[king[0]-pos->first][king[1]-pos->second]!=' ')
-				{
-					break;
-				}
-			}
-		}
-		// checking queen
-		for(auto dir=queenMove.begin(); dir!=queenMove.end(); ++dir)
-		{
-			for(auto pos=dir->begin(); pos!=dir->end(); ++pos)
-			{
-				if(board[king[0]-pos->first][king[1]-pos->second]=='q')
-				{
-					return false;
-				}
-				else if(board[king[0]-pos->first][king[1]-pos->second]!=' ')
-				{
-					break;
-				}
-			}
-		}
-	}
-	
-	return true;
 }
 
 // ITERATOR

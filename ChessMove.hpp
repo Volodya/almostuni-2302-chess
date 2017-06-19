@@ -11,19 +11,30 @@
 #include "ChessBoard.hpp"
 #include <string>
 
+class ChessMove;
+
 class ChessMove
 {
+public:
+	typedef ptr std::shared_ptr<ChessMove>;
+
+private:
 	ChessBoard::ptr from;
 	ChessBoard::ptr to;
 	
 	std::string notation;
 	int moveNum;
+	ChessMove(); // for initialisation in the factory
+
 public:
-	ChessMove(ChessBoard::ptr from_, char fileFrom, int rankFrom, char fileTo, int rankTo);
-	ChessMove(); // for initialisation
 	bool isMovePossible() const;
-	bool hasPrevious()
+	bool hasPrevious() const;
 	
+	ChessBoard::ptr getFrom() const;
+	ChessBoard::ptr getTo() const;
+	PlayerColour getTurn() const;
+	
+	friend class ChessBoardFactory;
 };
 
 #endif

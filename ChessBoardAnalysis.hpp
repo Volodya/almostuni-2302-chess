@@ -26,6 +26,8 @@ class ChessBoardAnalysis
 	int8_t underAttackByWhite[8][8];
 	int8_t underAttackByBlack[8][8];
 
+	std::vector<ChessMove::ptr> possibleMoves;
+	
 	bool check;
 public:
 	ChessBoardAnalysis(ChessBoard::ptr board_);
@@ -37,6 +39,9 @@ public:
 	double chessPositionWeight() const; // analise the position, but not the tree
 	
 	void calculatePossibleMoves();
+	std::vector<ChessMove::ptr> getPossibleMoves() const;
+	
+	ChessBoard::ptr getBoard() const;
 };
 
 #endif
