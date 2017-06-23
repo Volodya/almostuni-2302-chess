@@ -9,10 +9,11 @@
 #define MOVETEMPLATE__
 
 #include <vector>
+#include <map>
 
 typedef std::vector<std::vector<std::pair<int, int>>> MoveTemplate;
 
-const MoveTemplate pawnWhiteMoveNotTake =
+const MoveTemplate pawnWhiteMoveNoTake =
 {
 	{ std::pair<int, int>(0,1) }
 };
@@ -21,7 +22,7 @@ const MoveTemplate pawnWhiteMoveTake =
 	{ std::pair<int, int>(1,1) },
 	{ std::pair<int, int>(-1,1) }
 };
-const MoveTemplate pawnBlackMoveNotTake =
+const MoveTemplate pawnBlackMoveNoTake =
 {
 	{ std::pair<int, int>(0,-1) }
 };
@@ -101,23 +102,32 @@ const MoveTemplate kingMove =
 	{ std::pair<int, int>(1, -1) }
 };
 
-const std::vector<const MoveTemplate*> standardChessWhiteAttackMoves =
+struct ChessPieceParameters
 {
-	&pawnWhiteMoveTake,
-	&knightMove,
-	&bishopMove,
-	&rookMove,
-	&queenMove,
-	&kingMove
+	bool isDifferentMoveTypes;
+	MoveTemplate* takeMove;
+	MoveTemplate* noTakeMove;
+	MoveTemplate* anyMove;
+	
+	ChessPieceParameters(bool differentMoveTypes_, MoveTemplate* takeMove_, MoveTemplate* noTakeMove_,
+		MoveTemplate* anyMove_);
+	ChessPieceParameters(MoveTemplate* takeMove_, MoveTemplate* noTakeMove_);
+	ChessPieceParameters(MoveTemplate* anyMove_);
 };
-const std::vector<const MoveTemplate*> standardChessBlackAttackMoves =
-{
-	&pawnBlackMoveTake,
-	&knightMove,
-	&bishopMove,
-	&rookMove,
-	&queenMove,
-	&kingMove
-};
+
+std::map<ChessPiece, const ChessPieceParameters> moveParameters;
+
+moveParameters['P'] = ChessPieceParameters(&pawnWhiteMoveTake, &pawnWhiteMoveNoTake);
+moveParameters['p'] = ChessPieceParameters(&pawnBlackMoveTake, &pawnBlackMoveNoTake);
+moveParameters['N'] = ChessPieceParameters(&knightMove);
+moveParameters['n'] = ChessPieceParameters(&knightMove);
+moveParameters['B'] = ChessPieceParameters(&bishopMove);
+moveParameters['b'] = ChessPieceParameters(&bishopMove);
+moveParameters['R'] = ChessPieceParameters(&rookMove);
+moveParameters['r'] = ChessPieceParameters(&rookMove);
+moveParameters['Q'] = ChessPieceParameters(&queenMove);
+moveParameters['q'] = ChessPieceParameters(&queenMove);
+moveParameters['K'] = ChessPieceParameters(&kingMove);
+moveParameters['k'] = ChessPieceParameters(&kingMove);
 
 #endif

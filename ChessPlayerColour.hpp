@@ -23,4 +23,9 @@ constexpr double getWeightMultiplier(ChessPlayerColour c)
 	return (c==ChessPlayerColour::WHITE) ? 1.0 : -1.0;
 }
 
+constexpr size_t toArrayPosition(ChessPlayerColour c)
+{
+	return (c==ChessPlayerColour::WHITE) ? (size_t)0 : (size_t)1;
+}
+
 #endif

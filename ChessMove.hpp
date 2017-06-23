@@ -10,6 +10,8 @@
 
 #include "ChessBoard.hpp"
 #include <string>
+#include <functional>
+
 
 class ChessMove;
 
@@ -36,5 +38,14 @@ public:
 	
 	friend class ChessBoardFactory;
 };
+
+typedef std::function<void(char, int, char, int)> ChessMoveRecordingFunction;
+void move(
+	ChessMoveRecordingFunction recFunTake,
+	ChessMoveRecordingFunction recFunDefend,
+	const ChessBoard &cb, char file, int rank,
+	const MoveTemplate& mt,
+	bool canTake=true, bool canMoveToEmpty=true);
+
 
 #endif

@@ -9,6 +9,7 @@
 #define CHESSBOARDANALYSIS__
 
 #include "ChessBoard.hpp"
+#include "ChessMove.hpp"
 
 constexpr double
 	CHECKMATE_WEIGHT=-100000000, // mate is always more important

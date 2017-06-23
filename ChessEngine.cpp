@@ -18,10 +18,8 @@ ChessEngineWorker::ChessEngineWorker()
 
 void ChessEngineWorker::stop()
 {
-	std::cerr << "trying to stop" << std::endl;
 	pleaseStop=true;
 	thread.join();
-	std::cerr << "join completed" << std::endl;
 }
 /*
 01 function alphabeta(node, depth, α, β, maximizingPlayer)

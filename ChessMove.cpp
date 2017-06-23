@@ -99,3 +99,47 @@ PlayerColour ChessMove::getTurn() const
 {
 	return !to->getTurn();
 }
+
+void move(
+	ChessMoveRecordingFunction recFunTake,
+	ChessMoveRecordingFunction recFunDefend,
+	const ChessBoard &cb, char file, int rank,
+	const MoveTemplate& mt,
+	bool canTake, bool canMoveToEmpty)
+{
+	char newFile;
+	int newRank;
+	for(auto direction = mt.begin(); direction != mt.end(); ++direction)
+	{
+		for(auto attempt = direction->begin(); attempt != direction->end(); ++attempt)
+		{
+			newFile = file + attempt->first;
+			newRank = rank+attempt->second;
+			if(newFile<'A' || newFile>'H' || newRank<1 || newRank >8)
+			{
+				break;
+			}
+			
+			if(!cb.isEmpty(newFile, newRank))
+			{
+				if(canTake)
+				{
+					if(!ChessFunctions::ownPiece(cb.getPiece(newFile, newRank), cb.getTurn()))
+					{
+						recFunTake(file, rank, newFile, newRank);
+					}
+					recFunDefend(file, rank, newFile, newRank);
+				}
+				break; // stop if a cell isn't empty
+			}
+			else // if empty
+			{
+				if(canMoveToEmpty)
+				{
+					recFunTake(file, rank, newFile, newRank);
+				}
+				recFunDefend(file, rank, newFile, newRank);
+			}
+		}
+	}
+}
