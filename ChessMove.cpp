@@ -10,6 +10,7 @@
 ChessMove::ChessMove()
 {}
 
+/*
 ChessMove::ChessMove(
 	ChessBoard::ptr from_, char fileFrom, int rankFrom, char fileTo, int rankTo)
 {
@@ -21,6 +22,7 @@ ChessMove::ChessMove(
 	to->turn = (from->turn_==WHITE) ? BLACK : WHITE;
 	to->from = *this;
 }
+*/
 
 bool ChessMove::isMovePossible() const
 {
@@ -32,8 +34,8 @@ bool ChessMove::isMovePossible() const
 		{
 			// if it's white to move, we are looking for a black king
 			if(
-				(to->getPiece(file+'A', rank+1)=='K' && to->getTurn()==BLACK) || 
-				(to->getPiece(file+'A', rank+1)=='k' && to->getTurn()==WHITE)
+				(to->getPiece(file+'A', rank+1)=='K' && to->getTurn()==ChessPlayerColour::BLACK) || 
+				(to->getPiece(file+'A', rank+1)=='k' && to->getTurn()==ChessPlayerColour::WHITE)
 			  )
 			{
 				found = true;
@@ -44,7 +46,7 @@ bool ChessMove::isMovePossible() const
 		}
 	}
 
-	if(to->getTurn()==BLACK)
+	if(to->getTurn()==ChessPlayerColour::BLACK)
 	{
 		// checking pawns
 		for(auto dir=pawnBlackMoveTake.begin(); dir!=pawnBlackMoveTake.end(); ++dir)
@@ -85,7 +87,7 @@ bool ChessMove::isMovePossible() const
 
 bool ChessMove::hasPrevious() const
 {
-	return from;
+	return (bool)from;
 }
 ChessBoard::ptr ChessMove::getFrom() const
 {
@@ -95,12 +97,12 @@ ChessBoard::ptr ChessMove::getTo() const
 {
 	return to;
 }
-PlayerColour ChessMove::getTurn() const
+ChessPlayerColour ChessMove::getTurn() const
 {
 	return !to->getTurn();
 }
 
-void move(
+void ChessMove::moveAttempts(
 	ChessMoveRecordingFunction recFunTake,
 	ChessMoveRecordingFunction recFunDefend,
 	const ChessBoard &cb, char file, int rank,
@@ -124,7 +126,7 @@ void move(
 			{
 				if(canTake)
 				{
-					if(!ChessFunctions::ownPiece(cb.getPiece(newFile, newRank), cb.getTurn()))
+					if(getColour(cb.getPiece(newFile, newRank)) != cb.getTurn())
 					{
 						recFunTake(file, rank, newFile, newRank);
 					}

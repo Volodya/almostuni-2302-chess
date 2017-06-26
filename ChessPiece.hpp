@@ -15,7 +15,7 @@ typedef char ChessPiece;
 constexpr ChessPlayerColour getColour(const ChessPiece &cp)
 {
 	return
-		(cp>='a' && cp<='z') ? ChessPlayerColour::BLACK : ChessPlayerColour::WHITE);
+		(cp>='a' && cp<='z') ? ChessPlayerColour::BLACK : ChessPlayerColour::WHITE;
 }
 
 #endif

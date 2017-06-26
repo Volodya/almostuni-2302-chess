@@ -8,6 +8,10 @@
 #ifndef CHESSBOARDITERATOR__
 #define CHESSBOARDITERATOR__
 
+#include "ChessPiece.hpp"
+#include <iterator>
+
+
 class ChessBoard;
 
 class ChessBoardIterator : public std::iterator<std::input_iterator_tag, ChessPiece>

@@ -6,6 +6,7 @@
  */
 
 #include "ChessEngine.hpp"
+#include "ChessBoardAnalysis.hpp"
 #include <iostream>
 #include <algorithm>
 #include <cmath>
@@ -45,18 +46,18 @@ void ChessEngineWorker::stop()
 
 void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int startDepth)
 {
-	std::function<ChessBoardAnalysis(const ChessBoardAnalysis&,int,double,double,PlayerColour)> calculation;
+	std::function<ChessBoardAnalysis(const ChessBoardAnalysis&,int,double,double,ChessPlayerColour)> calculation;
 	calculation = [this, &calculation](const ChessBoardAnalysis &analysis, int depth,
 		double alpha, double beta, ChessPlayerColour maximizingPlayer)
 	{
 		if(depth==0 || analysis.isCheckMate() /* || node.isDraw() */)
 		{
-			return analysis->getBoard();
+			return analysis;
 		}
 		
 		auto answers = analysis.getPossibleMoves();
-		ChessBoard::ptr res;
-		if(maximizingPlayer == analysis->getBoard()->getTurn())
+		ChessBoardAnalysis res;
+		if(maximizingPlayer == analysis.getBoard()->getTurn())
 		{
 			double v = -INFINITY;
 			for(auto it=answers.begin(); it!=answers.end(); ++it)

@@ -8,7 +8,6 @@
 #ifndef CHESSBOARD__
 #define CHESSBOARD__
 
-#include <iterator>
 #include <vector>
 #include <memory>
 #include <cstdint>
@@ -28,9 +27,9 @@ public:
 private:
 	ChessPiece board[8][8]; // [rank][file]
 	
-	PlayerColour turn;
+	ChessPlayerColour turn;
 	
-	ChessMove::ptr move;
+	std::shared_ptr<ChessMove> move; // ChessMove::ptr
 
 	ChessBoard();
 public:
@@ -39,8 +38,8 @@ public:
 	bool isEmpty(char file, int rank) const;
 	void placePiece(char file, int rank, ChessPiece piece);
 	ChessPiece getPiece(char file, int rank) const;
-	PlayerColour getTurn() const;
-	ChessMove::ptr getMove() const;
+	ChessPlayerColour getTurn() const;
+	std::shared_ptr<ChessMove> getMove() const; // ChessMove::ptr
 	
 	void debugPrint() const;
 	

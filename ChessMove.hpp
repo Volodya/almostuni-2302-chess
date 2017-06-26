@@ -9,6 +9,8 @@
 #define CHESSMOVE__
 
 #include "ChessBoard.hpp"
+#include "ChessPlayerColour.hpp"
+#include "moveTemplate.hpp"
 #include <string>
 #include <functional>
 
@@ -18,7 +20,7 @@ class ChessMove;
 class ChessMove
 {
 public:
-	typedef ptr std::shared_ptr<ChessMove>;
+	typedef std::shared_ptr<ChessMove> ptr;
 
 private:
 	ChessBoard::ptr from;
@@ -34,18 +36,20 @@ public:
 	
 	ChessBoard::ptr getFrom() const;
 	ChessBoard::ptr getTo() const;
-	PlayerColour getTurn() const;
+	ChessPlayerColour getTurn() const;
 	
 	friend class ChessBoardFactory;
+
+	typedef std::function<void(char, int, char, int)> ChessMoveRecordingFunction;
+	static void moveAttempts(
+		ChessMoveRecordingFunction recFunTake,
+		ChessMoveRecordingFunction recFunDefend,
+		const ChessBoard &cb, char file, int rank,
+		const MoveTemplate& mt,
+		bool canTake=true, bool canMoveToEmpty=true);
+
 };
 
-typedef std::function<void(char, int, char, int)> ChessMoveRecordingFunction;
-void move(
-	ChessMoveRecordingFunction recFunTake,
-	ChessMoveRecordingFunction recFunDefend,
-	const ChessBoard &cb, char file, int rank,
-	const MoveTemplate& mt,
-	bool canTake=true, bool canMoveToEmpty=true);
 
 
 #endif

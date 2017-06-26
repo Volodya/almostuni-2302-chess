@@ -8,6 +8,8 @@
 #ifndef CHESSPLAYERCOLOUR__
 #define CHESSPLAYERCOLOUR__
 
+#include <cstddef>
+
 enum class ChessPlayerColour
 {
 	WHITE, BLACK

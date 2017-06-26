@@ -11,11 +11,10 @@
 #include <iostream>
 #include <cassert>
 
-#include "chessfunctions.hpp"
 #include "moveTemplate.hpp"
 
 ChessBoard::ChessBoard()
-	: turn(WHITE), from(nullptr)
+	: turn(ChessPlayerColour::WHITE), move(nullptr)
 {
 	for(int i=0; i<8; ++i)
 	{
@@ -31,7 +30,7 @@ ChessBoard::~ChessBoard()
 
 void ChessBoard::debugPrint() const
 {
-	if(turn==WHITE)
+	if(turn==ChessPlayerColour::WHITE)
 	{
 		std::cout << "White's turn" << std::endl;
 	}
@@ -56,7 +55,7 @@ void ChessBoard::debugPrint() const
 	}
 }
 
-PlayerColour ChessBoard::getTurn() const
+ChessPlayerColour ChessBoard::getTurn() const
 {
 	return turn;
 }
@@ -78,34 +77,4 @@ bool ChessBoard::isEmpty(char file, int rank) const
 	return (board[rank-1][file-'A'] == ' ');
 }
 
-bool ChessBoard::isCheckMate() const
-{
-	int count=0;
-	if(turn==BLACK)
-	{
-		// count white pieces
-		count=ChessFunctions::countPieces(*this, [](ChessPiece onBoard) {
-			return onBoard=='p' || onBoard=='n' || onBoard=='b' || onBoard=='r' || onBoard=='q' || onBoard=='k';
-		});
-	}
-	else
-	{
-		// count black pieces
-		count=ChessFunctions::countPieces(*this, [](ChessPiece onBoard) {
-			return onBoard=='P' || onBoard=='N' || onBoard=='B' || onBoard=='R' || onBoard=='Q' || onBoard=='K';
-		});
-	}
-	
-	if(count==0)
-	{
-		return true;
-	}
-	
-	if(isCheck())
-	{
-		return possibleMoves.empty();
-	}
-	
-	return false;
-}
 

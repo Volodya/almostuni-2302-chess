@@ -105,29 +105,30 @@ const MoveTemplate kingMove =
 struct ChessPieceParameters
 {
 	bool isDifferentMoveTypes;
-	MoveTemplate* takeMove;
-	MoveTemplate* noTakeMove;
-	MoveTemplate* anyMove;
+	const MoveTemplate* takeMove;
+	const MoveTemplate* noTakeMove;
+	const MoveTemplate* anyMove;
 	
-	ChessPieceParameters(bool differentMoveTypes_, MoveTemplate* takeMove_, MoveTemplate* noTakeMove_,
-		MoveTemplate* anyMove_);
-	ChessPieceParameters(MoveTemplate* takeMove_, MoveTemplate* noTakeMove_);
-	ChessPieceParameters(MoveTemplate* anyMove_);
+	ChessPieceParameters(bool differentMoveTypes_, const MoveTemplate* takeMove_, const MoveTemplate* noTakeMove_,
+		const MoveTemplate* anyMove_);
+	ChessPieceParameters(const MoveTemplate* takeMove_, const MoveTemplate* noTakeMove_);
+	ChessPieceParameters(const MoveTemplate* anyMove_);
 };
 
-std::map<ChessPiece, const ChessPieceParameters> moveParameters;
-
-moveParameters['P'] = ChessPieceParameters(&pawnWhiteMoveTake, &pawnWhiteMoveNoTake);
-moveParameters['p'] = ChessPieceParameters(&pawnBlackMoveTake, &pawnBlackMoveNoTake);
-moveParameters['N'] = ChessPieceParameters(&knightMove);
-moveParameters['n'] = ChessPieceParameters(&knightMove);
-moveParameters['B'] = ChessPieceParameters(&bishopMove);
-moveParameters['b'] = ChessPieceParameters(&bishopMove);
-moveParameters['R'] = ChessPieceParameters(&rookMove);
-moveParameters['r'] = ChessPieceParameters(&rookMove);
-moveParameters['Q'] = ChessPieceParameters(&queenMove);
-moveParameters['q'] = ChessPieceParameters(&queenMove);
-moveParameters['K'] = ChessPieceParameters(&kingMove);
-moveParameters['k'] = ChessPieceParameters(&kingMove);
+const std::map<ChessPiece, const ChessPieceParameters> moveParameters =
+	{
+			{'P', ChessPieceParameters(&pawnWhiteMoveTake, &pawnWhiteMoveNoTake)},
+			{'p', ChessPieceParameters(&pawnBlackMoveTake, &pawnBlackMoveNoTake)},
+			{'N', ChessPieceParameters(&knightMove)},
+			{'n', ChessPieceParameters(&knightMove)},
+			{'B', ChessPieceParameters(&bishopMove)},
+			{'b', ChessPieceParameters(&bishopMove)},
+			{'R', ChessPieceParameters(&rookMove)},
+			{'r', ChessPieceParameters(&rookMove)},
+			{'Q', ChessPieceParameters(&queenMove)},
+			{'q', ChessPieceParameters(&queenMove)},
+			{'K', ChessPieceParameters(&kingMove)},
+			{'k', ChessPieceParameters(&kingMove)}
+	};
 
 #endif

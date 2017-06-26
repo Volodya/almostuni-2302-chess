@@ -49,7 +49,7 @@ ChessBoard::ptr ChessBoardFactory::createBoard()
 	
 	cm->to=cb;
 	cm->moveNum=0;
-	cb->from=cm;
+	cb->move=cm;
 	
 	return cb;
 }
@@ -64,7 +64,7 @@ ChessBoard::ptr ChessBoardFactory::createBoard
 	cm->from=from;
 	cm->to=cb;
 	cm->moveNum=from->getMove()->moveNum+1;
-	cb->from=cm;
+	cb->move=cm;
 	
 	return cb;
 }

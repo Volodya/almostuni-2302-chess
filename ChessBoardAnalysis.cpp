@@ -6,6 +6,10 @@
  */
 
 #include "ChessBoardAnalysis.hpp"
+#include "ChessBoardFactory.hpp"
+#include "ChessPlayerColour.hpp"
+#include <cassert>
+#include <algorithm>
 
 ChessBoardAnalysis::ChessBoardAnalysis(ChessBoard::ptr board_)
 	: board(board_)
@@ -16,9 +20,10 @@ ChessBoardAnalysis::ChessBoardAnalysis(ChessBoard::ptr board_)
 void ChessBoardAnalysis::calculatePossibleMoves()
 {
 	ChessBoardFactory factory;
+	typedef ChessMove::ChessMoveRecordingFunction ChessMoveRecordingFunction;
 		// empty function
 	const static ChessMoveRecordingFunction emptyFunction =
-			[board](char file, int rank, char newFile, int newRank) {};
+			[](char file, int rank, char newFile, int newRank) {};
 
 	
 		// take opponent's piece
@@ -27,8 +32,8 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 	const static ChessMoveRecordingFunction whiteTurnFunctionTake[2] = 
 		{
 			//white
-			[board, &factory](char file, int rank, char newFile, int newRank) {
-				auto maybeMove = factory.createBoard(board, file, rank, newFile, newRank)->getMove();
+			[this, &factory](char file, int rank, char newFile, int newRank) {
+				auto maybeMove = factory.createBoard(this->board, file, rank, newFile, newRank)->getMove();
 				
 				assert(maybeMove->getTurn()==ChessPlayerColour::WHITE);
 				
@@ -38,10 +43,10 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				}
 			},
 			//black
-			[board](char file, int rank, char newFile, int newRank) {
-				assert(maybeMove->getTurn()==ChessPlayerColour::BLACK);
+			[this](char file, int rank, char newFile, int newRank) {
+				//assert(maybeMove->getTurn()==ChessPlayerColour::BLACK);
 				
-				if(board->getPiece(newFile, newRank)=='k')
+				if(this->board->getPiece(newFile, newRank)=='k')
 				{
 					check=true;
 				}
@@ -50,17 +55,17 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 	const static ChessMoveRecordingFunction  blackTurnFunctionTake[2] =
 		{
 			// white
-			[board](char file, int rank, char newFile, int newRank) {
+			[this](char file, int rank, char newFile, int newRank) {
 				//assert(maybeMove->getTurn()==ChessPlayerColour::WHITE);
 								
-				if(board->getPiece(newFile, newRank)=='K')
+				if(this->board->getPiece(newFile, newRank)=='K')
 				{
 					check=true;
 				}
 			},
 			// black
-			[board, &factory](char file, int rank, char newFile, int newRank) {
-				auto maybeMove = factory.createBoard(board, file, rank, newFile, newRank)->getMove();
+			[this, &factory](char file, int rank, char newFile, int newRank) {
+				auto maybeMove = factory.createBoard(this->board, file, rank, newFile, newRank)->getMove();
 				
 				assert(maybeMove->getTurn()==ChessPlayerColour::BLACK);
 				
@@ -77,7 +82,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 	const static ChessMoveRecordingFunction whiteTurnFunctionNoTake[2] = 
 		{
 			// white
-			whiteTurnFunctionTake[getArrayPosition(ChessPlayerColour::WHITE)],
+			whiteTurnFunctionTake[toArrayPosition(ChessPlayerColour::WHITE)],
 			// black
 			emptyFunction
 		};
@@ -86,20 +91,20 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 			// white
 			emptyFunction,
 			// black
-			blackTurnFunctionTake[getArrayPosition(ChessPlayerColour::BLACK)]
+			blackTurnFunctionTake[toArrayPosition(ChessPlayerColour::BLACK)]
 		};
 	
 		// we could recapture on this square	
 	const static ChessMoveRecordingFunction whiteTurnFunctionDefend[2] = 
 		{
 			// white
-			[](char file, int rank, char newFile, int newRank) {
+			[this](char file, int rank, char newFile, int newRank) {
 				//assert(maybeMove->getTurn()==ChessPlayerColour::WHITE);
 				
 				++underAttackByWhite[newRank-1][newFile-'A'];
 			},
 			// black
-			[](char file, int rank, char newFile, int newRank) {
+			[this](char file, int rank, char newFile, int newRank) {
 				//assert(maybeMove->getTurn()==ChessPlayerColour::BLACK);
 
 				++underAttackByWhite[newRank-1][newFile-'A'];
@@ -108,13 +113,13 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 	const static ChessMoveRecordingFunction blackTurnFunctionDefend[2] = 
 		{
 			// white
-			[](char file, int rank, char newFile, int newRank) {
+			[this](char file, int rank, char newFile, int newRank) {
 				//assert(maybeMove->getTurn()==ChessPlayerColour::WHITE);
 				
 				++underAttackByBlack[newRank-1][newFile-'A'];
 			},
 			// black
-			[](char file, int rank, char newFile, int newRank) {
+			[this](char file, int rank, char newFile, int newRank) {
 				//assert(maybeMove->getTurn()==ChessPlayerColour::BLACK);
 
 				++underAttackByBlack[newRank-1][newFile-'A'];
@@ -131,89 +136,28 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		int rank = it.getRank();
 		char file = it.getFile();
 
-		auto pieceParam = moveParameters[*it];
+		auto pieceParam = moveParameters.at(*it);
 		if(pieceParam.isDifferentMoveTypes)
 		{
-			ChessFunctions::move(whiteTurnFunctionNoTake[funcArrayPos], emptyFunction,
+			ChessMove::moveAttempts(whiteTurnFunctionNoTake[funcArrayPos], emptyFunction,
 				*board, file, rank,
 				*pieceParam.noTakeMove, false);
-			ChessFunctions::move(whiteTurnFunctionTake[funcArrayPos], whiteTurnFunctionDefend[funcArrayPos],
+			ChessMove::moveAttempts(whiteTurnFunctionTake[funcArrayPos], whiteTurnFunctionDefend[funcArrayPos],
 				*board, file, rank,
 				*pieceParam.takeMove, true, false);
 		}
 		else
 		{
-			ChessFunctions::move(whiteTurnFunctionTake[funcArrayPos], whiteTurnFunctionDefend[funcArrayPos],
+			ChessMove::moveAttempts(whiteTurnFunctionTake[funcArrayPos], whiteTurnFunctionDefend[funcArrayPos],
 				*board, file, rank, *pieceParam.anyMove, true);
 		}
-		/*
-		switch(*it)
-		{
-			case 'P':
-				ChessFunctions::move(whiteTurnFunctionNoTake, emptyFunction,
-					*board, file, rank,
-					pawnWhiteMoveNotTake, false);
-				ChessFunctions::move(whiteTurnFunctionTake, whiteTurnFunctionDefend,
-					*board, file, rank,
-					pawnWhiteMoveTake,    true, false);
-				break;
-			case 'p':
-				ChessFunctions::move(blackTurnFunctionNoTake, emptyFunction,
-					*board, file, rank,
-					pawnBlackMoveNotTake, false);
-				ChessFunctions::move(blackTurnFunctionTake, blackTurnFunctionDefend,
-					*board, file, rank,
-					pawnBlackMoveTake,    true, false);
-				break;
-			case 'R':
-				ChessFunctions::move(whiteTurnFunctionTake, whiteTurnFunctionDefend,
-					*board, file, rank, rookMove, true);
-				break;
-			case 'r':
-				ChessFunctions::move(blackTurnFunctionTake, blackTurnFunctionDefend,
-					*board, file, rank, rookMove, true);
-				break;
-			case 'N':
-				ChessFunctions::move(whiteTurnFunctionTake, whiteTurnFunctionDefend,
-					*board, file, rank, knightMove, true);
-				break;
-			case 'n':
-				ChessFunctions::move(blackTurnFunctionTake, blackTurnFunctionDefend,
-					*board, file, rank, knightMove, true);
-				break;
-			case 'B':
-				ChessFunctions::move(whiteTurnFunctionTake, whiteTurnFunctionDefend,
-					*board, file, rank, bishopMove, true);
-				break;
-			case 'b':
-				ChessFunctions::move(blackTurnFunctionTake, blackTurnFunctionDefend,
-					*board, file, rank, bishopMove, true);
-				break;
-			case 'Q':
-				ChessFunctions::move(whiteTurnFunctionTake, whiteTurnFunctionDefend,
-					*board, file, rank, queenMove, true);
-				break;
-			case 'q':
-				ChessFunctions::move(blackTurnFunctionTake, blackTurnFunctionDefend,
-					*board, file, rank, queenMove, true);
-				break;
-			case 'K':
-				ChessFunctions::move(whiteTurnFunctionTake, whiteTurnFunctionDefend,
-					*board, file, rank, kingMove, true);
-				break;
-			case 'k':
-				ChessFunctions::move(blackTurnFunctionTake, blackTurnFunctionDefend,
-					*board, file, rank, kingMove, true);
-				break;
-		}
-		*/
 	}
 }
 
 double ChessBoardAnalysis::chessPositionWeight() const
 {
 	return
-		(isCheckMate() ? (double)turn * CHECKMATE_WEIGHT : 0) // Check Mate
+		(isCheckMate() ? getWeightMultiplier(board->getTurn()) * CHECKMATE_WEIGHT : 0) // Check Mate
 
 		+
 		this->chessPiecesWeight()	// count pieces
@@ -250,13 +194,44 @@ double ChessBoardAnalysis::chessPiecesWeight() const
 
 }
 
-bool ChessBoard::isCheck() const
+bool ChessBoardAnalysis::isCheck() const
 {
-	assert(possibleMovesCalculated);
 	return check;
 }
 
-std::vector<ChessBoard::ptr> ChessBoard::getPossibleMoves() const
+bool ChessBoardAnalysis::isCheckMate() const
+{
+	int count=0;
+	if(board->getTurn()==ChessPlayerColour::BLACK)
+	{
+		// count white pieces
+		count=std::count_if(board->begin(), board->end(), [](ChessPiece onBoard) {
+			return getColour(onBoard)==ChessPlayerColour::WHITE;
+		});
+	}
+	else
+	{
+		// count black pieces
+		count=std::count_if(board->begin(), board->end(), [](ChessPiece onBoard) {
+			return getColour(onBoard)==ChessPlayerColour::BLACK;
+		});
+	}
+	
+	if(count==0)
+	{
+		return true;
+	}
+	
+	if(isCheck())
+	{
+		return possibleMoves.empty();
+	}
+	
+	return false;
+}
+
+
+std::vector<ChessMove::ptr> ChessBoardAnalysis::getPossibleMoves() const
 {
 	return possibleMoves;
 }

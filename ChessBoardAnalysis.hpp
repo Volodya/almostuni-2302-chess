@@ -30,6 +30,7 @@ class ChessBoardAnalysis
 	std::vector<ChessMove::ptr> possibleMoves;
 	
 	bool check;
+	
 public:
 	ChessBoardAnalysis(ChessBoard::ptr board_);
 
