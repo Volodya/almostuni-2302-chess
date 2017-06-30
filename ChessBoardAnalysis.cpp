@@ -7,6 +7,7 @@
 
 #include "ChessBoardAnalysis.hpp"
 #include "ChessBoardFactory.hpp"
+#include "ChessBoardIterator.hpp"
 #include "ChessPlayerColour.hpp"
 #include <cassert>
 #include <algorithm>
@@ -33,8 +34,12 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		{
 			//white
 			[this, &factory](char file, int rank, char newFile, int newRank) {
-				auto maybeMove = factory.createBoard(this->board, file, rank, newFile, newRank)->getMove();
+				assert(this->board->getTurn()==ChessPlayerColour::WHITE);
+
+				auto nextBoard = factory.createBoard(this->board, file, rank, newFile, newRank);
+				auto maybeMove = nextBoard->getMove();
 				
+				assert(nextBoard->getTurn()==ChessPlayerColour::BLACK);
 				assert(maybeMove->getTurn()==ChessPlayerColour::WHITE);
 				
 				if(maybeMove->isMovePossible())
@@ -65,8 +70,12 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 			},
 			// black
 			[this, &factory](char file, int rank, char newFile, int newRank) {
-				auto maybeMove = factory.createBoard(this->board, file, rank, newFile, newRank)->getMove();
+				assert(this->board->getTurn()==ChessPlayerColour::BLACK);
+
+				auto nextBoard = factory.createBoard(this->board, file, rank, newFile, newRank);
+				auto maybeMove = nextBoard->getMove();
 				
+				assert(nextBoard->getTurn()==ChessPlayerColour::WHITE);
 				assert(maybeMove->getTurn()==ChessPlayerColour::BLACK);
 				
 				if(maybeMove->isMovePossible())
@@ -130,9 +139,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 	for(auto it = board->begin(); it != board->end(); ++it)
 	{
 		if(*it == ' ') continue;
-		
-		//if(!ChessFunctions::ownPiece(*it, turn)) continue;
-				
+						
 		int rank = it.getRank();
 		char file = it.getFile();
 
@@ -234,4 +241,9 @@ bool ChessBoardAnalysis::isCheckMate() const
 std::vector<ChessMove::ptr> ChessBoardAnalysis::getPossibleMoves() const
 {
 	return possibleMoves;
+}
+
+ChessBoard::ptr ChessBoardAnalysis::getBoard() const
+{
+	return board;
 }

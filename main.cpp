@@ -7,9 +7,8 @@
 
 #include <iostream>
 #include "ChessBoard.hpp"
+#include "ChessBoardFactory.hpp"
 #include "ChessEngine.hpp"
-
-#include "chessfunctions.hpp"
 
 int main()
 {

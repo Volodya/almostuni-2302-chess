@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <map>
+#include "ChessPiece.hpp"
 
 typedef std::vector<std::vector<std::pair<int, int>>> MoveTemplate;
 

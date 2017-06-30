@@ -19,7 +19,7 @@ class ChessBoardIterator : public std::iterator<std::input_iterator_tag, ChessPi
 	int rank, file;
 	ChessBoard *cb;
 public:
-	ChessBoardIterator(const ChessBoardIterator& that);
+	ChessBoardIterator(const ChessBoardIterator& that) = default;
 	
 	bool operator!=(const ChessBoardIterator& that);
 	bool operator==(const ChessBoardIterator& that);
@@ -38,7 +38,7 @@ class ChessBoardConstIterator : public std::iterator<std::input_iterator_tag, Ch
 	int rank, file;
 	const ChessBoard * cb;
 public:
-	ChessBoardConstIterator(const ChessBoardConstIterator& that);
+	ChessBoardConstIterator(const ChessBoardConstIterator& that) = default;
 	
 	bool operator!=(const ChessBoardConstIterator& that);
 	bool operator==(const ChessBoardConstIterator& that);

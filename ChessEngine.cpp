@@ -11,7 +11,9 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <memory>
 #include <new> // std::bad_alloc
+#include <cassert>
 
 ChessEngineWorker::ChessEngineWorker()
 	: pleaseStop(false)
@@ -46,24 +48,30 @@ void ChessEngineWorker::stop()
 
 void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int startDepth)
 {
-	std::function<ChessBoardAnalysis(const ChessBoardAnalysis&,int,double,double,ChessPlayerColour)> calculation;
-	calculation = [this, &calculation](const ChessBoardAnalysis &analysis, int depth,
+	typedef std::unique_ptr<ChessBoardAnalysis> ChessBoardAnalysisPtr;
+	std::function<ChessBoardAnalysisPtr&&(ChessBoardAnalysisPtr&&,int,double,double,ChessPlayerColour)> calculation;
+	calculation = [this, &calculation](ChessBoardAnalysisPtr&& analysis, int depth,
 		double alpha, double beta, ChessPlayerColour maximizingPlayer)
 	{
-		if(depth==0 || analysis.isCheckMate() /* || node.isDraw() */)
+		std::cerr << ".";
+		if(depth==0 || analysis->isCheckMate() /* || node.isDraw() */)
 		{
-			return analysis;
+			return std::move(analysis);
 		}
 		
-		auto answers = analysis.getPossibleMoves();
-		ChessBoardAnalysis res;
-		if(maximizingPlayer == analysis.getBoard()->getTurn())
+		auto answers = analysis->getPossibleMoves();
+		ChessBoardAnalysisPtr res=nullptr;
+		if(maximizingPlayer == analysis->getBoard()->getTurn())
 		{
+		std::cerr << ":";
 			double v = -INFINITY;
 			for(auto it=answers.begin(); it!=answers.end(); ++it)
 			{
-				ChessBoardAnalysis analysis((*it)->getTo());
-				res = calculation(analysis, depth-1, alpha, beta, maximizingPlayer);
+				ChessBoardAnalysisPtr analysis(new ChessBoardAnalysis((*it)->getTo()));
+				std::cerr << "+";
+				// TODO: создать временный указатель и записать его в res только если v изменился
+				res = calculation(std::move(analysis), depth-1, alpha, beta, maximizingPlayer);
+				std::cerr << "/";
 				v = std::max(v, res->chessPositionWeight()*getWeightMultiplier(maximizingPlayer));
 				alpha = std::max(alpha, v);
 				if(beta <= alpha)
@@ -75,11 +83,13 @@ void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int s
 		}
 		else
 		{
+		std::cerr << ";";
 			double v = INFINITY;
 			for(auto it=answers.begin(); it!=answers.end(); ++it)
 			{
-				ChessBoardAnalysis analysis((*it)->getTo());
-				res = calculation(analysis, depth-1, alpha, beta, maximizingPlayer);
+						std::cerr << "*";
+				ChessBoardAnalysisPtr analysis(new ChessBoardAnalysis((*it)->getTo()));
+				res = calculation(std::move(analysis), depth-1, alpha, beta, maximizingPlayer);
 				v = std::min(v, res->chessPositionWeight()*getWeightMultiplier(maximizingPlayer));
 				beta = std::min(v, beta);
 				if(beta <= alpha)
@@ -88,8 +98,10 @@ void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int s
 					break;
 				}
 			}
+			std::cerr << "$";
 		}
-		return res;
+		
+		return std::move(res);
 	};
 	
 	int depth = startDepth;
@@ -98,7 +110,8 @@ void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int s
 		std::cout << "i am thinking" << std::endl;
 		try
 		{
-			auto best = calculation(original, depth, -INFINITY, INFINITY, original->getTurn());
+			ChessBoardAnalysisPtr best = calculation(ChessBoardAnalysisPtr(new ChessBoardAnalysis(original)),
+				depth, -INFINITY, INFINITY, original->getTurn());
 			positionPreferences.emplace_front(best->chessPositionWeight(), best->getBoard());
 			++depth;
 		}

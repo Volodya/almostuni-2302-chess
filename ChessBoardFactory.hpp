@@ -15,7 +15,7 @@ class ChessBoardFactory
 {
 public:
 	ChessBoard::ptr createBoard();
-	ChessBoard::ptr createBoard(ChessBoard::ptr from, char fileFrom, int rankFrom, char fileTo, int rankTo);
+	ChessBoard::ptr createBoard(ChessBoard::ptr fromBoard, char fileFrom, int rankFrom, char fileTo, int rankTo);
 };
 
 #endif

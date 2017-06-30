@@ -7,6 +7,7 @@
 
 #include "ChessBoardFactory.hpp"
 #include <memory>
+#include <cassert>
 
 ChessBoard::ptr ChessBoardFactory::createBoard()
 {
@@ -51,20 +52,26 @@ ChessBoard::ptr ChessBoardFactory::createBoard()
 	cm->moveNum=0;
 	cb->move=cm;
 	
+	assert(cb->getTurn()==ChessPlayerColour::WHITE);
+	
 	return cb;
 }
 
 ChessBoard::ptr ChessBoardFactory::createBoard
-  (ChessBoard::ptr from, char fileFrom, int rankFrom, char fileTo, int rankTo)
+  (ChessBoard::ptr fromBoard, char fileFrom, int rankFrom, char fileTo, int rankTo)
 {
-	ChessBoard::ptr cb(new ChessBoard);
+	ChessBoard::ptr toBoard(new ChessBoard);
 
-	ChessMove::ptr cm(new ChessMove);
+	ChessMove::ptr curMove(new ChessMove);
 	
-	cm->from=from;
-	cm->to=cb;
-	cm->moveNum=from->getMove()->moveNum+1;
-	cb->move=cm;
+	curMove->from=fromBoard;
+	curMove->to=toBoard;
+	curMove->moveNum=fromBoard->getMove()->moveNum+1;
+	toBoard->move=curMove;
+	toBoard->turn=!fromBoard->getTurn();
 	
-	return cb;
+	assert(fromBoard->getTurn()!=toBoard->getTurn());
+	assert(fromBoard->getTurn()==curMove->getTurn());
+	
+	return toBoard;
 }
