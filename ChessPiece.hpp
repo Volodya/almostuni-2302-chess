@@ -11,6 +11,7 @@
 #include "ChessPlayerColour.hpp"
 
 typedef char ChessPiece;
+constexpr ChessPiece EMPTY_CELL = ' ';
 
 constexpr ChessPlayerColour getColour(const ChessPiece &cp)
 {

@@ -103,12 +103,15 @@ ChessPlayerColour ChessMove::getTurn() const
 }
 
 void ChessMove::moveAttempts(
-	ChessMoveRecordingFunction recFunTake,
-	ChessMoveRecordingFunction recFunDefend,
+	ChessMoveRecordingFunction recFunTake[],
+	ChessMoveRecordingFunction recFunDefend[],
 	const ChessBoard &cb, char file, int rank,
 	const MoveTemplate& mt,
 	bool canTake, bool canMoveToEmpty)
 {
+	auto attackArrayPos = toArrayPosition(cb.getTurn());
+	auto defendArrayPos = toArrayPosition(!cb.getTurn());
+
 	char newFile;
 	int newRank;
 	for(auto direction = mt.begin(); direction != mt.end(); ++direction)

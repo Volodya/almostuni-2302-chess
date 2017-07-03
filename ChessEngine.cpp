@@ -49,30 +49,37 @@ void ChessEngineWorker::stop()
 void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int startDepth)
 {
 	typedef std::unique_ptr<ChessBoardAnalysis> ChessBoardAnalysisPtr;
-	std::function<ChessBoardAnalysisPtr&&(ChessBoardAnalysisPtr&&,int,double,double,ChessPlayerColour)> calculation;
+	std::function<ChessBoardAnalysisPtr(ChessBoardAnalysisPtr&&,int,double,double,ChessPlayerColour)> calculation;
 	calculation = [this, &calculation](ChessBoardAnalysisPtr&& analysis, int depth,
 		double alpha, double beta, ChessPlayerColour maximizingPlayer)
 	{
-		std::cerr << ".";
+		analysis->getBoard()->debugPrint();
 		if(depth==0 || analysis->isCheckMate() /* || node.isDraw() */)
 		{
 			return std::move(analysis);
 		}
-		
 		auto answers = analysis->getPossibleMoves();
+		if(answers.empty())
+		{
+			return std::move(analysis);
+		}
 		ChessBoardAnalysisPtr res=nullptr;
 		if(maximizingPlayer == analysis->getBoard()->getTurn())
 		{
-		std::cerr << ":";
 			double v = -INFINITY;
 			for(auto it=answers.begin(); it!=answers.end(); ++it)
 			{
 				ChessBoardAnalysisPtr analysis(new ChessBoardAnalysis((*it)->getTo()));
-				std::cerr << "+";
-				// TODO: создать временный указатель и записать его в res только если v изменился
-				res = calculation(std::move(analysis), depth-1, alpha, beta, maximizingPlayer);
-				std::cerr << "/";
-				v = std::max(v, res->chessPositionWeight()*getWeightMultiplier(maximizingPlayer));
+
+				// we are changing res only if v also changes
+				auto potentialRes = calculation(std::move(analysis), depth-1, alpha, beta, maximizingPlayer);
+				auto potentialV = potentialRes->chessPositionWeight()*getWeightMultiplier(maximizingPlayer);
+				std::cerr << "we are here now" << std::endl;
+				if(v < potentialV)
+				{
+					res = std::move(potentialRes);
+					v = potentialV;
+				}
 				alpha = std::max(alpha, v);
 				if(beta <= alpha)
 				{
@@ -83,14 +90,19 @@ void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int s
 		}
 		else
 		{
-		std::cerr << ";";
 			double v = INFINITY;
 			for(auto it=answers.begin(); it!=answers.end(); ++it)
 			{
-						std::cerr << "*";
 				ChessBoardAnalysisPtr analysis(new ChessBoardAnalysis((*it)->getTo()));
-				res = calculation(std::move(analysis), depth-1, alpha, beta, maximizingPlayer);
-				v = std::min(v, res->chessPositionWeight()*getWeightMultiplier(maximizingPlayer));
+				
+				// we are changing res only if v also changes
+				auto potentialRes = calculation(std::move(analysis), depth-1, alpha, beta, maximizingPlayer);
+				auto potentialV = potentialRes->chessPositionWeight()*getWeightMultiplier(maximizingPlayer);
+				if(v > potentialV)
+				{
+					res = std::move(potentialRes);
+					v = potentialV;
+				}
 				beta = std::min(v, beta);
 				if(beta <= alpha)
 				{
@@ -98,13 +110,13 @@ void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int s
 					break;
 				}
 			}
-			std::cerr << "$";
 		}
 		
 		return std::move(res);
 	};
 	
 	int depth = startDepth;
+	depth = 1;
 	do
 	{
 		std::cout << "i am thinking" << std::endl;
@@ -114,6 +126,7 @@ void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int s
 				depth, -INFINITY, INFINITY, original->getTurn());
 			positionPreferences.emplace_front(best->chessPositionWeight(), best->getBoard());
 			++depth;
+			pleaseStop=true;
 		}
 		catch(std::bad_alloc& e)
 		{

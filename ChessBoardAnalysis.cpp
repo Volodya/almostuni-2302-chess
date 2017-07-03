@@ -135,11 +135,10 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 			}
 		};
 	
-	auto funcArrayPos = toArrayPosition(board->getTurn());
 	for(auto it = board->begin(); it != board->end(); ++it)
 	{
-		if(*it == ' ') continue;
-						
+		if(*it == EMPTY_CELL) continue;
+		
 		int rank = it.getRank();
 		char file = it.getFile();
 

@@ -61,6 +61,18 @@ ChessBoard::ptr ChessBoardFactory::createBoard
   (ChessBoard::ptr fromBoard, char fileFrom, int rankFrom, char fileTo, int rankTo)
 {
 	ChessBoard::ptr toBoard(new ChessBoard);
+	
+	// moving all pieces from the old board to new
+	for(auto it=fromBoard->begin(); it!=fromBoard->end(); ++it)
+	{
+		toBoard->placePiece(it.getFile(), it.getRank(), *it);
+	}
+	// moving one of the pieces to the new position
+	assert(fileFrom!=fileTo || rankFrom!=rankTo);
+	toBoard->placePiece(fileTo, rankTo, fromBoard->getPiece(fileFrom, rankFrom));
+	toBoard->placePiece(fileFrom, rankFrom, EMPTY_CELL);
+	
+	
 
 	ChessMove::ptr curMove(new ChessMove);
 	

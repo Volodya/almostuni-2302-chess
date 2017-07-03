@@ -10,8 +10,27 @@
 #include "ChessBoardFactory.hpp"
 #include "ChessEngine.hpp"
 
+#include <memory>
+class Test
+{int i;};
+std::unique_ptr<Test> foo1()
+{
+	std::unique_ptr<Test> res(new Test);
+	return res;
+}
+std::unique_ptr<Test> foo2(std::unique_ptr<Test>&& t)
+{
+	return std::move(t);
+}
+
 int main()
 {
+	std::cerr << "Trying first" << std::endl;
+	auto test1=foo1();
+	std::cerr << "First succeeded" << std::endl;
+	std::cerr << "Trying second" << std::endl;
+	auto test2=foo2(std::unique_ptr<Test>(new Test));
+	std::cerr << "Second succeeded" << std::endl;
 	ChessBoardFactory factory;
 	auto cb = factory.createBoard();
 	
