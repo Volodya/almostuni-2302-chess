@@ -17,15 +17,18 @@ constexpr double
 	BOARD_KNIGHT_WEIGHT=300,
 	BOARD_BISHOP_WEIGHT=300,
 	BOARD_ROOK_WEIGHT=500,
-	BOARD_QUEEN_WEIGHT=700
+	BOARD_QUEEN_WEIGHT=700,
+	BOARD_KING_WEIGHT=400,
+	
+	PIECE_ATTACK_MULTIPLIER=0.20,
+	PIECE_DEFENCE_MUTIPLIER=0.05
 	;
-
 class ChessBoardAnalysis
 {
 	ChessBoard::ptr board;
 	
-	int8_t underAttackByWhite[8][8];
-	int8_t underAttackByBlack[8][8];
+	int8_t underAttackByWhite[8][8]; // [rank][file]
+	int8_t underAttackByBlack[8][8]; // [rank][file]
 
 	std::vector<ChessMove::ptr> possibleMoves;
 	
@@ -38,6 +41,9 @@ public:
 
 	double chessPiecesWeight() const; // simple piece count (can be shown to user)
 	double chessPositionWeight() const; // analise the position, but not the tree
+	
+	double chessPieceAttackedWeight() const;
+	double chessCentreControlWeight() const;
 	
 	void calculatePossibleMoves();
 	std::vector<ChessMove::ptr> getPossibleMoves() const;

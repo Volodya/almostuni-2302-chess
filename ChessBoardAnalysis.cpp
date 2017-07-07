@@ -12,6 +12,29 @@
 #include <cassert>
 #include <algorithm>
 
+// helper
+
+constexpr double domination(int8_t white, int8_t black)
+{
+	return
+		white==black ? 0 :
+		white>black ? 1 :
+		-1;
+}
+constexpr double weightFromPiece(const ChessPiece cp)
+{
+	return 
+		cp=='P' || cp=='p' ? BOARD_PAWN_WEIGHT :
+		cp=='N' || cp=='n' ? BOARD_KNIGHT_WEIGHT :
+		cp=='B' || cp=='b' ? BOARD_BISHOP_WEIGHT :
+		cp=='R' || cp=='r' ? BOARD_ROOK_WEIGHT :
+		cp=='Q' || cp=='q' ? BOARD_QUEEN_WEIGHT :
+		cp=='K' || cp=='k' ? BOARD_KING_WEIGHT :
+		0;
+}
+
+// class functions
+
 ChessBoardAnalysis::ChessBoardAnalysis(ChessBoard::ptr board_)
 	: board(board_)
 {
@@ -30,7 +53,9 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		// take opponent's piece
 		// or
 		// attack empty space
-	const static ChessMoveRecordingFunction whiteTurnFunctionTake[2] = 
+	const ChessMoveRecordingFunction functionTake[2][2] = 
+	{
+		// white turn
 		{
 			//white
 			[this, &factory](char file, int rank, char newFile, int newRank) {
@@ -56,12 +81,12 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 					check=true;
 				}
 			}
-		};
-	const static ChessMoveRecordingFunction  blackTurnFunctionTake[2] =
+		},
+		// black turn
 		{
 			// white
 			[this](char file, int rank, char newFile, int newRank) {
-				//assert(maybeMove->getTurn()==ChessPlayerColour::WHITE);
+				assert(this->board->getTurn()==ChessPlayerColour::BLACK);
 								
 				if(this->board->getPiece(newFile, newRank)=='K')
 				{
@@ -83,28 +108,31 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 					possibleMoves.push_back(maybeMove);
 				}
 			}
-		};
-	
+		}
+	};
 		// move to empty space
 		// with no possibility of attack
 		// (pawn move forward)
-	const static ChessMoveRecordingFunction whiteTurnFunctionNoTake[2] = 
+	const ChessMoveRecordingFunction functionNoTake[2][2] = 
+	{
 		{
 			// white
-			whiteTurnFunctionTake[toArrayPosition(ChessPlayerColour::WHITE)],
+			functionTake[toArrayPosition(ChessPlayerColour::WHITE)][toArrayPosition(ChessPlayerColour::WHITE)],
 			// black
 			emptyFunction
-		};
-	const static ChessMoveRecordingFunction blackTurnFunctionNoTake[2] =
+		},
+	//const static ChessMoveRecordingFunction blackTurnFunctionNoTake[2] =
 		{
 			// white
 			emptyFunction,
 			// black
-			blackTurnFunctionTake[toArrayPosition(ChessPlayerColour::BLACK)]
-		};
+			functionTake[toArrayPosition(ChessPlayerColour::BLACK)][toArrayPosition(ChessPlayerColour::BLACK)]
+		}
+	};
 	
 		// we could recapture on this square	
-	const static ChessMoveRecordingFunction whiteTurnFunctionDefend[2] = 
+	const ChessMoveRecordingFunction functionDefend[2][2] = 
+	{
 		{
 			// white
 			[this](char file, int rank, char newFile, int newRank) {
@@ -118,8 +146,8 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 
 				++underAttackByWhite[newRank-1][newFile-'A'];
 			}
-		};
-	const static ChessMoveRecordingFunction blackTurnFunctionDefend[2] = 
+		},
+	//const static ChessMoveRecordingFunction blackTurnFunctionDefend[2] = 
 		{
 			// white
 			[this](char file, int rank, char newFile, int newRank) {
@@ -133,7 +161,8 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 
 				++underAttackByBlack[newRank-1][newFile-'A'];
 			}
-		};
+		}
+	};
 	
 	for(auto it = board->begin(); it != board->end(); ++it)
 	{
@@ -143,18 +172,22 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		char file = it.getFile();
 
 		auto pieceParam = moveParameters.at(*it);
+		auto moveArrayPos = toArrayPosition(board->getTurn());
+		auto pieceArrayPos = toArrayPosition(getColour(*it));
 		if(pieceParam.isDifferentMoveTypes)
 		{
-			ChessMove::moveAttempts(whiteTurnFunctionNoTake[funcArrayPos], emptyFunction,
+			ChessMove::moveAttempts(functionNoTake[moveArrayPos][pieceArrayPos], emptyFunction,
 				*board, file, rank,
 				*pieceParam.noTakeMove, false);
-			ChessMove::moveAttempts(whiteTurnFunctionTake[funcArrayPos], whiteTurnFunctionDefend[funcArrayPos],
+			ChessMove::moveAttempts(functionTake[moveArrayPos][pieceArrayPos],
+				functionDefend[moveArrayPos][pieceArrayPos],
 				*board, file, rank,
 				*pieceParam.takeMove, true, false);
 		}
 		else
 		{
-			ChessMove::moveAttempts(whiteTurnFunctionTake[funcArrayPos], whiteTurnFunctionDefend[funcArrayPos],
+			ChessMove::moveAttempts(functionTake[moveArrayPos][pieceArrayPos],
+				functionDefend[moveArrayPos][pieceArrayPos],
 				*board, file, rank, *pieceParam.anyMove, true);
 		}
 	}
@@ -168,17 +201,13 @@ double ChessBoardAnalysis::chessPositionWeight() const
 		+
 		this->chessPiecesWeight()	// count pieces
 		
-		/*
-			// todo: create more metrics
 		+
 		
-			// count attacked pieces
-			
+		this->chessPieceAttackedWeight() // count attacked pieces
+		
 		+
 		
-			// count attacked empty positions
-		
-		*/
+		this->chessCentreControlWeight() // control of the centre of the board
 		;
 }
 
@@ -198,6 +227,59 @@ double ChessBoardAnalysis::chessPiecesWeight() const
 		BOARD_ROOK_WEIGHT * (count['R'] - count['r']) +
 		BOARD_QUEEN_WEIGHT * (count['Q'] - count['q']);
 
+}
+double ChessBoardAnalysis::chessPieceAttackedWeight() const
+{
+	double result = 0;
+		
+	for(auto it=board->begin(); it!=board->end(); ++it)
+	{
+		if(*it == EMPTY_CELL) continue;
+		
+		auto multiplierColour = getWeightMultiplier(getColour(*it));
+		auto dominator = domination(
+			underAttackByWhite[it.getRankPos()][it.getFilePos()],
+			underAttackByBlack[it.getRankPos()][it.getFilePos()]
+			);
+		auto attackOrDefence = PIECE_ATTACK_MULTIPLIER;
+		if(multiplierColour==dominator)
+		{
+			attackOrDefence = PIECE_DEFENCE_MUTIPLIER; // defending own piece
+		}
+			
+		result += multiplierColour * dominator * weightFromPiece(*it) * attackOrDefence;
+	}
+	
+	return result;
+}
+
+double ChessBoardAnalysis::chessCentreControlWeight() const
+{
+	const static double CELL_WEIGHT_MULTIPLIER = 5.0;
+	const static double CELL_WEIGHT[8][8]
+	{
+		{ 3, 3, 3, 3, 3, 3, 3, 3 },
+		{ 6, 6, 6, 6, 6, 6, 6, 6 },
+		{ 2, 2, 7, 7, 7, 7, 2, 2 },
+		{ 1, 4, 6, 8, 8, 6, 4, 1 },
+		{ 1, 4, 6, 8, 8, 6, 4, 1 },
+		{ 2, 2, 7, 7, 7, 7, 2, 2 },
+		{ 6, 6, 6, 6, 6, 6, 6, 6 },
+		{ 3, 3, 3, 3, 3, 3, 3, 3 }
+	};
+	
+	double result = 0;
+	for(auto it=board->begin(); it!=board->end(); ++it)
+	{
+		result +=
+			domination(
+				underAttackByWhite[it.getRankPos()][it.getFilePos()],
+				underAttackByBlack[it.getRankPos()][it.getFilePos()]
+				)
+			* CELL_WEIGHT[it.getRankPos()][it.getFilePos()]
+			* CELL_WEIGHT_MULTIPLIER;
+	}
+	return result;
 }
 
 bool ChessBoardAnalysis::isCheck() const

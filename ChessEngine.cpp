@@ -53,7 +53,7 @@ void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int s
 	calculation = [this, &calculation](ChessBoardAnalysisPtr&& analysis, int depth,
 		double alpha, double beta, ChessPlayerColour maximizingPlayer)
 	{
-		analysis->getBoard()->debugPrint();
+		//analysis->getBoard()->debugPrint();
 		if(depth==0 || analysis->isCheckMate() /* || node.isDraw() */)
 		{
 			return std::move(analysis);
@@ -74,7 +74,6 @@ void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int s
 				// we are changing res only if v also changes
 				auto potentialRes = calculation(std::move(analysis), depth-1, alpha, beta, maximizingPlayer);
 				auto potentialV = potentialRes->chessPositionWeight()*getWeightMultiplier(maximizingPlayer);
-				std::cerr << "we are here now" << std::endl;
 				if(v < potentialV)
 				{
 					res = std::move(potentialRes);
@@ -116,7 +115,6 @@ void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int s
 	};
 	
 	int depth = startDepth;
-	depth = 1;
 	do
 	{
 		std::cout << "i am thinking" << std::endl;
@@ -125,8 +123,8 @@ void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int s
 			ChessBoardAnalysisPtr best = calculation(ChessBoardAnalysisPtr(new ChessBoardAnalysis(original)),
 				depth, -INFINITY, INFINITY, original->getTurn());
 			positionPreferences.emplace_front(best->chessPositionWeight(), best->getBoard());
+			std::cout << "Depth " << depth << " has been calculated" << std::endl;
 			++depth;
-			pleaseStop=true;
 		}
 		catch(std::bad_alloc& e)
 		{

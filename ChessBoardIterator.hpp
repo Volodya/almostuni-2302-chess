@@ -16,7 +16,7 @@ class ChessBoard;
 
 class ChessBoardIterator : public std::iterator<std::input_iterator_tag, ChessPiece>
 {
-	int rank, file;
+	size_t rank, file;
 	ChessBoard *cb;
 public:
 	ChessBoardIterator(const ChessBoardIterator& that) = default;
@@ -27,7 +27,9 @@ public:
 	ChessBoardIterator& operator++();
 	
 	int getRank() const;
+	size_t getRankPos() const;
 	char getFile() const;
+	size_t getFilePos() const;
 private:
 	ChessBoardIterator(ChessBoard* cb_, int rank_, int file_);
 	
@@ -35,7 +37,7 @@ private:
 };
 class ChessBoardConstIterator : public std::iterator<std::input_iterator_tag, ChessPiece>
 {
-	int rank, file;
+	size_t rank, file;
 	const ChessBoard * cb;
 public:
 	ChessBoardConstIterator(const ChessBoardConstIterator& that) = default;
@@ -46,7 +48,9 @@ public:
 	ChessBoardConstIterator& operator++();
 	
 	int getRank() const;
+	size_t getRankPos() const;
 	char getFile() const;
+	size_t getFilePos() const;
 private:
 	ChessBoardConstIterator(const ChessBoard* cb_, int rank_, int file_);
 	

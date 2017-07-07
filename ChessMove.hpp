@@ -42,8 +42,8 @@ public:
 
 	typedef std::function<void(char, int, char, int)> ChessMoveRecordingFunction;
 	static void moveAttempts(
-		ChessMoveRecordingFunction recFunTake[],
-		ChessMoveRecordingFunction recFunDefend[],
+		const ChessMoveRecordingFunction &recFunTake,
+		const ChessMoveRecordingFunction &recFunDefend,
 		const ChessBoard &cb, char file, int rank,
 		const MoveTemplate& mt,
 		bool canTake=true, bool canMoveToEmpty=true);

@@ -51,9 +51,17 @@ int ChessBoardIterator::getRank() const
 {
 	return rank+1;
 }
+size_t ChessBoardIterator::getRankPos() const
+{
+	return rank;
+}
 char ChessBoardIterator::getFile() const
 {
 	return file+'A';
+}
+size_t ChessBoardIterator::getFilePos() const
+{
+	return file;
 }
 
 
@@ -96,9 +104,17 @@ ChessBoardConstIterator& ChessBoardConstIterator::operator++()
 	return *this;
 }
 
+size_t ChessBoardConstIterator::getRankPos() const
+{
+	return rank;
+}
 int ChessBoardConstIterator::getRank() const
 {
 	return rank+1;
+}
+size_t ChessBoardConstIterator::getFilePos() const
+{
+	return file;
 }
 char ChessBoardConstIterator::getFile() const
 {
