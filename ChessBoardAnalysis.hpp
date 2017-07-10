@@ -30,11 +30,12 @@ class ChessBoardAnalysis
 	int8_t underAttackByWhite[8][8]; // [rank][file]
 	int8_t underAttackByBlack[8][8]; // [rank][file]
 
-	std::vector<ChessMove::ptr> possibleMoves;
+	std::vector<ChessBoard::ptr> possibleMoves;
 	
 	bool check;
 public:
 	ChessBoardAnalysis(ChessBoard::ptr board_);
+	~ChessBoardAnalysis();
 
 	bool isCheckMate() const;  // call to this function is underfined without calculatePossibleMoves()
 	bool isCheck() const; // call to this function is underfined without calculatePossibleMoves()
@@ -46,7 +47,7 @@ public:
 	double chessCentreControlWeight() const;
 	
 	void calculatePossibleMoves();
-	std::vector<ChessMove::ptr> getPossibleMoves() const;
+	std::vector<ChessBoard::ptr> getPossibleMoves() const;
 	
 	ChessBoard::ptr getBoard() const;
 };

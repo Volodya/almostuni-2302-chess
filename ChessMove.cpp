@@ -10,96 +10,103 @@
 ChessMove::ChessMove()
 {}
 
-/*
-ChessMove::ChessMove(
-	ChessBoard::ptr from_, char fileFrom, int rankFrom, char fileTo, int rankTo)
-{
-	to = ChessBoard::ptr(*from_);
-	
-	to->placePiece(fileTo, rankTo, from_->getPiece(fileFrom, rankFrom));
-	to->placePiece(fileFrom, rankFrom, ' ');
-	
-	to->turn = (from->turn_==WHITE) ? BLACK : WHITE;
-	to->from = *this;
-}
-*/
-
 bool ChessMove::isMovePossible() const
 {
-	int king[2]={};
-	bool found=false;
-	for(int rank=0; !found && rank<8; ++rank)
+	if(ChessBoard::ptr pTo = to.lock())
 	{
-		for(int file=0; file<8; ++file)
+		int king[2]={};
+		bool found=false;
+		for(int rank=0; !found && rank<8; ++rank)
 		{
-			// if it's white to move, we are looking for a black king
-			if(
-				(to->getPiece(file+'A', rank+1)=='K' && to->getTurn()==ChessPlayerColour::BLACK) || 
-				(to->getPiece(file+'A', rank+1)=='k' && to->getTurn()==ChessPlayerColour::WHITE)
-			  )
+			for(int file=0; file<8; ++file)
 			{
-				found = true;
-				king[0] = rank;
-				king[1] = file;
-				break;
+				// if it's white to move, we are looking for a black king
+				if(
+					(pTo->getPiece(file+'A', rank+1)=='K' && pTo->getTurn()==ChessPlayerColour::BLACK) || 
+					(pTo->getPiece(file+'A', rank+1)=='k' && pTo->getTurn()==ChessPlayerColour::WHITE)
+				  )
+				{
+					found = true;
+					king[0] = rank;
+					king[1] = file;
+					break;
+				}
 			}
 		}
-	}
 
-	if(to->getTurn()==ChessPlayerColour::BLACK)
-	{
-		// checking pawns
-		for(auto dir=pawnBlackMoveTake.begin(); dir!=pawnBlackMoveTake.end(); ++dir)
+		if(pTo->getTurn()==ChessPlayerColour::BLACK)
 		{
-			for(auto pos=dir->begin(); pos!=dir->end(); ++pos)
+			// checking pawns
+			for(auto dir=pawnBlackMoveTake.begin(); dir!=pawnBlackMoveTake.end(); ++dir)
 			{
-				auto piece = to->getPiece(king[1]-pos->second+'A', king[0]-pos->first+1);
-				if(piece=='p')
+				for(auto pos=dir->begin(); pos!=dir->end(); ++pos)
 				{
-					return false;
+					auto piece = pTo->getPiece(king[1]-pos->second+'A', king[0]-pos->first+1);
+					if(piece=='p')
+					{
+						return false;
+					}
+					else if(piece!=' ')
+					{
+						break;
+					}
 				}
-				else if(piece!=' ')
+			}
+			// checking queen
+			for(auto dir=queenMove.begin(); dir!=queenMove.end(); ++dir)
+			{
+				for(auto pos=dir->begin(); pos!=dir->end(); ++pos)
 				{
-					break;
+					auto piece = pTo->getPiece(king[1]-pos->second+'A', king[0]-pos->first+1);
+					if(piece=='q')
+					{
+						return false;
+					}
+					else if(piece!=' ')
+					{
+						break;
+					}
 				}
 			}
 		}
-		// checking queen
-		for(auto dir=queenMove.begin(); dir!=queenMove.end(); ++dir)
-		{
-			for(auto pos=dir->begin(); pos!=dir->end(); ++pos)
-			{
-				auto piece = to->getPiece(king[1]-pos->second+'A', king[0]-pos->first+1);
-				if(piece=='q')
-				{
-					return false;
-				}
-				else if(piece!=' ')
-				{
-					break;
-				}
-			}
-		}
+		
+		return true;
 	}
-	
-	return true;
+	else
+	{
+		return false;
+	}
 }
 
 bool ChessMove::hasPrevious() const
 {
-	return (bool)from;
+	return previous;
 }
 ChessBoard::ptr ChessMove::getFrom() const
 {
-	return from;
+	if(ChessBoard::ptr pFrom = from.lock())
+	{
+		return pFrom;
+	}
+	else
+	{
+		return nullptr;
+	}
 }
 ChessBoard::ptr ChessMove::getTo() const
 {
-	return to;
+	if(ChessBoard::ptr pTo = to.lock())
+	{
+		return pTo;
+	}
+	else
+	{
+		return nullptr;
+	}
 }
 ChessPlayerColour ChessMove::getTurn() const
 {
-	return !to->getTurn();
+	return !getTo()->getTurn();
 }
 
 void ChessMove::moveAttempts(

@@ -23,7 +23,9 @@ class ChessBoard
 {
 public:
 	typedef std::shared_ptr<ChessBoard> ptr;
+	typedef std::weak_ptr<ChessBoard> wptr;
 
+	static unsigned long long count;
 private:
 	ChessPiece board[8][8]; // [rank][file]
 	

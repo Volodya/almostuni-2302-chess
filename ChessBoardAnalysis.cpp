@@ -12,6 +12,8 @@
 #include <cassert>
 #include <algorithm>
 
+#include <iostream> // temporary
+
 // helper
 
 constexpr double domination(int8_t white, int8_t black)
@@ -38,11 +40,19 @@ constexpr double weightFromPiece(const ChessPiece cp)
 ChessBoardAnalysis::ChessBoardAnalysis(ChessBoard::ptr board_)
 	: board(board_)
 {
+	assert(board!=nullptr);
 	this->calculatePossibleMoves();
+	//std::cerr << "[ChessBoardAnalysis] " << std::endl;
+}
+
+ChessBoardAnalysis::~ChessBoardAnalysis()
+{
+	//std::cerr << "[~ChessBoardAnalysis] " << board.use_count() << ' ' << possibleMoves.size() << std::endl;
 }
 
 void ChessBoardAnalysis::calculatePossibleMoves()
 {
+	//std::cerr << "[calculatePossibleMoves]" << std::endl;
 	ChessBoardFactory factory;
 	typedef ChessMove::ChessMoveRecordingFunction ChessMoveRecordingFunction;
 		// empty function
@@ -69,7 +79,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				
 				if(maybeMove->isMovePossible())
 				{
-					possibleMoves.push_back(maybeMove);
+					possibleMoves.push_back(nextBoard);
 				}
 			},
 			//black
@@ -105,7 +115,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				
 				if(maybeMove->isMovePossible())
 				{
-					possibleMoves.push_back(maybeMove);
+					possibleMoves.push_back(nextBoard);
 				}
 			}
 		}
@@ -163,7 +173,6 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 			}
 		}
 	};
-	
 	for(auto it = board->begin(); it != board->end(); ++it)
 	{
 		if(*it == EMPTY_CELL) continue;
@@ -319,7 +328,7 @@ bool ChessBoardAnalysis::isCheckMate() const
 }
 
 
-std::vector<ChessMove::ptr> ChessBoardAnalysis::getPossibleMoves() const
+std::vector<ChessBoard::ptr> ChessBoardAnalysis::getPossibleMoves() const
 {
 	return possibleMoves;
 }

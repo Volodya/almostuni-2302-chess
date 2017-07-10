@@ -17,20 +17,6 @@ int main()
 	ChessBoardFactory factory;
 	auto cb = factory.createBoard();
 	
-	//cb->debugPrint();
-	//std::cout << "Weight: " << cb->weight() << std::endl;
-	
-	//auto tmp = cb->getPossibleMoves();
-	
-	//std::cout << "Number of possible moves: " << tmp.size() << std::endl;
-	
-	//for(auto it=tmp.begin(); it!=tmp.end(); ++it)
-	{
-		//calculatePossibleMoves(*it);
-		//(*it)->debugPrint();
-		//std::cout << "Weight: " << (*it)->weight() << std::endl;
-	}
-	
 	ChessEngine ce;
 	ce.setCurPos(cb);
 	ce.startNextMoveCalculation();

@@ -50,6 +50,7 @@ ChessBoard::ptr ChessBoardFactory::createBoard()
 	
 	cm->to=cb;
 	cm->moveNum=0;
+	cm->previous=false;
 	cb->move=cm;
 	
 	assert(cb->getTurn()==ChessPlayerColour::WHITE);
@@ -76,6 +77,7 @@ ChessBoard::ptr ChessBoardFactory::createBoard
 
 	ChessMove::ptr curMove(new ChessMove);
 	
+	curMove->previous=true;
 	curMove->from=fromBoard;
 	curMove->to=toBoard;
 	curMove->moveNum=fromBoard->getMove()->moveNum+1;

@@ -13,6 +13,8 @@
 
 #include "moveTemplate.hpp"
 
+unsigned long long ChessBoard::count=0;
+
 ChessBoard::ChessBoard()
 	: turn(ChessPlayerColour::WHITE), move(nullptr)
 {
@@ -23,9 +25,11 @@ ChessBoard::ChessBoard()
 			board[i][j] = ' ';
 		}
 	}
+	//std::cerr << "[CONST] " << ++count << std::endl;
 }
 ChessBoard::~ChessBoard()
 {
+	//std::cerr << "[DEST] " << --count << std::endl;
 }
 
 void ChessBoard::debugPrint() const

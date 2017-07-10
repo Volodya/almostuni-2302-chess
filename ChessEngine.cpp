@@ -69,7 +69,7 @@ void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int s
 			double v = -INFINITY;
 			for(auto it=answers.begin(); it!=answers.end(); ++it)
 			{
-				ChessBoardAnalysisPtr analysis(new ChessBoardAnalysis((*it)->getTo()));
+				ChessBoardAnalysisPtr analysis(new ChessBoardAnalysis(*it));
 
 				// we are changing res only if v also changes
 				auto potentialRes = calculation(std::move(analysis), depth-1, alpha, beta, maximizingPlayer);
@@ -92,7 +92,7 @@ void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int s
 			double v = INFINITY;
 			for(auto it=answers.begin(); it!=answers.end(); ++it)
 			{
-				ChessBoardAnalysisPtr analysis(new ChessBoardAnalysis((*it)->getTo()));
+				ChessBoardAnalysisPtr analysis(new ChessBoardAnalysis(*it));
 				
 				// we are changing res only if v also changes
 				auto potentialRes = calculation(std::move(analysis), depth-1, alpha, beta, maximizingPlayer);

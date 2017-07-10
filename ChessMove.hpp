@@ -23,8 +23,9 @@ public:
 	typedef std::shared_ptr<ChessMove> ptr;
 
 private:
-	ChessBoard::ptr from;
-	ChessBoard::ptr to;
+	bool previous;
+	ChessBoard::wptr from;
+	ChessBoard::wptr to;
 	
 	std::string notation;
 	int moveNum;
