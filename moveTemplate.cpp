@@ -17,5 +17,5 @@ ChessPieceParameters::ChessPieceParameters(const MoveTemplate* takeMove_, const 
 {}
 
 ChessPieceParameters::ChessPieceParameters(const MoveTemplate* anyMove_)
-	: ChessPieceParameters(false, nullptr, nullptr, anyMove_)
+	: ChessPieceParameters(false, anyMove_, anyMove_, anyMove_)
 {}

@@ -177,6 +177,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 	{
 		if(*it == EMPTY_CELL) continue;
 		
+		// todo make size_t
 		int rank = it.getRank();
 		char file = it.getFile();
 
@@ -268,12 +269,12 @@ double ChessBoardAnalysis::chessCentreControlWeight() const
 	const static double CELL_WEIGHT[8][8]
 	{
 		{ 3, 3, 3, 3, 3, 3, 3, 3 },
-		{ 6, 6, 6, 6, 6, 6, 6, 6 },
+		{ 3, 3, 3, 3, 3, 3, 3, 3 },
 		{ 2, 2, 7, 7, 7, 7, 2, 2 },
 		{ 1, 4, 6, 8, 8, 6, 4, 1 },
 		{ 1, 4, 6, 8, 8, 6, 4, 1 },
 		{ 2, 2, 7, 7, 7, 7, 2, 2 },
-		{ 6, 6, 6, 6, 6, 6, 6, 6 },
+		{ 3, 3, 3, 3, 3, 3, 3, 3 },
 		{ 3, 3, 3, 3, 3, 3, 3, 3 }
 	};
 	

@@ -8,6 +8,7 @@
 #include "ChessBoardFactory.hpp"
 #include <memory>
 #include <cassert>
+#include <iostream>
 
 ChessBoard::ptr ChessBoardFactory::createBoard()
 {
@@ -54,6 +55,53 @@ ChessBoard::ptr ChessBoardFactory::createBoard()
 	cb->move=cm;
 	
 	assert(cb->getTurn()==ChessPlayerColour::WHITE);
+	
+	return cb;
+}
+
+	// starting position: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
+{
+	ChessBoard::ptr cb(new ChessBoard);
+	size_t file=0, rank=7;
+	for(auto it=fen.begin(); it!=fen.end(); ++it)
+	{
+		if(*it==' ')
+		{
+			++it;
+			if(*it=='w')
+			{
+				cb->turn=ChessPlayerColour::WHITE;
+			}
+			else
+			{
+				cb->turn=ChessPlayerColour::BLACK;
+			}
+			break;
+		}
+		else if(*it=='/')
+		{
+			file=0;
+			--rank;
+			continue;
+		}
+		if(*it>='1' && *it<='9')
+		{
+			file+=*it-'0';
+		}
+		else
+		{
+			cb->placePiecePos(file, rank, *it);
+			++file;
+		}
+	}
+	
+	ChessMove::ptr cm(new ChessMove);
+	
+	cm->to=cb;
+	cm->moveNum=0;
+	cm->previous=false;
+	cb->move=cm;
 	
 	return cb;
 }

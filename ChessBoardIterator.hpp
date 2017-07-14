@@ -8,6 +8,8 @@
 #ifndef CHESSBOARDITERATOR__
 #define CHESSBOARDITERATOR__
 
+#include "config.hpp"
+
 #include "ChessPiece.hpp"
 #include <iterator>
 

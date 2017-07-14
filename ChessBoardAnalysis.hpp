@@ -8,6 +8,8 @@
 #ifndef CHESSBOARDANALYSIS__
 #define CHESSBOARDANALYSIS__
 
+#include "config.hpp"
+
 #include "ChessBoard.hpp"
 #include "ChessMove.hpp"
 

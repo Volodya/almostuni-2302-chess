@@ -8,6 +8,8 @@
 #ifndef MOVETEMPLATE__
 #define MOVETEMPLATE__
 
+#include "config.hpp"
+
 #include <vector>
 #include <map>
 #include "ChessPiece.hpp"

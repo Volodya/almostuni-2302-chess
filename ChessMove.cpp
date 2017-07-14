@@ -7,6 +7,8 @@
 
 #include "ChessMove.hpp"
 
+#include <iostream> // temporary
+
 ChessMove::ChessMove()
 {}
 
@@ -14,16 +16,37 @@ bool ChessMove::isMovePossible() const
 {
 	if(ChessBoard::ptr pTo = to.lock())
 	{
-		int king[2]={};
-		bool found=false;
-		for(int rank=0; !found && rank<8; ++rank)
+		ChessPiece kingPiece;
+		ChessPiece attackersPieces[6];
+		if(pTo->getTurn()==ChessPlayerColour::WHITE)
 		{
-			for(int file=0; file<8; ++file)
+			// if it's white to move, we are looking for a black king
+			kingPiece = 'k';
+			attackersPieces[0]='Q';
+			attackersPieces[1]='R';
+			attackersPieces[2]='B';
+			attackersPieces[3]='N';
+			attackersPieces[4]='P';
+			attackersPieces[5]='K';
+		}
+		else
+		{
+			kingPiece = 'K';
+			attackersPieces[0]='q';
+			attackersPieces[1]='r';
+			attackersPieces[2]='b';
+			attackersPieces[3]='n';
+			attackersPieces[4]='p';
+			attackersPieces[5]='k';
+		}
+		size_t king[2]={};
+		bool found=false;
+		for(size_t rank=0; !found && rank<8; ++rank)
+		{
+			for(size_t file=0; file<8; ++file)
 			{
-				// if it's white to move, we are looking for a black king
 				if(
-					(pTo->getPiece(file+'A', rank+1)=='K' && pTo->getTurn()==ChessPlayerColour::BLACK) || 
-					(pTo->getPiece(file+'A', rank+1)=='k' && pTo->getTurn()==ChessPlayerColour::WHITE)
+					(pTo->getPiecePos(file, rank)==kingPiece)
 				  )
 				{
 					found = true;
@@ -34,35 +57,19 @@ bool ChessMove::isMovePossible() const
 			}
 		}
 
-		if(pTo->getTurn()==ChessPlayerColour::BLACK)
+		for(size_t i=0; i<6; ++i)
 		{
-			// checking pawns
-			for(auto dir=pawnBlackMoveTake.begin(); dir!=pawnBlackMoveTake.end(); ++dir)
+			const MoveTemplate* takeMove = moveParameters.at(attackersPieces[i]).takeMove;
+			for(auto dir=takeMove->begin(); dir!=takeMove->end(); ++dir)
 			{
 				for(auto pos=dir->begin(); pos!=dir->end(); ++pos)
 				{
 					auto piece = pTo->getPiece(king[1]-pos->second+'A', king[0]-pos->first+1);
-					if(piece=='p')
+					if(piece==attackersPieces[i])
 					{
 						return false;
 					}
-					else if(piece!=' ')
-					{
-						break;
-					}
-				}
-			}
-			// checking queen
-			for(auto dir=queenMove.begin(); dir!=queenMove.end(); ++dir)
-			{
-				for(auto pos=dir->begin(); pos!=dir->end(); ++pos)
-				{
-					auto piece = pTo->getPiece(king[1]-pos->second+'A', king[0]-pos->first+1);
-					if(piece=='q')
-					{
-						return false;
-					}
-					else if(piece!=' ')
+					else if(piece!=EMPTY_CELL)
 					{
 						break;
 					}

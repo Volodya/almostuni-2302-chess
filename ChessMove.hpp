@@ -8,6 +8,8 @@
 #ifndef CHESSMOVE__
 #define CHESSMOVE__
 
+#include "config.hpp"
+
 #include "ChessBoard.hpp"
 #include "ChessPlayerColour.hpp"
 #include "moveTemplate.hpp"

@@ -66,12 +66,21 @@ ChessPlayerColour ChessBoard::getTurn() const
 
 void ChessBoard::placePiece(char file, int rank, ChessPiece piece)
 {
-	board[rank-1][file-'A'] = piece;
+	this->placePiecePos(file-'A', rank-1, piece);
+}
+void ChessBoard::placePiecePos(size_t file, size_t rank, ChessPiece piece)
+{
+	board[rank][file] = piece;
 }
 ChessPiece ChessBoard::getPiece(char file, int rank) const
 {
-	return board[rank-1][file-'A'];
+	return this->getPiecePos(file-'A', rank-1);
 }
+ChessPiece ChessBoard::getPiecePos(size_t file, size_t rank) const
+{
+	return board[rank][file];
+}
+
 ChessMove::ptr ChessBoard::getMove() const
 {
 	return move;

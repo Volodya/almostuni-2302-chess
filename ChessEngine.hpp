@@ -8,6 +8,8 @@
 #ifndef CHESSENGINE__
 #define CHESSENGINE__
 
+#include "config.hpp"
+
 #include "ChessBoard.hpp"
 #include <list>
 #include <thread>

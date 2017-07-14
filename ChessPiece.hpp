@@ -8,6 +8,8 @@
 #ifndef CHESSPIECE__
 #define CHESSPIECE__
 
+#include "config.hpp"
+
 #include "ChessPlayerColour.hpp"
 
 typedef char ChessPiece;

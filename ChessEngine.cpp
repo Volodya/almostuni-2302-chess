@@ -118,12 +118,15 @@ void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int s
 	do
 	{
 		std::cout << "i am thinking" << std::endl;
+		std::cout << " current depth is " << depth << " current pref size " << positionPreferences.size() << std::endl;
 		try
 		{
 			ChessBoardAnalysisPtr best = calculation(ChessBoardAnalysisPtr(new ChessBoardAnalysis(original)),
 				depth, -INFINITY, INFINITY, original->getTurn());
 			positionPreferences.emplace_front(best->chessPositionWeight(), best->getBoard());
 			std::cout << "Depth " << depth << " has been calculated" << std::endl;
+			std::cout << " current best move is" << std::endl;
+			positionPreferences.begin()->second->debugPrint();
 			++depth;
 		}
 		catch(std::bad_alloc& e)
