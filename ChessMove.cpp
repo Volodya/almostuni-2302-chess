@@ -64,12 +64,20 @@ bool ChessMove::isMovePossible() const
 			{
 				for(auto pos=dir->begin(); pos!=dir->end(); ++pos)
 				{
-					auto piece = pTo->getPiece(king[1]-pos->second+'A', king[0]-pos->first+1);
+					int rank = king[0] - pos->first;
+					int file = king[1] - pos->second;
+					if(rank < 0 || file < 0 || rank >= 8 || file >= 8 ) // TODO: change to board dimentions
+					{
+						break;
+					}
+					auto piece = pTo->getPiecePos(file, rank);
+					
 					if(piece==attackersPieces[i])
 					{
 						return false;
 					}
-					else if(piece!=EMPTY_CELL)
+
+					if(piece!=EMPTY_CELL)
 					{
 						break;
 					}

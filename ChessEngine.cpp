@@ -46,6 +46,23 @@ void ChessEngineWorker::stop()
 19          return v
 */
 
+/*
+01 function negamax(node, depth, α, β, color)
+02     if depth = 0 or node is a terminal node
+03         return color * the heuristic value of node
+
+04     childNodes := GenerateMoves(node)
+05     childNodes := OrderMoves(childNodes)
+06     bestValue := −∞
+07     foreach child in childNodes
+08         v := −negamax(child, depth − 1, −β, −α, −color)
+09         bestValue := max( bestValue, v )
+10         α := max( α, v )
+11         if α ≥ β
+12             break
+13     return bestValue
+*/
+
 void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int startDepth)
 {
 	typedef std::unique_ptr<ChessBoardAnalysis> ChessBoardAnalysisPtr;
@@ -64,50 +81,51 @@ void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int s
 			return std::move(analysis);
 		}
 		ChessBoardAnalysisPtr res=nullptr;
+		
+		double v;
+		std::function<bool(double, double)> testBetterV;
+		std::function<double(double, double)> newAlpha, newBeta;
 		if(maximizingPlayer == analysis->getBoard()->getTurn())
 		{
-			double v = -INFINITY;
-			for(auto it=answers.begin(); it!=answers.end(); ++it)
-			{
-				ChessBoardAnalysisPtr analysis(new ChessBoardAnalysis(*it));
-
-				// we are changing res only if v also changes
-				auto potentialRes = calculation(std::move(analysis), depth-1, alpha, beta, maximizingPlayer);
-				auto potentialV = potentialRes->chessPositionWeight()*getWeightMultiplier(maximizingPlayer);
-				if(v < potentialV)
-				{
-					res = std::move(potentialRes);
-					v = potentialV;
-				}
-				alpha = std::max(alpha, v);
-				if(beta <= alpha)
-				{
-					// remove unneeded part of the tree
-					break;
-				}
-			}
+			v = -INFINITY;
+			testBetterV = std::less<double>();
+			newAlpha = [](double alpha, double v) {
+				return std::max(alpha, v);
+			};
+			newBeta = [](double beta, double v) {
+				return beta;
+			};
 		}
 		else
 		{
-			double v = INFINITY;
-			for(auto it=answers.begin(); it!=answers.end(); ++it)
+			v = INFINITY;
+			testBetterV = std::greater<double>();
+			newAlpha = [](double alpha, double v) {
+				return alpha;
+			};
+			newBeta = [](double beta, double v) {
+				return std::min(beta, v);
+			};
+		}
+
+		for(auto it=answers.begin(); it!=answers.end(); ++it)
+		{
+			ChessBoardAnalysisPtr analysis(new ChessBoardAnalysis(*it));
+
+			// we are changing res only if v also changes
+			auto potentialRes = calculation(std::move(analysis), depth-1, alpha, beta, maximizingPlayer);
+			auto potentialV = potentialRes->chessPositionWeight()*getWeightMultiplier(maximizingPlayer);
+			if(testBetterV(v, potentialV))
 			{
-				ChessBoardAnalysisPtr analysis(new ChessBoardAnalysis(*it));
-				
-				// we are changing res only if v also changes
-				auto potentialRes = calculation(std::move(analysis), depth-1, alpha, beta, maximizingPlayer);
-				auto potentialV = potentialRes->chessPositionWeight()*getWeightMultiplier(maximizingPlayer);
-				if(v > potentialV)
-				{
-					res = std::move(potentialRes);
-					v = potentialV;
-				}
-				beta = std::min(v, beta);
-				if(beta <= alpha)
-				{
-					// remove unneeded part of the tree
-					break;
-				}
+				res = std::move(potentialRes);
+				v = potentialV;
+			}
+			alpha = newAlpha(alpha, v);
+			beta = newBeta(beta, v);
+			if(beta <= alpha)
+			{
+				// remove unneeded part of the tree
+				break;
 			}
 		}
 		

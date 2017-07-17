@@ -63,7 +63,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		// take opponent's piece
 		// or
 		// attack empty space
-	const ChessMoveRecordingFunction functionTake[2][2] = 
+	ChessMoveRecordingFunction functionTake[2][2] = 
 	{
 		// white turn
 		{
@@ -123,15 +123,16 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		// move to empty space
 		// with no possibility of attack
 		// (pawn move forward)
-	const ChessMoveRecordingFunction functionNoTake[2][2] = 
+	ChessMoveRecordingFunction functionNoTake[2][2] = 
 	{
+		// white turn
 		{
 			// white
 			functionTake[toArrayPosition(ChessPlayerColour::WHITE)][toArrayPosition(ChessPlayerColour::WHITE)],
 			// black
 			emptyFunction
 		},
-	//const static ChessMoveRecordingFunction blackTurnFunctionNoTake[2] =
+		// black turn
 		{
 			// white
 			emptyFunction,
@@ -141,8 +142,9 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 	};
 	
 		// we could recapture on this square	
-	const ChessMoveRecordingFunction functionDefend[2][2] = 
+	ChessMoveRecordingFunction functionDefend[2][2] = 
 	{
+		// white's turn
 		{
 			// white
 			[this](char file, int rank, char newFile, int newRank) {
@@ -157,7 +159,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				++underAttackByWhite[newRank-1][newFile-'A'];
 			}
 		},
-	//const static ChessMoveRecordingFunction blackTurnFunctionDefend[2] = 
+		// black's turn
 		{
 			// white
 			[this](char file, int rank, char newFile, int newRank) {
