@@ -99,14 +99,7 @@ bool ChessMove::hasPrevious() const
 }
 ChessBoard::ptr ChessMove::getFrom() const
 {
-	if(ChessBoard::ptr pFrom = from.lock())
-	{
-		return pFrom;
-	}
-	else
-	{
-		return nullptr;
-	}
+	return from;
 }
 ChessBoard::ptr ChessMove::getTo() const
 {
@@ -122,6 +115,10 @@ ChessBoard::ptr ChessMove::getTo() const
 ChessPlayerColour ChessMove::getTurn() const
 {
 	return !getTo()->getTurn();
+}
+std::string ChessMove::getNotation() const
+{
+	return notation;
 }
 
 void ChessMove::moveAttempts(

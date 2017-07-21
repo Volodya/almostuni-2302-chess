@@ -23,6 +23,7 @@ class ChessEngineWorker
 	typedef std::pair<double, ChessBoard::ptr> WeightBoardPair;
 	
 	bool pleaseStop; // request to stop received
+	ChessBoard::ptr original;
 	
 	std::thread thread; // the thread that we run this worker in
 	
@@ -31,15 +32,18 @@ class ChessEngineWorker
 	ChessEngineWorker();
 
 	void stop();
-	void startNextMoveCalculation(ChessBoard::ptr original, int startDepth); // this is what performs execution
+	void startNextMoveCalculation(ChessBoard::ptr original, int startDepth); // this is what starts the thread
+	void startNextMoveCalculationInternal(ChessBoard::ptr original, int startDepth); // this is what performs execution
 };
+class ChessEngineWorkerInterruptedException
+{};
 
 class ChessEngine
 {
 	ChessBoard::ptr curPos;
 	ChessEngineWorker worker;
 	
-	int START_DEPTH = 1;
+	int START_DEPTH = 4;
 public:
 	void setCurPos(ChessBoard::ptr newPos);
 	ChessBoard::ptr getCurPos() const;

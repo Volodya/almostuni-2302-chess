@@ -26,7 +26,7 @@ public:
 
 private:
 	bool previous;
-	ChessBoard::wptr from;
+	ChessBoard::ptr from;
 	ChessBoard::wptr to;
 	
 	std::string notation;
@@ -40,6 +40,7 @@ public:
 	ChessBoard::ptr getFrom() const;
 	ChessBoard::ptr getTo() const;
 	ChessPlayerColour getTurn() const;
+	std::string getNotation() const;
 	
 	friend class ChessBoardFactory;
 

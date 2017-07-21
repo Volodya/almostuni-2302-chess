@@ -17,22 +17,26 @@
 int main()
 {
 	ChessBoardFactory factory;
-	//auto cb = factory.createBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-	auto cb = factory.createBoard("4k3/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
+	auto cb = factory.createBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+	//auto cb = factory.createBoard("4k3/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
 	
 	ChessEngine ce;
 	ce.setCurPos(cb);
 	ce.startNextMoveCalculation();
 	
 	std::cin.get();
+	std::cout << "Getting next move" << std::endl;
 	auto best = ce.getNextMove();
+	std::cout << "Next move has been received" << std::endl;
 	if(best)
 	{
+		best->debugPrint();
 		do
 		{
 			//best->debugPrint();
-			//std::cout << "Weight: " << best->weight() << std::endl;
-			//best=best->getFrom();
+			auto move = best->getMove();
+			std::cout << move->getNotation() << std::endl;
+			best=move->getFrom();
 		} while(best);
 	}
 	else
