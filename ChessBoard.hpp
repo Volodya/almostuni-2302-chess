@@ -49,6 +49,8 @@ public:
 	
 	void debugPrint() const;
 	
+	std::string toFEN() const;
+	
 	ChessBoardIterator begin();
 	ChessBoardConstIterator begin() const;
 	ChessBoardIterator end();

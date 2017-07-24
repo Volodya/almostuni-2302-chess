@@ -12,7 +12,9 @@
 #include <cassert>
 #include <algorithm>
 
-#include <iostream> // temporary
+#include <string>
+
+#include "Log.hpp"
 
 // helper
 
@@ -207,19 +209,27 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 
 double ChessBoardAnalysis::chessPositionWeight() const
 {
+	Log::ptr log = Log::getInstance();
+	log->log(Log::INFO, board->toFEN());
+	
+	double wIsCheckMate = (isCheckMate() ? getWeightMultiplier(board->getTurn()) * CHECKMATE_WEIGHT : 0);
+	log->log(Log::INFO, "wIsCheckMate=" + std::to_string(wIsCheckMate));
+	double wChessPieces = this->chessPiecesWeight();	// count pieces
+	log->log(Log::INFO, "wChessPieces=" + std::to_string(wChessPieces));
+	double wChessPieceAttacked = this->chessPieceAttackedWeight(); // count attacked pieces
+	log->log(Log::INFO, "wChessPieceAttacked=" + std::to_string(wChessPieceAttacked));
+	double wChessCentreControl = this->chessCentreControlWeight(); // control of the centre of the board
+	log->log(Log::INFO, "wChessCentreControl=" + std::to_string(wChessCentreControl));
+	
+	
 	return
-		(isCheckMate() ? getWeightMultiplier(board->getTurn()) * CHECKMATE_WEIGHT : 0) // Check Mate
-
+		wIsCheckMate
 		+
-		this->chessPiecesWeight()	// count pieces
-		
+		wChessPieces
 		+
-		
-		this->chessPieceAttackedWeight() // count attacked pieces
-		
+		wChessPieceAttacked
 		+
-		
-		this->chessCentreControlWeight() // control of the centre of the board
+		wChessCentreControl
 		;
 }
 
@@ -249,7 +259,7 @@ double ChessBoardAnalysis::chessPieceAttackedWeight() const
 		if(*it == EMPTY_CELL) continue;
 		
 		auto multiplierColour = getWeightMultiplier(getColour(*it));
-		auto dominator = domination(
+		auto dominator = domination( // who has more attacks -1 (black); 0 (neutral); 1 (white)
 			underAttackByWhite[it.getRankPos()][it.getFilePos()],
 			underAttackByBlack[it.getRankPos()][it.getFilePos()]
 			);
@@ -259,7 +269,7 @@ double ChessBoardAnalysis::chessPieceAttackedWeight() const
 			attackOrDefence = PIECE_DEFENCE_MUTIPLIER; // defending own piece
 		}
 			
-		result += multiplierColour * dominator * weightFromPiece(*it) * attackOrDefence;
+		result += dominator * weightFromPiece(*it) * attackOrDefence;
 	}
 	
 	return result;
@@ -267,7 +277,7 @@ double ChessBoardAnalysis::chessPieceAttackedWeight() const
 
 double ChessBoardAnalysis::chessCentreControlWeight() const
 {
-	const static double CELL_WEIGHT_MULTIPLIER = 5.0;
+	const static double CELL_WEIGHT_MULTIPLIER = 3.0;
 	const static double CELL_WEIGHT[8][8]
 	{
 		{ 3, 3, 3, 3, 3, 3, 3, 3 },

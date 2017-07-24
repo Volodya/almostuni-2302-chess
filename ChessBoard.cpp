@@ -32,6 +32,50 @@ ChessBoard::~ChessBoard()
 	//std::cerr << "[DEST] " << --count << std::endl;
 }
 
+std::string ChessBoard::toFEN() const
+{
+	std::string result;
+	
+	int countEmpty=0;
+	for(int rank=7; rank>=0; --rank)
+	{
+		for(int file=0; file<8; ++file)
+		{
+			if(board[rank][file] == EMPTY_CELL)
+			{
+				++countEmpty;
+			}
+			else
+			{
+				if(countEmpty>0)
+				{
+					result += std::to_string(countEmpty);
+					countEmpty = 0;
+				}
+				result += board[rank][file];
+			}
+		}
+		if(countEmpty>0)
+		{
+			result += std::to_string(countEmpty);
+			countEmpty = 0;
+		}
+		
+		if(rank>0)
+		{
+			result += '/';
+		}
+	}
+	
+	result += ' ';
+	
+	result += turn==ChessPlayerColour::WHITE ? 'w' : 'b';
+	
+	result += ' ';
+	
+	return result;
+}
+
 void ChessBoard::debugPrint() const
 {
 	if(turn==ChessPlayerColour::WHITE)
