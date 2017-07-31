@@ -7,35 +7,35 @@
 
 #include "BitBoard.hpp"
 
-BitBoard::BitBoard(int8_t height, int8_t width)
-	: h(height), w(width), data((height*width+7)/8)
+BitBoard::BitBoard(uint8_t height, uint8_t width)
+	: h(height), w(width), data(((size_t)height*width+(BITBLOCKSIZE-1))/BITBLOCKSIZE)
 {}
 
-int8_t BitBoard::getHeight() const
+uint8_t BitBoard::getHeight() const
 {
 	return h;
 }
-int8_t BitBoard::getWidth() const
+uint8_t BitBoard::getWidth() const
 {
 	return w;
 }
 
-bool BitBoard::set(int8_t f, int8_t r, bool val)
+void BitBoard::set(uint8_t f, uint8_t r, bool val)
 {
 	size_t bit = f+r*w;
-	size_t dword = bit / 32;
-	bit %= 32;
+	size_t dword = bit / BITBLOCKSIZE;
+	bit %= BITBLOCKSIZE;
 	this->data[dword].set(bit, val);
 }
-bool BitBoard::get(int8_t f, int8_t r)
+bool BitBoard::get(uint8_t f, uint8_t r) const
 {
 	size_t bit = f+r*w;
-	size_t dword = bit / 32;
-	bit %= 32;
+	size_t dword = bit / BITBLOCKSIZE;
+	bit %= BITBLOCKSIZE;
 	return this->data[dword].test(bit);
 }
 
-int BitBoard::countBits()
+int BitBoard::countBits() const
 {
 	int res = 0;
 	for(auto it=data.begin(); it!=data.end(); ++it)
@@ -45,20 +45,20 @@ int BitBoard::countBits()
 	return res;
 }
 
-std::pair<int8_t, int8_t> BitBoard::getFirstOccurance() const
+std::pair<uint8_t, uint8_t> BitBoard::getFirstOccurance() const
 {
 	for(size_t dword=0; dword<data.size(); ++dword)
 	{
 		if(data[dword].none()) continue;
 		
-		for(size_t bit=0; bit<32; ++bit)
+		for(size_t bit=0; bit<BITBLOCKSIZE; ++bit)
 		{
 			if(data[dword].test(bit))
 			{
-				int setbit = dword*32 + bit;
+				int setbit = dword*BITBLOCKSIZE + bit;
 				return {setbit % w, setbit / w};
 			}
 		}
 	}
-	return {0, 0}
+	return {0, 0};
 }

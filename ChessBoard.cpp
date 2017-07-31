@@ -13,35 +13,70 @@
 
 #include "moveTemplate.hpp"
 
-unsigned long long ChessBoard::count=0;
-
-ChessBoard::ChessBoard()
-	: turn(ChessPlayerColour::WHITE), move(nullptr)
+// helper
+std::map<ChessPiece, BitBoard> generateEmptyBitBoards(const std::vector<ChessPiece> possiblePieces, uint8_t height, uint8_t width)
 {
-	for(int i=0; i<8; ++i)
+	std::map<ChessPiece, BitBoard> result;
+	for(auto it=possiblePieces.begin(); it!=possiblePieces.end(); ++it)
 	{
-		for(int j=0; j<8; ++j)
+		result.emplace(*it, height, width);
+	}
+	return result;
+}
+
+// class functions
+
+ChessBoard::ChessBoard(uint8_t height, uint8_t width)
+	: h(height), w(width), board(new ChessPiece[size_t(height)*width]), bitBoards(generateEmptyBitBoards({'p', 'P'}, height, width),
+	  turn(ChessPlayerColour::WHITE), move(nullptr)
+{
+	for(uint8_t i=0; i<w; ++i)
+	{
+		for(uint8_t j=0; j<h; ++j)
 		{
-			board[i][j] = ' ';
+			board[size_t(i)*j] = ' ';
 		}
 	}
-	//std::cerr << "[CONST] " << ++count << std::endl;
 }
+ChessBoard::ChessBoard(const ChessBoard& that)
+	: h(that.h), w(that.w), board(new ChessPiece[size_t(that.h)*that.w]), bitBoards(that.bitBoards),
+	  turn(that.turn), move(that.move)
+{
+	for(uint8_t i=0; i<w; ++i)
+	{
+		for(uint8_t j=0; j<h; ++j)
+		{
+			board[size_t(i)*j] = that.board[size_t(i)*j];
+		}
+	}
+}
+
 ChessBoard::~ChessBoard()
 {
-	//std::cerr << "[DEST] " << --count << std::endl;
+	delete[] board;
 }
+
+uint8_t ChessBoard::getHeight() const
+{
+	return h;
+}
+uint8_t ChessBoard::getWidth() const
+{
+	return w;
+}
+
 
 std::string ChessBoard::toFEN() const
 {
 	std::string result;
 	
 	int countEmpty=0;
+	ChessPiece* c=board;
 	for(int rank=7; rank>=0; --rank)
 	{
 		for(int file=0; file<8; ++file)
 		{
-			if(board[rank][file] == EMPTY_CELL)
+			if(*c == EMPTY_CELL)
 			{
 				++countEmpty;
 			}
@@ -52,8 +87,10 @@ std::string ChessBoard::toFEN() const
 					result += std::to_string(countEmpty);
 					countEmpty = 0;
 				}
-				result += board[rank][file];
+				result += *c;
 			}
+			
+			++c;
 		}
 		if(countEmpty>0)
 		{
@@ -87,19 +124,23 @@ void ChessBoard::debugPrint() const
 		std::cout << "Black's turn" << std::endl;
 	}
 	std::cout << ' ';
-	for(int i=0; i<8; ++i)
+	for(uint8_t i=0; i<w; ++i)
 	{
 		std::cout << ' ' << (char)('A'+i);
 	}
 	std::cout << std::endl;
-	for(int rank=8; rank>0; --rank)
 	{
-		std::cout << rank;
-		for(int file=0; file<8; ++file)
+		ChessPiece* c=board;
+		for(uint8_t rank=h; rank>0; --rank)
 		{
-			std::cout << ' ' << board[rank-1][file];
+			std::cout << rank;
+			for(uint8_t file=0; file<w; ++file)
+			{
+				std::cout << ' ' << *c;
+				++c;
+			}
+			std::cout << std::endl;
 		}
-		std::cout << std::endl;
 	}
 }
 
@@ -114,7 +155,7 @@ void ChessBoard::placePiece(char file, int rank, ChessPiece piece)
 }
 void ChessBoard::placePiecePos(size_t file, size_t rank, ChessPiece piece)
 {
-	board[rank][file] = piece;
+	board[rank*w+file] = piece;
 }
 ChessPiece ChessBoard::getPiece(char file, int rank) const
 {
@@ -122,7 +163,7 @@ ChessPiece ChessBoard::getPiece(char file, int rank) const
 }
 ChessPiece ChessBoard::getPiecePos(size_t file, size_t rank) const
 {
-	return board[rank][file];
+	return board[rank*w+file];
 }
 
 ChessMove::ptr ChessBoard::getMove() const
@@ -131,7 +172,11 @@ ChessMove::ptr ChessBoard::getMove() const
 }
 bool ChessBoard::isEmpty(char file, int rank) const
 {
-	return (board[rank-1][file-'A'] == ' ');
+	return this->isEmptyPos(file-'A', rank-1);
+}
+bool ChessBoard::isEmptyPos(size_t file, size_t rank) const
+{
+	return (board[rank*w+file] == ' ');
 }
 
 

@@ -12,7 +12,7 @@
 
 ChessBoard::ptr ChessBoardFactory::createBoard()
 {
-	ChessBoard::ptr cb(new ChessBoard);
+	ChessBoard::ptr cb(new ChessBoard(8, 8));
 	// standard chess board
 	cb->placePiece('A', 2, 'P');
 	cb->placePiece('B', 2, 'P');
@@ -62,7 +62,7 @@ ChessBoard::ptr ChessBoardFactory::createBoard()
 	// starting position: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
 {
-	ChessBoard::ptr cb(new ChessBoard);
+	ChessBoard::ptr cb(new ChessBoard(8, 8));
 	size_t file=0, rank=7;
 	for(auto it=fen.begin(); it!=fen.end(); ++it)
 	{
@@ -109,7 +109,7 @@ ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
 ChessBoard::ptr ChessBoardFactory::createBoard
   (ChessBoard::ptr fromBoard, char fileFrom, int rankFrom, char fileTo, int rankTo)
 {
-	ChessBoard::ptr toBoard(new ChessBoard);
+	ChessBoard::ptr toBoard(new ChessBoard(fromBoard->getHeight(), fromBoard->getWidth()));
 	
 	// moving all pieces from the old board to new
 	for(auto it=fromBoard->begin(); it!=fromBoard->end(); ++it)

@@ -11,24 +11,27 @@
 #include <cstdint>
 #include <vector>
 #include <bitset>
-#include <pair>
+#include <utility>
 
 class BitBoard
 {
-	int8_t h, w;
-	std::vector<std::bitset<32>> data;
+	constexpr static size_t BITBLOCKSIZE=32;
+	
+	uint8_t h, w;
+	std::vector<std::bitset<BITBLOCKSIZE>> data;
 public:
 	BitBoard() = delete;
-	BitBoard(int8_t height, int8_t width);
-	int8_t getHeight() const;
-	int8_t getWidth() const;
-	void set(int8_t f, int8_t r, bool val);
-	bool get(int8_t f, int8_t r) const;
+	BitBoard(const BitBoard& other) = default;
+	BitBoard(uint8_t height, uint8_t width);
+	uint8_t getHeight() const;
+	uint8_t getWidth() const;
+	void set(uint8_t f, uint8_t r, bool val);
+	bool get(uint8_t f, uint8_t r) const;
 	int countBits() const;
-	std::pair<int8_t, int8_t> getFirstOccurance() const; // file, rank
+	std::pair<uint8_t, uint8_t> getFirstOccurance() const; // file, rank
 	BitBoard operator&(const BitBoard& that) const;
 	BitBoard operator&=(const BitBoard& that);
-	BitBoard operator|(const BitBoard| that) const;
+	BitBoard operator|(const BitBoard& that) const;
 	BitBoard operator|=(const BitBoard& that);
 };
 

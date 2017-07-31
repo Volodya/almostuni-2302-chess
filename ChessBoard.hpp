@@ -11,11 +11,14 @@
 #include "config.hpp"
 
 #include <vector>
+#include <map>
 #include <memory>
 #include <cstdint>
 
 #include "ChessBoardIterator.hpp"
 #include "ChessPiece.hpp"
+
+#include "BitBoard.hpp"
 
 class ChessMove;
 
@@ -27,19 +30,26 @@ public:
 	typedef std::shared_ptr<ChessBoard> ptr;
 	typedef std::weak_ptr<ChessBoard> wptr;
 
-	static unsigned long long count;
 private:
-	ChessPiece board[8][8]; // [rank][file]
+	uint8_t h, w;
+	ChessPiece* board; // [rank*w+file]
+	std::map<ChessPiece, BitBoard> bitBoards;
 	
 	ChessPlayerColour turn;
 	
 	std::shared_ptr<ChessMove> move; // ChessMove::ptr
 
-	ChessBoard();
+	ChessBoard() = delete;
+	ChessBoard(uint8_t height, uint8_t width);
 public:
-	ChessBoard(const ChessBoard& that) = default;
+	ChessBoard(const ChessBoard& that);
 	~ChessBoard();
+	
+	uint8_t getHeight() const;
+	uint8_t getWidth() const;
+
 	bool isEmpty(char file, int rank) const;
+	bool isEmptyPos(size_t file, size_t rank) const;
 	void placePiece(char file, int rank, ChessPiece piece);
 	void placePiecePos(size_t file, size_t rank, ChessPiece piece);
 	ChessPiece getPiece(char file, int rank) const;
@@ -55,6 +65,8 @@ public:
 	ChessBoardConstIterator begin() const;
 	ChessBoardIterator end();
 	ChessBoardConstIterator end() const;
+	
+	
 	
 	friend class ChessBoardFactory;
 	friend class ChessBoardIterator;
