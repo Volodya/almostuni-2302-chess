@@ -7,29 +7,29 @@
 
 #include "BitBoard.hpp"
 
-BitBoard::BitBoard(uint8_t height, uint8_t width)
-	: h(height), w(width), data(((size_t)height*width+(BITBLOCKSIZE-1))/BITBLOCKSIZE)
+BitBoard::BitBoard(ChessGameParameters::ptr param_)
+	:param(param_), data((param->getCellCount()+(BITBLOCKSIZE-1))/BITBLOCKSIZE)
 {}
 
 uint8_t BitBoard::getHeight() const
 {
-	return h;
+	return param->getHeight();
 }
 uint8_t BitBoard::getWidth() const
 {
-	return w;
+	return param->getWidth();
 }
 
 void BitBoard::set(uint8_t f, uint8_t r, bool val)
 {
-	size_t bit = f+r*w;
+	size_t bit = f+r*param->getWidth();
 	size_t dword = bit / BITBLOCKSIZE;
 	bit %= BITBLOCKSIZE;
 	this->data[dword].set(bit, val);
 }
 bool BitBoard::get(uint8_t f, uint8_t r) const
 {
-	size_t bit = f+r*w;
+	size_t bit = f+r*param->getWidth();
 	size_t dword = bit / BITBLOCKSIZE;
 	bit %= BITBLOCKSIZE;
 	return this->data[dword].test(bit);
@@ -47,6 +47,7 @@ int BitBoard::countBits() const
 
 std::pair<uint8_t, uint8_t> BitBoard::getFirstOccurance() const
 {
+	auto w = param->getWidth();
 	for(size_t dword=0; dword<data.size(); ++dword)
 	{
 		if(data[dword].none()) continue;

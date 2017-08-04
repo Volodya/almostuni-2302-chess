@@ -17,6 +17,7 @@
 
 #include "ChessBoardIterator.hpp"
 #include "ChessPiece.hpp"
+#include "ChessGameParameters.hpp"
 
 #include "BitBoard.hpp"
 
@@ -31,7 +32,7 @@ public:
 	typedef std::weak_ptr<ChessBoard> wptr;
 
 private:
-	uint8_t h, w;
+	ChessGameParameters::ptr param;
 	ChessPiece* board; // [rank*w+file]
 	std::map<ChessPiece, BitBoard> bitBoards;
 	
@@ -40,7 +41,9 @@ private:
 	std::shared_ptr<ChessMove> move; // ChessMove::ptr
 
 	ChessBoard() = delete;
-	ChessBoard(uint8_t height, uint8_t width);
+	ChessBoard(ChessGameParameters::ptr param_);
+	
+	size_t getPos(size_t file, size_t rank) const;
 public:
 	ChessBoard(const ChessBoard& that);
 	~ChessBoard();

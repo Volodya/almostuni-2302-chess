@@ -8,6 +8,8 @@
 #ifndef BITBOARD__
 #define BITBOARD__
 
+#include "ChessGameParameters.hpp"
+
 #include <cstdint>
 #include <vector>
 #include <bitset>
@@ -17,12 +19,12 @@ class BitBoard
 {
 	constexpr static size_t BITBLOCKSIZE=32;
 	
-	uint8_t h, w;
+	ChessGameParameters::ptr param;
 	std::vector<std::bitset<BITBLOCKSIZE>> data;
 public:
 	BitBoard() = delete;
 	BitBoard(const BitBoard& other) = default;
-	BitBoard(uint8_t height, uint8_t width);
+	explicit BitBoard(ChessGameParameters::ptr param_);
 	uint8_t getHeight() const;
 	uint8_t getWidth() const;
 	void set(uint8_t f, uint8_t r, bool val);

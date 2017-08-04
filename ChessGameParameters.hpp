@@ -28,9 +28,11 @@ public:
 	void setHeight(uint8_t h);
 	void setWidth(uint8_t w);
 	void addPossiblePiece(ChessPiece cp);
+	void addPossiblePieces(std::vector<ChessPiece> cp);
 	
 	uint8_t getHeight() const;
 	uint8_t getWidth() const;
+	size_t getCellCount() const;
 	const std::vector<ChessPiece> getPossiblePieces() const;
 };
 

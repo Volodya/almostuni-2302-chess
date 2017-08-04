@@ -6,13 +6,19 @@
  */
 
 #include "ChessBoardFactory.hpp"
+#include "ChessGameParameters.hpp"
 #include <memory>
 #include <cassert>
 #include <iostream>
 
 ChessBoard::ptr ChessBoardFactory::createBoard()
 {
-	ChessBoard::ptr cb(new ChessBoard(8, 8));
+	ChessGameParameters::ptr param(new ChessGameParameters());
+	param->setWidth(8);
+	param->setHeight(8);
+	param->addPossiblePieces(STANDARD_GAME_PIECES);
+	
+	ChessBoard::ptr cb(new ChessBoard(param));
 	// standard chess board
 	cb->placePiece('A', 2, 'P');
 	cb->placePiece('B', 2, 'P');
@@ -62,7 +68,12 @@ ChessBoard::ptr ChessBoardFactory::createBoard()
 	// starting position: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
 {
-	ChessBoard::ptr cb(new ChessBoard(8, 8));
+	ChessGameParameters::ptr param(new ChessGameParameters());
+	param->setWidth(8);
+	param->setHeight(8);
+	param->addPossiblePieces(STANDARD_GAME_PIECES);
+
+	ChessBoard::ptr cb(new ChessBoard(param));
 	size_t file=0, rank=7;
 	for(auto it=fen.begin(); it!=fen.end(); ++it)
 	{
@@ -109,7 +120,7 @@ ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
 ChessBoard::ptr ChessBoardFactory::createBoard
   (ChessBoard::ptr fromBoard, char fileFrom, int rankFrom, char fileTo, int rankTo)
 {
-	ChessBoard::ptr toBoard(new ChessBoard(fromBoard->getHeight(), fromBoard->getWidth()));
+	ChessBoard::ptr toBoard(new ChessBoard(fromBoard->param));
 	
 	// moving all pieces from the old board to new
 	for(auto it=fromBoard->begin(); it!=fromBoard->end(); ++it)

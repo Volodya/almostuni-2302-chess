@@ -13,42 +13,37 @@
 
 #include "moveTemplate.hpp"
 
+#include "Log.hpp"
+
 // helper
-std::map<ChessPiece, BitBoard> generateEmptyBitBoards(const std::vector<ChessPiece> possiblePieces, uint8_t height, uint8_t width)
+std::map<ChessPiece, BitBoard> generateEmptyBitBoards(const std::vector<ChessPiece> possiblePieces, 
+	ChessGameParameters::ptr param)
 {
 	std::map<ChessPiece, BitBoard> result;
 	for(auto it=possiblePieces.begin(); it!=possiblePieces.end(); ++it)
 	{
-		result.emplace(*it, height, width);
+		result.emplace(*it, BitBoard(param));
 	}
 	return result;
 }
 
 // class functions
 
-ChessBoard::ChessBoard(uint8_t height, uint8_t width)
-	: h(height), w(width), board(new ChessPiece[size_t(height)*width]), bitBoards(generateEmptyBitBoards({'p', 'P'}, height, width),
+ChessBoard::ChessBoard(ChessGameParameters::ptr param_)
+	: param(param_), board(new ChessPiece[param->getCellCount()]),
+	  bitBoards(generateEmptyBitBoards({'p', 'P'}, param)),
 	  turn(ChessPlayerColour::WHITE), move(nullptr)
 {
-	for(uint8_t i=0; i<w; ++i)
-	{
-		for(uint8_t j=0; j<h; ++j)
-		{
-			board[size_t(i)*j] = ' ';
-		}
-	}
+	auto s = param->getCellCount();
+	std::fill(board, board+s, EMPTY_CELL);
 }
 ChessBoard::ChessBoard(const ChessBoard& that)
-	: h(that.h), w(that.w), board(new ChessPiece[size_t(that.h)*that.w]), bitBoards(that.bitBoards),
+	: param(that.param), board(new ChessPiece[param->getCellCount()]),
+	  bitBoards(that.bitBoards),
 	  turn(that.turn), move(that.move)
 {
-	for(uint8_t i=0; i<w; ++i)
-	{
-		for(uint8_t j=0; j<h; ++j)
-		{
-			board[size_t(i)*j] = that.board[size_t(i)*j];
-		}
-	}
+	auto s = param->getCellCount();
+	std::copy(that.board, that.board+s, this->board);
 }
 
 ChessBoard::~ChessBoard()
@@ -56,13 +51,18 @@ ChessBoard::~ChessBoard()
 	delete[] board;
 }
 
+size_t ChessBoard::getPos(size_t file, size_t rank) const
+{
+	return rank*param->getWidth()+file;
+}
+
 uint8_t ChessBoard::getHeight() const
 {
-	return h;
+	return param->getHeight();
 }
 uint8_t ChessBoard::getWidth() const
 {
-	return w;
+	return param->getWidth();
 }
 
 
@@ -124,17 +124,17 @@ void ChessBoard::debugPrint() const
 		std::cout << "Black's turn" << std::endl;
 	}
 	std::cout << ' ';
-	for(uint8_t i=0; i<w; ++i)
+	for(uint8_t i=0; i<param->getWidth(); ++i)
 	{
 		std::cout << ' ' << (char)('A'+i);
 	}
 	std::cout << std::endl;
 	{
 		ChessPiece* c=board;
-		for(uint8_t rank=h; rank>0; --rank)
+		for(uint8_t rank=param->getHeight(); rank>0; --rank)
 		{
 			std::cout << rank;
-			for(uint8_t file=0; file<w; ++file)
+			for(uint8_t file=0; file<param->getWidth(); ++file)
 			{
 				std::cout << ' ' << *c;
 				++c;
@@ -155,7 +155,22 @@ void ChessBoard::placePiece(char file, int rank, ChessPiece piece)
 }
 void ChessBoard::placePiecePos(size_t file, size_t rank, ChessPiece piece)
 {
-	board[rank*w+file] = piece;
+	auto pos = getPos(file, rank);
+	
+	// update board
+	ChessPiece takenPiece = board[pos];
+	board[pos] = piece;
+	
+	// update BitBoards
+	if(takenPiece != EMPTY_CELL)
+	{
+		assert(bitBoards.count(takenPiece)==1);
+		bitBoards.at(takenPiece).set(file, rank, false);
+	}
+	auto log = Log::getInstance();
+	log->log(Log::INFO, "count is " + std::to_string(bitBoards.count(piece)));
+	assert(bitBoards.count(piece)==1);
+	bitBoards.at(piece).set(file, rank, true);
 }
 ChessPiece ChessBoard::getPiece(char file, int rank) const
 {
@@ -163,7 +178,7 @@ ChessPiece ChessBoard::getPiece(char file, int rank) const
 }
 ChessPiece ChessBoard::getPiecePos(size_t file, size_t rank) const
 {
-	return board[rank*w+file];
+	return board[getPos(file, rank)];
 }
 
 ChessMove::ptr ChessBoard::getMove() const
@@ -176,7 +191,5 @@ bool ChessBoard::isEmpty(char file, int rank) const
 }
 bool ChessBoard::isEmptyPos(size_t file, size_t rank) const
 {
-	return (board[rank*w+file] == ' ');
+	return board[getPos(file, rank)] == ' ';
 }
-
-
