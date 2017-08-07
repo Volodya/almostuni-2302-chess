@@ -8,6 +8,6 @@
 #ifndef CONFIG__
 #define CONFIG__
 
-#define NDEBUG
+//#define NDEBUG
 
 #endif

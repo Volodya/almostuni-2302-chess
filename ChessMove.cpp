@@ -14,6 +14,7 @@ ChessMove::ChessMove()
 
 bool ChessMove::isMovePossible() const
 {
+	return true;
 	if(ChessBoard::ptr pTo = to.lock())
 	{
 		ChessPiece kingPiece;

@@ -16,10 +16,10 @@
 #include "Log.hpp"
 
 // helper
-std::map<ChessPiece, BitBoard> generateEmptyBitBoards(const std::vector<ChessPiece> possiblePieces, 
-	ChessGameParameters::ptr param)
+std::map<ChessPiece, BitBoard> generateEmptyBitBoards(ChessGameParameters::ptr param)
 {
 	std::map<ChessPiece, BitBoard> result;
+	auto possiblePieces = param->getPossiblePieces();
 	for(auto it=possiblePieces.begin(); it!=possiblePieces.end(); ++it)
 	{
 		result.emplace(*it, BitBoard(param));
@@ -31,7 +31,7 @@ std::map<ChessPiece, BitBoard> generateEmptyBitBoards(const std::vector<ChessPie
 
 ChessBoard::ChessBoard(ChessGameParameters::ptr param_)
 	: param(param_), board(new ChessPiece[param->getCellCount()]),
-	  bitBoards(generateEmptyBitBoards({'p', 'P'}, param)),
+	  bitBoards(generateEmptyBitBoards(param)),
 	  turn(ChessPlayerColour::WHITE), move(nullptr)
 {
 	auto s = param->getCellCount();
@@ -130,14 +130,14 @@ void ChessBoard::debugPrint() const
 	}
 	std::cout << std::endl;
 	{
-		ChessPiece* c=board;
+		ChessPiece c;
 		for(uint8_t rank=param->getHeight(); rank>0; --rank)
 		{
-			std::cout << rank;
+			std::cout << (int)rank;
 			for(uint8_t file=0; file<param->getWidth(); ++file)
 			{
-				std::cout << ' ' << *c;
-				++c;
+				c = board[getPos(file, rank-1)];
+				std::cout << ' ' << c;
 			}
 			std::cout << std::endl;
 		}
@@ -167,10 +167,11 @@ void ChessBoard::placePiecePos(size_t file, size_t rank, ChessPiece piece)
 		assert(bitBoards.count(takenPiece)==1);
 		bitBoards.at(takenPiece).set(file, rank, false);
 	}
-	auto log = Log::getInstance();
-	log->log(Log::INFO, "count is " + std::to_string(bitBoards.count(piece)));
-	assert(bitBoards.count(piece)==1);
-	bitBoards.at(piece).set(file, rank, true);
+	if(piece != EMPTY_CELL)
+	{
+		assert(bitBoards.count(piece)==1);
+		bitBoards.at(piece).set(file, rank, true);
+	}
 }
 ChessPiece ChessBoard::getPiece(char file, int rank) const
 {

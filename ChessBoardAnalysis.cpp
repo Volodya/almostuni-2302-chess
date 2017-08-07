@@ -44,17 +44,13 @@ ChessBoardAnalysis::ChessBoardAnalysis(ChessBoard::ptr board_)
 {
 	assert(board!=nullptr);
 	this->calculatePossibleMoves();
-	//std::cerr << "[ChessBoardAnalysis] " << std::endl;
 }
 
 ChessBoardAnalysis::~ChessBoardAnalysis()
-{
-	//std::cerr << "[~ChessBoardAnalysis] " << board.use_count() << ' ' << possibleMoves.size() << std::endl;
-}
+{}
 
 void ChessBoardAnalysis::calculatePossibleMoves()
 {
-	//std::cerr << "[calculatePossibleMoves]" << std::endl;
 	ChessBoardFactory factory;
 	typedef ChessMove::ChessMoveRecordingFunction ChessMoveRecordingFunction;
 		// empty function

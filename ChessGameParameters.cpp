@@ -23,8 +23,8 @@ void ChessGameParameters::addPossiblePiece(ChessPiece cp)
 }
 void ChessGameParameters::addPossiblePieces(std::vector<ChessPiece> cp)
 {
-	possiblePieces.resize(possiblePieces.size()+cp.size());
-	std::copy(cp.begin(), cp.end(), possiblePieces.end());
+	possiblePieces.reserve(possiblePieces.size()+cp.size());
+	std::copy(cp.begin(), cp.end(), std::back_inserter(possiblePieces));
 }
 
 uint8_t ChessGameParameters::getHeight() const
