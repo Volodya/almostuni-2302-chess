@@ -20,6 +20,7 @@
 #include "ChessGameParameters.hpp"
 
 #include "BitBoard.hpp"
+#include "ChessBoardHash.hpp"
 
 class ChessMove;
 
@@ -39,6 +40,9 @@ private:
 	ChessPlayerColour turn;
 	
 	std::shared_ptr<ChessMove> move; // ChessMove::ptr
+	
+	ChessBoardHash hash;
+	std::shared_ptr<std::map</*PieceType+Position*/, ChessBoardHash>> pieceHashes;
 
 	ChessBoard() = delete;
 	ChessBoard(ChessGameParameters::ptr param_);

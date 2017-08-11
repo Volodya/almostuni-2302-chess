@@ -118,11 +118,17 @@ void ChessEngineWorker::startNextMoveCalculationInternal(ChessBoard::ptr origina
 
 		for(auto it=answers.begin(); it!=answers.end(); ++it)
 		{
+			// check database if the analysis is already there (by hash+depth)
+			
+			// make new analysis
 			ChessBoardAnalysisPtr analysis(new ChessBoardAnalysis(*it));
 
 			// we are changing res only if v also changes
 			auto potentialRes = calculation(std::move(analysis), depth-1, alpha, beta, maximizingPlayer);
 			auto potentialV = potentialRes->chessPositionWeight()*getWeightMultiplier(maximizingPlayer);
+			
+			// record the weight+depth+hash if it's new
+			
 			if(testBetterV(v, potentialV))
 			{
 				res = std::move(potentialRes);

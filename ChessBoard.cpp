@@ -36,11 +36,14 @@ ChessBoard::ChessBoard(ChessGameParameters::ptr param_)
 {
 	auto s = param->getCellCount();
 	std::fill(board, board+s, EMPTY_CELL);
+	
+	// generate hashes
 }
 ChessBoard::ChessBoard(const ChessBoard& that)
 	: param(that.param), board(new ChessPiece[param->getCellCount()]),
 	  bitBoards(that.bitBoards),
-	  turn(that.turn), move(that.move)
+	  turn(that.turn), move(that.move),
+	  hash(that.hash), pieceHashes(that.pieceHashes);
 {
 	auto s = param->getCellCount();
 	std::copy(that.board, that.board+s, this->board);
