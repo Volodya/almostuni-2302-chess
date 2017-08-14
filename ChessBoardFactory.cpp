@@ -130,7 +130,6 @@ ChessBoard::ptr ChessBoardFactory::createBoard
 	// moving one of the pieces to the new position
 	assert(fileFrom!=fileTo || rankFrom!=rankTo);
 	auto piece = fromBoard->getPiece(fileFrom, rankFrom);
-	auto takenPiece = toBoard->getPiece(fileTo, rankTo);
 	toBoard->placePiece(fileTo, rankTo, piece);
 	toBoard->placePiece(fileFrom, rankFrom, EMPTY_CELL);
 	

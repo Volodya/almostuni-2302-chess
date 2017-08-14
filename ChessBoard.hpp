@@ -17,6 +17,7 @@
 
 #include "ChessBoardIterator.hpp"
 #include "ChessPiece.hpp"
+#include "ChessBoardPiece.hpp"
 #include "ChessGameParameters.hpp"
 
 #include "BitBoard.hpp"
@@ -42,8 +43,9 @@ private:
 	std::shared_ptr<ChessMove> move; // ChessMove::ptr
 	
 	ChessBoardHash hash;
-	std::shared_ptr<std::map</*PieceType+Position*/, ChessBoardHash>> pieceHashes;
-
+	std::shared_ptr<std::map<ChessBoardPiece, ChessBoardHash>> pieceHashes;
+	static std::shared_ptr<std::map<ChessBoardPiece, ChessBoardHash>> generatePieceHashes(ChessGameParameters::ptr param);
+	
 	ChessBoard() = delete;
 	ChessBoard(ChessGameParameters::ptr param_);
 	

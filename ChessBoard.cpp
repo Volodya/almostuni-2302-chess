@@ -29,10 +29,32 @@ std::map<ChessPiece, BitBoard> generateEmptyBitBoards(ChessGameParameters::ptr p
 
 // class functions
 
+std::shared_ptr<std::map<ChessBoardPiece, ChessBoardHash>>
+	ChessBoard::generatePieceHashes(ChessGameParameters::ptr param)
+{
+	auto result = std::make_shared<std::map<ChessBoardPiece, ChessBoardHash>>();
+	
+	auto log = Log::getInstance();
+	
+	auto possiblePieces = param->getPossiblePieces();
+	for(auto it=possiblePieces.begin(); it!=possiblePieces.end(); ++it)
+	{
+		for(size_t i=0, n=param->getCellCount(); i<n; ++i)
+		{
+			auto curHash = generateRandomChessBoardHash();
+			log->log(Log::INFO, curHash.to_string());
+			result->emplace(ChessBoardPiece(*it, i), curHash);
+		}
+	}
+	
+	return result;
+}
+
 ChessBoard::ChessBoard(ChessGameParameters::ptr param_)
 	: param(param_), board(new ChessPiece[param->getCellCount()]),
 	  bitBoards(generateEmptyBitBoards(param)),
-	  turn(ChessPlayerColour::WHITE), move(nullptr)
+	  turn(ChessPlayerColour::WHITE), move(nullptr),
+	  hash(generateRandomChessBoardHash()), pieceHashes(generatePieceHashes(param))
 {
 	auto s = param->getCellCount();
 	std::fill(board, board+s, EMPTY_CELL);
@@ -43,7 +65,7 @@ ChessBoard::ChessBoard(const ChessBoard& that)
 	: param(that.param), board(new ChessPiece[param->getCellCount()]),
 	  bitBoards(that.bitBoards),
 	  turn(that.turn), move(that.move),
-	  hash(that.hash), pieceHashes(that.pieceHashes);
+	  hash(that.hash), pieceHashes(that.pieceHashes)
 {
 	auto s = param->getCellCount();
 	std::copy(that.board, that.board+s, this->board);
@@ -175,6 +197,20 @@ void ChessBoard::placePiecePos(size_t file, size_t rank, ChessPiece piece)
 		assert(bitBoards.count(piece)==1);
 		bitBoards.at(piece).set(file, rank, true);
 	}
+	
+	// update hash
+	std::cerr << "Hash was " << hash << std::endl;
+	if(takenPiece != EMPTY_CELL)
+	{
+		assert(pieceHashes->count(ChessBoardPiece(takenPiece, pos))==1);
+		hash^=pieceHashes->at(ChessBoardPiece(takenPiece, pos));
+	}
+	if(piece != EMPTY_CELL)
+	{
+		assert(pieceHashes->count(ChessBoardPiece(piece, pos))==1);
+		hash^=pieceHashes->at(ChessBoardPiece(piece, pos));
+	}
+	std::cerr << "Hash is  " << hash << std::endl;
 }
 ChessPiece ChessBoard::getPiece(char file, int rank) const
 {

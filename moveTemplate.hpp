@@ -16,15 +16,7 @@
 
 typedef std::vector<std::vector<std::pair<int, int>>> MoveTemplate;
 
-MoveTemplate combineTwo(const MoveTemplate& a, const MoveTemplate& b)
-{
-	MoveTemplate result;
-	result.reserve(a.size() + b.size());
-	result.insert(result.end(), a.begin(), a.end());
-	result.insert(result.end(), b.begin(), b.end());
-	result.shrink_to_fit();
-	return result;
-}
+MoveTemplate combineTwo(const MoveTemplate& a, const MoveTemplate& b);
 
 const MoveTemplate pawnWhiteMoveNoTake =
 {
