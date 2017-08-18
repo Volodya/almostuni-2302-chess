@@ -25,8 +25,13 @@ constexpr double
 	PIECE_ATTACK_MULTIPLIER=0.20,
 	PIECE_DEFENCE_MUTIPLIER=0.05
 	;
+class ChessBoardAnalysis;
 class ChessBoardAnalysis
 {
+public:
+	typedef std::shared_ptr<ChessBoardAnalysis> ptr;
+	
+private:
 	ChessBoard::ptr board;
 	
 	int8_t underAttackByWhite[8][8]; // [rank][file]
@@ -52,6 +57,7 @@ public:
 	std::vector<ChessBoard::ptr> getPossibleMoves() const;
 	
 	ChessBoard::ptr getBoard() const;
+	ChessBoardHash getBoardHash() const;
 };
 
 #endif

@@ -65,6 +65,7 @@ public:
 	ChessPiece getPiecePos(size_t file, size_t rank) const;
 	ChessPlayerColour getTurn() const;
 	std::shared_ptr<ChessMove> getMove() const; // ChessMove::ptr
+	ChessBoardHash getHash() const;
 	
 	void debugPrint() const;
 	

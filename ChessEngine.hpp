@@ -11,7 +11,9 @@
 #include "config.hpp"
 
 #include "ChessBoard.hpp"
+#include "ChessBoardAnalysis.hpp"
 #include <list>
+#include <functional>
 #include <thread>
 
 class ChessEngine;
@@ -19,6 +21,16 @@ class ChessEngine;
 class ChessEngineWorker
 {
 	friend class ChessEngine;
+	
+	struct DepthPosition
+	{
+		int depth;
+		ChessBoardAnalysis::ptr analysis;
+		DepthPosition(int depth_, ChessBoardAnalysis::ptr analysis_)
+			: depth(depth_), analysis(analysis_) {}
+	};
+	
+	std::map<ChessBoardHash, DepthPosition, std::function<bool(const ChessBoardHash&, const ChessBoardHash&)>> readyResults;
 	
 	typedef std::pair<double, ChessBoard::ptr> WeightBoardPair;
 	

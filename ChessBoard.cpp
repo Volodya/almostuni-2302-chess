@@ -225,6 +225,12 @@ ChessMove::ptr ChessBoard::getMove() const
 {
 	return move;
 }
+
+ChessBoardHash ChessBoard::getHash() const
+{
+	return hash;
+}
+
 bool ChessBoard::isEmpty(char file, int rank) const
 {
 	return this->isEmptyPos(file-'A', rank-1);

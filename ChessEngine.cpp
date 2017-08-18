@@ -6,17 +6,15 @@
  */
 
 #include "ChessEngine.hpp"
-#include "ChessBoardAnalysis.hpp"
 #include <iostream>
 #include <algorithm>
 #include <cmath>
-#include <functional>
 #include <memory>
 #include <new> // std::bad_alloc
 #include <cassert>
 
 ChessEngineWorker::ChessEngineWorker()
-	: pleaseStop(false)
+	: readyResults([](const ChessBoardHash& l, const ChessBoardHash& r){return l<r;}), pleaseStop(false)
 {}
 
 void ChessEngineWorker::stop()
@@ -69,26 +67,38 @@ void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int s
 
 void ChessEngineWorker::startNextMoveCalculationInternal(ChessBoard::ptr original, int startDepth)
 {
-	typedef std::unique_ptr<ChessBoardAnalysis> ChessBoardAnalysisPtr;
-	std::function<ChessBoardAnalysisPtr(ChessBoardAnalysisPtr&&,int,double,double,ChessPlayerColour)> calculation;
-	calculation = [this, &calculation](ChessBoardAnalysisPtr&& analysis, int depth,
+	std::function<ChessBoardAnalysis::ptr(ChessBoardAnalysis::ptr,int,double,double,ChessPlayerColour)> calculation;
+	calculation = [this, &calculation](ChessBoardAnalysis::ptr analysis, int depth,
 		double alpha, double beta, ChessPlayerColour maximizingPlayer)
 	{
 		if(this->pleaseStop)
 		{
 			throw ChessEngineWorkerInterruptedException();
 		}
-		//analysis->getBoard()->debugPrint();
-		if(depth==0 || analysis->isCheckMate() /* || node.isDraw() */)
+		
+		auto curHash=analysis->getBoardHash();
+		if(this->readyResults.count(curHash)!=0 && this->readyResults.at(curHash).depth >= depth)
 		{
-			return std::move(analysis);
+			return this->readyResults.at(curHash).analysis;
+		}
+		
+		//analysis->getBoard()->debugPrint();
+		if(depth==0)
+		{
+			return analysis;
+		}
+		if(analysis->isCheckMate() /* || node.isDraw() */)
+		{
+			readyResults.emplace(curHash, DepthPosition(depth, analysis));
+			return analysis;
 		}
 		auto answers = analysis->getPossibleMoves();
 		if(answers.empty())
 		{
-			return std::move(analysis);
+			readyResults.emplace(curHash, DepthPosition(depth, analysis));
+			return analysis;
 		}
-		ChessBoardAnalysisPtr res=nullptr;
+		ChessBoardAnalysis::ptr res=nullptr;
 		
 		double v;
 		std::function<bool(double, double)> testBetterV;
@@ -121,7 +131,7 @@ void ChessEngineWorker::startNextMoveCalculationInternal(ChessBoard::ptr origina
 			// check database if the analysis is already there (by hash+depth)
 			
 			// make new analysis
-			ChessBoardAnalysisPtr analysis(new ChessBoardAnalysis(*it));
+			ChessBoardAnalysis::ptr analysis(new ChessBoardAnalysis(*it));
 
 			// we are changing res only if v also changes
 			auto potentialRes = calculation(std::move(analysis), depth-1, alpha, beta, maximizingPlayer);
@@ -142,8 +152,8 @@ void ChessEngineWorker::startNextMoveCalculationInternal(ChessBoard::ptr origina
 				break;
 			}
 		}
-		
-		return std::move(res);
+			readyResults.emplace(curHash, DepthPosition(depth, res));
+		return res;
 	};
 	
 	int depth = startDepth;
@@ -151,12 +161,11 @@ void ChessEngineWorker::startNextMoveCalculationInternal(ChessBoard::ptr origina
 	do
 	{
 		std::cout << "i am thinking" << std::endl;
-		std::cout << " current depth is " << depth << " current pref size " << positionPreferences.size() << std::endl;
 		try
 		{
-			ChessBoardAnalysisPtr best = calculation(ChessBoardAnalysisPtr(new ChessBoardAnalysis(original)),
+			ChessBoardAnalysis::ptr best = calculation(ChessBoardAnalysis::ptr(new ChessBoardAnalysis(original)),
 				depth, -INFINITY, INFINITY, original->getTurn());
-				std::cerr << "here" << std::endl;
+
 			positionPreferences.emplace_front(best->chessPositionWeight(), best->getBoard());
 			//std::cout << "Depth " << depth << " has been calculated" << std::endl;
 			//std::cout << " current best move is" << std::endl;
@@ -165,7 +174,7 @@ void ChessEngineWorker::startNextMoveCalculationInternal(ChessBoard::ptr origina
 		}
 		catch(std::bad_alloc& e)
 		{
-			std::cout << "i ran out of memory. depth was " << depth << std::endl;
+			std::cerr << "i ran out of memory. depth was " << depth << std::endl;
 			pleaseStop=true;
 		}
 		catch(ChessEngineWorkerInterruptedException& e)

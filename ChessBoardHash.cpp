@@ -9,6 +9,26 @@
 
 #include "RandomGenerator.hpp"
 
+bool operator<(const ChessBoardHash& l, const ChessBoardHash& r)
+{
+	for(size_t i=0; i<l.size(); ++i)
+	{
+		if(l[i] == r[i])
+		{
+			continue;
+		}
+		if(!l[i] && r[i])
+		{
+			return true; // l<r
+		}
+		if(l[i] && !r[i])
+		{
+			return false; // l>r;
+		}
+	}
+	return false; // l==r
+}
+
 ChessBoardHash generateRandomChessBoardHash()
 {
 	ChessBoardHash result;

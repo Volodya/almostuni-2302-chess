@@ -12,6 +12,8 @@
 
 typedef std::bitset<1024> ChessBoardHash;
 
+bool operator<(const ChessBoardHash& l, const ChessBoardHash& r);
+
 ChessBoardHash generateRandomChessBoardHash();
 
 #endif
