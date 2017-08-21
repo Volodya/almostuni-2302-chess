@@ -42,7 +42,7 @@ std::shared_ptr<std::map<ChessBoardPiece, ChessBoardHash>>
 		for(size_t i=0, n=param->getCellCount(); i<n; ++i)
 		{
 			auto curHash = generateRandomChessBoardHash();
-			log->log(Log::INFO, curHash.to_string());
+			//log->log(Log::INFO, curHash.to_string());
 			result->emplace(ChessBoardPiece(*it, i), curHash);
 		}
 	}
@@ -199,7 +199,6 @@ void ChessBoard::placePiecePos(size_t file, size_t rank, ChessPiece piece)
 	}
 	
 	// update hash
-	std::cerr << "Hash was " << hash << std::endl;
 	if(takenPiece != EMPTY_CELL)
 	{
 		assert(pieceHashes->count(ChessBoardPiece(takenPiece, pos))==1);
@@ -210,7 +209,6 @@ void ChessBoard::placePiecePos(size_t file, size_t rank, ChessPiece piece)
 		assert(pieceHashes->count(ChessBoardPiece(piece, pos))==1);
 		hash^=pieceHashes->at(ChessBoardPiece(piece, pos));
 	}
-	std::cerr << "Hash is  " << hash << std::endl;
 }
 ChessPiece ChessBoard::getPiece(char file, int rank) const
 {

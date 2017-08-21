@@ -8,11 +8,12 @@
 #ifndef CHESSBOARDHASH__
 #define CHESSBOARDHASH__
 
-#include <bitset>
+#include <array>
 
-typedef std::bitset<1024> ChessBoardHash;
+typedef std::array<unsigned long long, 2> ChessBoardHash;
 
 bool operator<(const ChessBoardHash& l, const ChessBoardHash& r);
+void operator^=(ChessBoardHash& l, const ChessBoardHash& r);
 
 ChessBoardHash generateRandomChessBoardHash();
 

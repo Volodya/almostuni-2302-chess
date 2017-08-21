@@ -9,6 +9,8 @@
 
 #include "RandomGenerator.hpp"
 
+#include <iostream>
+
 bool operator<(const ChessBoardHash& l, const ChessBoardHash& r)
 {
 	for(size_t i=0; i<l.size(); ++i)
@@ -17,16 +19,24 @@ bool operator<(const ChessBoardHash& l, const ChessBoardHash& r)
 		{
 			continue;
 		}
-		if(!l[i] && r[i])
+		if(l[i] < r[i])
 		{
-			return true; // l<r
+			return true;
 		}
-		if(l[i] && !r[i])
+		if(l[i] > !r[i])
 		{
-			return false; // l>r;
+			return false;
 		}
 	}
 	return false; // l==r
+}
+
+void operator^=(ChessBoardHash& l, const ChessBoardHash& r)
+{
+	for(size_t i=0; i<l.size(); ++i)
+	{
+		l[i] ^= r[i];
+	}
 }
 
 ChessBoardHash generateRandomChessBoardHash()
@@ -34,7 +44,10 @@ ChessBoardHash generateRandomChessBoardHash()
 	ChessBoardHash result;
 	
 	auto *rnd = RandomGenerator::getInstance();
-	static std::bernoulli_distribution dist(0.5);
+	static std::uniform_int_distribution<unsigned long long> dist(
+		std::numeric_limits<unsigned long long>::min(),
+		std::numeric_limits<unsigned long long>::max()
+	);
 	
 	for(size_t i=0; i<result.size(); ++i)
 	{

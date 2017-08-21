@@ -349,5 +349,5 @@ ChessBoard::ptr ChessBoardAnalysis::getBoard() const
 
 ChessBoardHash ChessBoardAnalysis::getBoardHash() const
 {
-	this->getBoard()->getHash();
+	return this->getBoard()->getHash();
 }

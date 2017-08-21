@@ -13,6 +13,8 @@
 
 ChessBoard::ptr ChessBoardFactory::createBoard()
 {
+		std::cout << "I'm creating a new board from parameters" << std::endl;
+
 	ChessGameParameters::ptr param(new ChessGameParameters());
 	param->setWidth(8);
 	param->setHeight(8);
@@ -120,13 +122,15 @@ ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
 ChessBoard::ptr ChessBoardFactory::createBoard
   (ChessBoard::ptr fromBoard, char fileFrom, int rankFrom, char fileTo, int rankTo)
 {
-	ChessBoard::ptr toBoard(new ChessBoard(fromBoard->param));
+	ChessBoard::ptr toBoard(new ChessBoard(*fromBoard));
 	
 	// moving all pieces from the old board to new
+	/*
 	for(auto it=fromBoard->begin(); it!=fromBoard->end(); ++it)
 	{
 		toBoard->placePiece(it.getFile(), it.getRank(), *it);
 	}
+	*/
 	// moving one of the pieces to the new position
 	assert(fileFrom!=fileTo || rankFrom!=rankTo);
 	auto piece = fromBoard->getPiece(fileFrom, rankFrom);
