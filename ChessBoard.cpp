@@ -16,13 +16,26 @@
 #include "Log.hpp"
 
 // helper
-std::map<ChessPiece, BitBoard> generateEmptyBitBoards(ChessGameParameters::ptr param)
+std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> generateEmptyBitBoards(ChessGameParameters::ptr param)
 {
-	std::map<ChessPiece, BitBoard> result;
+	std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> result;
 	auto possiblePieces = param->getPossiblePieces();
 	for(auto it=possiblePieces.begin(); it!=possiblePieces.end(); ++it)
 	{
-		result.emplace(*it, BitBoard(param));
+		result[*it] = std::unique_ptr<BitBoard>(new BitBoard(param));
+	}
+	return result;
+}
+std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> copy(
+	const std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> &original)
+{
+	std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> result;
+	for(size_t i=0; i<KNOWN_CHESS_PIECE_COUNT; ++i)
+	{
+		if(original[i])
+		{
+			result[i] = std::unique_ptr<BitBoard>(new BitBoard(*original[i]));
+		}
 	}
 	return result;
 }
@@ -63,7 +76,7 @@ ChessBoard::ChessBoard(ChessGameParameters::ptr param_)
 }
 ChessBoard::ChessBoard(const ChessBoard& that)
 	: param(that.param), board(new ChessPiece[param->getCellCount()]),
-	  bitBoards(that.bitBoards),
+	  bitBoards(copy(that.bitBoards)),
 	  turn(that.turn), move(that.move),
 	  hash(that.hash), pieceHashes(that.pieceHashes)
 {
@@ -162,7 +175,7 @@ void ChessBoard::debugPrint() const
 			for(uint8_t file=0; file<param->getWidth(); ++file)
 			{
 				c = board[getPos(file, rank-1)];
-				std::cout << ' ' << c;
+				std::cout << ' ' << chessPieceStrings[c];
 			}
 			std::cout << std::endl;
 		}
@@ -189,13 +202,13 @@ void ChessBoard::placePiecePos(size_t file, size_t rank, ChessPiece piece)
 	// update BitBoards
 	if(takenPiece != EMPTY_CELL)
 	{
-		assert(bitBoards.count(takenPiece)==1);
-		bitBoards.at(takenPiece).set(file, rank, false);
+		assert(bitBoards[takenPiece]!=nullptr);
+		bitBoards[takenPiece]->set(file, rank, false);
 	}
 	if(piece != EMPTY_CELL)
 	{
-		assert(bitBoards.count(piece)==1);
-		bitBoards.at(piece).set(file, rank, true);
+		assert(bitBoards[piece]!=nullptr);
+		bitBoards[piece]->set(file, rank, true);
 	}
 	
 	// update hash

@@ -18,29 +18,16 @@ bool ChessMove::isMovePossible() const
 	if(ChessBoard::ptr pTo = to.lock())
 	{
 		ChessPiece kingPiece;
-		ChessPiece attackersPieces[6];
 		if(pTo->getTurn()==ChessPlayerColour::WHITE)
 		{
 			// if it's white to move, we are looking for a black king
-			kingPiece = 'k';
-			attackersPieces[0]='Q';
-			attackersPieces[1]='R';
-			attackersPieces[2]='B';
-			attackersPieces[3]='N';
-			attackersPieces[4]='P';
-			attackersPieces[5]='K';
+			kingPiece = KING_BLACK;
 		}
 		else
 		{
-			kingPiece = 'K';
-			attackersPieces[0]='q';
-			attackersPieces[1]='r';
-			attackersPieces[2]='b';
-			attackersPieces[3]='n';
-			attackersPieces[4]='p';
-			attackersPieces[5]='k';
+			kingPiece = KING_WHITE;
 		}
-		size_t king[2]={};
+		size_t king[2]={}; // TODO: change this monstrocity!!!!
 		bool found=false;
 		for(size_t rank=0; !found && rank<8; ++rank)
 		{
@@ -57,10 +44,14 @@ bool ChessMove::isMovePossible() const
 				}
 			}
 		}
-
-		for(size_t i=0; i<6; ++i)
+		auto possiblePieces = pTo->param->getPossiblePieces();
+		for(auto attackingPiece = possiblePieces.begin(); attackingPiece != possiblePieces.end(); ++attackingPiece)
 		{
-			const MoveTemplate* takeMove = moveParameters.at(attackersPieces[i]).takeMove;
+			if(*attackingPiece == EMPTY_CELL || getColour(*attackingPiece) == pTo->getTurn())
+			{
+				continue;
+			}
+			const MoveTemplate* takeMove = moveParameters.at(*attackingPiece).takeMove;
 			for(auto dir=takeMove->begin(); dir!=takeMove->end(); ++dir)
 			{
 				for(auto pos=dir->begin(); pos!=dir->end(); ++pos)
@@ -73,7 +64,7 @@ bool ChessMove::isMovePossible() const
 					}
 					auto piece = pTo->getPiecePos(file, rank);
 					
-					if(piece==attackersPieces[i])
+					if(piece==*attackingPiece)
 					{
 						return false;
 					}

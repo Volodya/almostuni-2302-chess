@@ -36,7 +36,8 @@ public:
 private:
 	ChessGameParameters::ptr param;
 	ChessPiece* board; // [rank*w+file]
-	std::map<ChessPiece, BitBoard> bitBoards;
+	//std::map<ChessPiece, BitBoard> bitBoards;
+	std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> bitBoards;
 	
 	ChessPlayerColour turn;
 	

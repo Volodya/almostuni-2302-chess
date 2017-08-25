@@ -28,12 +28,12 @@ constexpr double domination(int8_t white, int8_t black)
 constexpr double weightFromPiece(const ChessPiece cp)
 {
 	return 
-		cp=='P' || cp=='p' ? BOARD_PAWN_WEIGHT :
-		cp=='N' || cp=='n' ? BOARD_KNIGHT_WEIGHT :
-		cp=='B' || cp=='b' ? BOARD_BISHOP_WEIGHT :
-		cp=='R' || cp=='r' ? BOARD_ROOK_WEIGHT :
-		cp=='Q' || cp=='q' ? BOARD_QUEEN_WEIGHT :
-		cp=='K' || cp=='k' ? BOARD_KING_WEIGHT :
+		cp==PAWN_WHITE   || cp==PAWN_BLACK   ? BOARD_PAWN_WEIGHT :
+		cp==KNIGHT_WHITE || cp==KNIGHT_BLACK ? BOARD_KNIGHT_WEIGHT :
+		cp==BISHOP_WHITE || cp==BISHOP_BLACK ? BOARD_BISHOP_WEIGHT :
+		cp==ROOK_WHITE   || cp==ROOK_BLACK   ? BOARD_ROOK_WEIGHT :
+		cp==QUEEN_WHITE  || cp==QUEEN_BLACK  ? BOARD_QUEEN_WEIGHT :
+		cp==KING_WHITE   || cp==KING_BLACK   ? BOARD_KING_WEIGHT :
 		0;
 }
 
@@ -205,17 +205,17 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 
 double ChessBoardAnalysis::chessPositionWeight() const
 {
-	Log::ptr log = Log::getInstance();
-	log->log(Log::INFO, board->toFEN());
+//	Log::ptr log = Log::getInstance();
+//	log->log(Log::INFO, board->toFEN());
 	
 	double wIsCheckMate = (isCheckMate() ? getWeightMultiplier(board->getTurn()) * CHECKMATE_WEIGHT : 0);
-	log->log(Log::INFO, "wIsCheckMate=" + std::to_string(wIsCheckMate));
+//	log->log(Log::INFO, "wIsCheckMate=" + std::to_string(wIsCheckMate));
 	double wChessPieces = this->chessPiecesWeight();	// count pieces
-	log->log(Log::INFO, "wChessPieces=" + std::to_string(wChessPieces));
+//	log->log(Log::INFO, "wChessPieces=" + std::to_string(wChessPieces));
 	double wChessPieceAttacked = this->chessPieceAttackedWeight(); // count attacked pieces
-	log->log(Log::INFO, "wChessPieceAttacked=" + std::to_string(wChessPieceAttacked));
+//	log->log(Log::INFO, "wChessPieceAttacked=" + std::to_string(wChessPieceAttacked));
 	double wChessCentreControl = this->chessCentreControlWeight(); // control of the centre of the board
-	log->log(Log::INFO, "wChessCentreControl=" + std::to_string(wChessCentreControl));
+//	log->log(Log::INFO, "wChessCentreControl=" + std::to_string(wChessCentreControl));
 	
 	
 	return
@@ -231,7 +231,7 @@ double ChessBoardAnalysis::chessPositionWeight() const
 
 double ChessBoardAnalysis::chessPiecesWeight() const
 {
-	std::map<ChessPiece, int> count;
+	int count[KNOWN_CHESS_PIECE_COUNT] = { 0 };
 	for(auto it=board->begin(); it!=board->end(); ++it)
 	{
 		++count[*it];

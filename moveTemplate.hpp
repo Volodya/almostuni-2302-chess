@@ -148,18 +148,18 @@ struct ChessPieceParameters
 
 const std::map<ChessPiece, const ChessPieceParameters> moveParameters =
 	{
-			{'P', ChessPieceParameters(&pawnWhiteMoveTake, &pawnWhiteMoveNoTake)},
-			{'p', ChessPieceParameters(&pawnBlackMoveTake, &pawnBlackMoveNoTake)},
-			{'N', ChessPieceParameters(&knightMove)},
-			{'n', ChessPieceParameters(&knightMove)},
-			{'B', ChessPieceParameters(&bishopMove)},
-			{'b', ChessPieceParameters(&bishopMove)},
-			{'R', ChessPieceParameters(&rookMove)},
-			{'r', ChessPieceParameters(&rookMove)},
-			{'Q', ChessPieceParameters(&queenMove)},
-			{'q', ChessPieceParameters(&queenMove)},
-			{'K', ChessPieceParameters(&kingMove)},
-			{'k', ChessPieceParameters(&kingMove)}
+			{PAWN_WHITE,   ChessPieceParameters(&pawnWhiteMoveTake, &pawnWhiteMoveNoTake)},
+			{PAWN_BLACK,   ChessPieceParameters(&pawnBlackMoveTake, &pawnBlackMoveNoTake)},
+			{KNIGHT_WHITE, ChessPieceParameters(&knightMove)},
+			{KNIGHT_BLACK, ChessPieceParameters(&knightMove)},
+			{BISHOP_WHITE, ChessPieceParameters(&bishopMove)},
+			{BISHOP_BLACK, ChessPieceParameters(&bishopMove)},
+			{ROOK_WHITE,   ChessPieceParameters(&rookMove)},
+			{ROOK_BLACK,   ChessPieceParameters(&rookMove)},
+			{QUEEN_WHITE,  ChessPieceParameters(&queenMove)},
+			{QUEEN_BLACK,  ChessPieceParameters(&queenMove)},
+			{KING_WHITE,   ChessPieceParameters(&kingMove)},
+			{KING_BLACK,   ChessPieceParameters(&kingMove)}
 	};
 
 #endif

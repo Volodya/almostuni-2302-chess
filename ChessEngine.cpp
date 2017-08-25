@@ -7,6 +7,7 @@
 
 #include "ChessEngine.hpp"
 #include <iostream>
+#include "Log.hpp"
 #include <algorithm>
 #include <cmath>
 #include <memory>
@@ -71,6 +72,8 @@ void ChessEngineWorker::startNextMoveCalculationInternal(ChessBoard::ptr origina
 	calculation = [this, &calculation](ChessBoardAnalysis::ptr analysis, int depth,
 		double alpha, double beta, ChessPlayerColour maximizingPlayer)
 	{
+		Log::ptr log = Log::getInstance();
+		log->log(Log::INFO, "I have entered the calculation");
 		if(this->pleaseStop)
 		{
 			throw ChessEngineWorkerInterruptedException();
@@ -95,6 +98,8 @@ void ChessEngineWorker::startNextMoveCalculationInternal(ChessBoard::ptr origina
 		auto answers = analysis->getPossibleMoves();
 		if(answers.empty())
 		{
+			log->log(Log::INFO, "I'm here somehow!!!!!");
+			analysis->getBoard()->debugPrint();
 			readyResults.emplace(curHash, DepthPosition(depth, analysis));
 			return analysis;
 		}
@@ -169,6 +174,7 @@ void ChessEngineWorker::startNextMoveCalculationInternal(ChessBoard::ptr origina
 			positionPreferences.emplace_front(best->chessPositionWeight(), best->getBoard());
 			std::cout << "Depth " << depth << " has been calculated" << std::endl;
 			std::cout << " current best move is" << std::endl;
+			std::cout << " size of positionPreferences: " << positionPreferences.size() << std::endl;
 			positionPreferences.begin()->second->debugPrint();
 			++depth;
 		}

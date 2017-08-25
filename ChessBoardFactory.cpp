@@ -22,38 +22,38 @@ ChessBoard::ptr ChessBoardFactory::createBoard()
 	
 	ChessBoard::ptr cb(new ChessBoard(param));
 	// standard chess board
-	cb->placePiece('A', 2, 'P');
-	cb->placePiece('B', 2, 'P');
-	cb->placePiece('C', 2, 'P');
-	cb->placePiece('D', 2, 'P');
-	cb->placePiece('E', 2, 'P');
-	cb->placePiece('F', 2, 'P');
-	cb->placePiece('G', 2, 'P');
-	cb->placePiece('H', 2, 'P');
-	cb->placePiece('A', 1, 'R');
-	cb->placePiece('B', 1, 'N');
-	cb->placePiece('C', 1, 'B');
-	cb->placePiece('D', 1, 'Q');
-	cb->placePiece('E', 1, 'K');
-	cb->placePiece('F', 1, 'B');
-	cb->placePiece('G', 1, 'N');
-	cb->placePiece('H', 1, 'R');
-	cb->placePiece('A', 7, 'p');
-	cb->placePiece('B', 7, 'p');
-	cb->placePiece('C', 7, 'p');
-	cb->placePiece('D', 7, 'p');
-	cb->placePiece('E', 7, 'p');
-	cb->placePiece('F', 7, 'p');
-	cb->placePiece('G', 7, 'p');
-	cb->placePiece('H', 7, 'p');
-	cb->placePiece('A', 8, 'r');
-	cb->placePiece('B', 8, 'n');
-	cb->placePiece('C', 8, 'b');
-	cb->placePiece('D', 8, 'q');
-	cb->placePiece('E', 8, 'k');
-	cb->placePiece('F', 8, 'b');
-	cb->placePiece('G', 8, 'n');
-	cb->placePiece('H', 8, 'r');
+	cb->placePiece('A', 2, PAWN_WHITE);
+	cb->placePiece('B', 2, PAWN_WHITE);
+	cb->placePiece('C', 2, PAWN_WHITE);
+	cb->placePiece('D', 2, PAWN_WHITE);
+	cb->placePiece('E', 2, PAWN_WHITE);
+	cb->placePiece('F', 2, PAWN_WHITE);
+	cb->placePiece('G', 2, PAWN_WHITE);
+	cb->placePiece('H', 2, PAWN_WHITE);
+	cb->placePiece('A', 1, ROOK_WHITE);
+	cb->placePiece('B', 1, KNIGHT_WHITE);
+	cb->placePiece('C', 1, BISHOP_WHITE);
+	cb->placePiece('D', 1, QUEEN_WHITE);
+	cb->placePiece('E', 1, KING_WHITE);
+	cb->placePiece('F', 1, BISHOP_WHITE);
+	cb->placePiece('G', 1, KNIGHT_WHITE);
+	cb->placePiece('H', 1, ROOK_WHITE);
+	cb->placePiece('A', 7, PAWN_BLACK);
+	cb->placePiece('B', 7, PAWN_BLACK);
+	cb->placePiece('C', 7, PAWN_BLACK);
+	cb->placePiece('D', 7, PAWN_BLACK);
+	cb->placePiece('E', 7, PAWN_BLACK);
+	cb->placePiece('F', 7, PAWN_BLACK);
+	cb->placePiece('G', 7, PAWN_BLACK);
+	cb->placePiece('H', 7, PAWN_BLACK);
+	cb->placePiece('A', 8, ROOK_BLACK);
+	cb->placePiece('B', 8, KNIGHT_BLACK);
+	cb->placePiece('C', 8, BISHOP_BLACK);
+	cb->placePiece('D', 8, QUEEN_BLACK);
+	cb->placePiece('E', 8, KING_BLACK);
+	cb->placePiece('F', 8, BISHOP_BLACK);
+	cb->placePiece('G', 8, KNIGHT_BLACK);
+	cb->placePiece('H', 8, ROOK_BLACK);
 
 	ChessMove::ptr cm(new ChessMove);
 	
@@ -104,7 +104,7 @@ ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
 		}
 		else
 		{
-			cb->placePiecePos(file, rank, *it);
+			cb->placePiecePos(file, rank, charToChessPiece(*it));
 			++file;
 		}
 	}
@@ -145,7 +145,7 @@ ChessBoard::ptr ChessBoardFactory::createBoard
 	curMove->from=fromBoard;
 	curMove->to=toBoard;
 	curMove->notation=std::string("")+
-		piece+" "+
+		chessPieceStrings[piece]+" "+
 		fileFrom+std::to_string(rankFrom)+" "+
 		fileTo+std::to_string(rankTo);
 	curMove->moveNum=fromBoard->getMove()->moveNum+1;
