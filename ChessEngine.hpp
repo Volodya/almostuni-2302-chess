@@ -46,6 +46,9 @@ class ChessEngineWorker
 	void stop();
 	void startNextMoveCalculation(ChessBoard::ptr original, int startDepth); // this is what starts the thread
 	void startNextMoveCalculationInternal(ChessBoard::ptr original, int startDepth); // this is what performs execution
+	
+	ChessBoardAnalysis::ptr calculation(ChessBoardAnalysis::ptr analysis, int depth,
+		double alpha, double beta, ChessPlayerColour maximizingPlayer);
 };
 class ChessEngineWorkerInterruptedException
 {};

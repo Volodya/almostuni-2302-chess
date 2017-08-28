@@ -84,7 +84,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 			[this](char file, int rank, char newFile, int newRank) {
 				//assert(maybeMove->getTurn()==ChessPlayerColour::BLACK);
 				
-				if(this->board->getPiece(newFile, newRank)=='k')
+				if(this->board->getPiece(newFile, newRank)==KING_BLACK)
 				{
 					check=true;
 				}
@@ -96,7 +96,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 			[this](char file, int rank, char newFile, int newRank) {
 				assert(this->board->getTurn()==ChessPlayerColour::BLACK);
 								
-				if(this->board->getPiece(newFile, newRank)=='K')
+				if(this->board->getPiece(newFile, newRank)==KING_WHITE)
 				{
 					check=true;
 				}
@@ -173,10 +173,11 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 			}
 		}
 	};
+	Log::ptr log = Log::getInstance();
 	for(auto it = board->begin(); it != board->end(); ++it)
 	{
 		if(*it == EMPTY_CELL) continue;
-		
+				
 		// todo make size_t
 		int rank = it.getRank();
 		char file = it.getFile();
@@ -239,11 +240,11 @@ double ChessBoardAnalysis::chessPiecesWeight() const
 	
 	// todo: rewrite as a loop, create a 'ChessPiece.hpp'
 	return
-		BOARD_PAWN_WEIGHT * (count['P'] - count['p']) +
-		BOARD_KNIGHT_WEIGHT * (count['N'] - count['n']) +
-		BOARD_BISHOP_WEIGHT * (count['B'] - count['b']) +
-		BOARD_ROOK_WEIGHT * (count['R'] - count['r']) +
-		BOARD_QUEEN_WEIGHT * (count['Q'] - count['q']);
+		BOARD_PAWN_WEIGHT   * (count[PAWN_WHITE]   - count[PAWN_BLACK]) +
+		BOARD_KNIGHT_WEIGHT * (count[KNIGHT_WHITE] - count[KNIGHT_BLACK]) +
+		BOARD_BISHOP_WEIGHT * (count[BISHOP_WHITE] - count[BISHOP_BLACK]) +
+		BOARD_ROOK_WEIGHT   * (count[ROOK_WHITE]   - count[ROOK_BLACK]) +
+		BOARD_QUEEN_WEIGHT  * (count[QUEEN_WHITE]  - count[QUEEN_BLACK]);
 
 }
 double ChessBoardAnalysis::chessPieceAttackedWeight() const

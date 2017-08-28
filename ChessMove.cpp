@@ -7,7 +7,7 @@
 
 #include "ChessMove.hpp"
 
-#include <iostream> // temporary
+#include "Log.hpp"
 
 ChessMove::ChessMove()
 {}
@@ -120,6 +120,8 @@ void ChessMove::moveAttempts(
 	const MoveTemplate& mt,
 	bool canTake, bool canMoveToEmpty)
 {
+	Log::ptr log = Log::getInstance();
+
 	char newFile;
 	int newRank;
 	for(auto direction = mt.begin(); direction != mt.end(); ++direction)
@@ -137,6 +139,7 @@ void ChessMove::moveAttempts(
 			{
 				if(canTake)
 				{
+					
 					if(getColour(cb.getPiece(newFile, newRank)) != cb.getTurn())
 					{
 						recFunTake(file, rank, newFile, newRank);

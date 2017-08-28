@@ -248,5 +248,5 @@ bool ChessBoard::isEmpty(char file, int rank) const
 }
 bool ChessBoard::isEmptyPos(size_t file, size_t rank) const
 {
-	return board[getPos(file, rank)] == ' ';
+	return board[getPos(file, rank)] == EMPTY_CELL;
 }

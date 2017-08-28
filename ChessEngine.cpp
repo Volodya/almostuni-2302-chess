@@ -66,109 +66,106 @@ void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int s
 	thread = std::thread( &ChessEngineWorker::startNextMoveCalculationInternal, this, original, startDepth);
 }
 
+ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr analysis, int depth,
+		double alpha, double beta, ChessPlayerColour maximizingPlayer)
+{
+	Log::ptr log = Log::getInstance();
+	log->log(Log::INFO, std::string("I have entered the calculation with depth ")+std::to_string(depth));
+	if(this->pleaseStop)
+	{
+		throw ChessEngineWorkerInterruptedException();
+	}
+	
+	auto curHash=analysis->getBoardHash();
+	if(this->readyResults.count(curHash)!=0 && this->readyResults.at(curHash).depth >= depth)
+	{
+		return this->readyResults.at(curHash).analysis;
+	}
+	
+	//analysis->getBoard()->debugPrint();
+	if(depth==0)
+	{
+		return analysis;
+	}
+	if(analysis->isCheckMate() /* || node.isDraw() */)
+	{
+		readyResults.emplace(curHash, DepthPosition(depth, analysis));
+		return analysis;
+	}
+	auto answers = analysis->getPossibleMoves();
+	if(answers.empty())
+	{
+		readyResults.emplace(curHash, DepthPosition(depth, analysis));
+		return analysis;
+	}
+	ChessBoardAnalysis::ptr res=nullptr;
+	
+	double v;
+	std::function<bool(double, double)> testBetterV;
+	std::function<double(double, double)> newAlpha, newBeta;
+	if(maximizingPlayer == analysis->getBoard()->getTurn())
+	{
+		v = -INFINITY;
+		testBetterV = std::less<double>();
+		newAlpha = [](double alpha, double v) {
+			return std::max(alpha, v);
+		};
+		newBeta = [](double beta, double v) {
+			return beta;
+		};
+	}
+	else
+	{
+		v = INFINITY;
+		testBetterV = std::greater<double>();
+		newAlpha = [](double alpha, double v) {
+			return alpha;
+		};
+		newBeta = [](double beta, double v) {
+			return std::min(beta, v);
+		};
+	}
+
+	for(auto it=answers.begin(); it!=answers.end(); ++it)
+	{
+		// check database if the analysis is already there (by hash+depth)
+		
+		// make new analysis
+		ChessBoardAnalysis::ptr analysis(new ChessBoardAnalysis(*it));
+		// we are changing res only if v also changes
+		auto potentialRes = calculation(std::move(analysis), depth-1, alpha, beta, maximizingPlayer);
+		auto potentialV = potentialRes->chessPositionWeight()*getWeightMultiplier(maximizingPlayer);
+		
+		// record the weight+depth+hash if it's new
+		
+		if(testBetterV(v, potentialV))
+		{
+			res = std::move(potentialRes);
+			v = potentialV;
+		}
+		alpha = newAlpha(alpha, v);
+		beta = newBeta(beta, v);
+		if(beta <= alpha)
+		{
+			// remove unneeded part of the tree
+			break;
+		}
+	}
+		readyResults.emplace(curHash, DepthPosition(depth, res));
+	return res;
+};
+
 void ChessEngineWorker::startNextMoveCalculationInternal(ChessBoard::ptr original, int startDepth)
 {
-	std::function<ChessBoardAnalysis::ptr(ChessBoardAnalysis::ptr,int,double,double,ChessPlayerColour)> calculation;
-	calculation = [this, &calculation](ChessBoardAnalysis::ptr analysis, int depth,
-		double alpha, double beta, ChessPlayerColour maximizingPlayer)
-	{
-		Log::ptr log = Log::getInstance();
-		log->log(Log::INFO, "I have entered the calculation");
-		if(this->pleaseStop)
-		{
-			throw ChessEngineWorkerInterruptedException();
-		}
-		
-		auto curHash=analysis->getBoardHash();
-		if(this->readyResults.count(curHash)!=0 && this->readyResults.at(curHash).depth >= depth)
-		{
-			return this->readyResults.at(curHash).analysis;
-		}
-		
-		//analysis->getBoard()->debugPrint();
-		if(depth==0)
-		{
-			return analysis;
-		}
-		if(analysis->isCheckMate() /* || node.isDraw() */)
-		{
-			readyResults.emplace(curHash, DepthPosition(depth, analysis));
-			return analysis;
-		}
-		auto answers = analysis->getPossibleMoves();
-		if(answers.empty())
-		{
-			log->log(Log::INFO, "I'm here somehow!!!!!");
-			analysis->getBoard()->debugPrint();
-			readyResults.emplace(curHash, DepthPosition(depth, analysis));
-			return analysis;
-		}
-		ChessBoardAnalysis::ptr res=nullptr;
-		
-		double v;
-		std::function<bool(double, double)> testBetterV;
-		std::function<double(double, double)> newAlpha, newBeta;
-		if(maximizingPlayer == analysis->getBoard()->getTurn())
-		{
-			v = -INFINITY;
-			testBetterV = std::less<double>();
-			newAlpha = [](double alpha, double v) {
-				return std::max(alpha, v);
-			};
-			newBeta = [](double beta, double v) {
-				return beta;
-			};
-		}
-		else
-		{
-			v = INFINITY;
-			testBetterV = std::greater<double>();
-			newAlpha = [](double alpha, double v) {
-				return alpha;
-			};
-			newBeta = [](double beta, double v) {
-				return std::min(beta, v);
-			};
-		}
-
-		for(auto it=answers.begin(); it!=answers.end(); ++it)
-		{
-			// check database if the analysis is already there (by hash+depth)
-			
-			// make new analysis
-			ChessBoardAnalysis::ptr analysis(new ChessBoardAnalysis(*it));
-
-			// we are changing res only if v also changes
-			auto potentialRes = calculation(std::move(analysis), depth-1, alpha, beta, maximizingPlayer);
-			auto potentialV = potentialRes->chessPositionWeight()*getWeightMultiplier(maximizingPlayer);
-			
-			// record the weight+depth+hash if it's new
-			
-			if(testBetterV(v, potentialV))
-			{
-				res = std::move(potentialRes);
-				v = potentialV;
-			}
-			alpha = newAlpha(alpha, v);
-			beta = newBeta(beta, v);
-			if(beta <= alpha)
-			{
-				// remove unneeded part of the tree
-				break;
-			}
-		}
-			readyResults.emplace(curHash, DepthPosition(depth, res));
-		return res;
-	};
-	
 	int depth = startDepth;
+	auto originalAnalysis = ChessBoardAnalysis::ptr(new ChessBoardAnalysis(original));
 	
 	do
 	{
 		std::cout << "i am thinking" << std::endl;
 		try
 		{
-			ChessBoardAnalysis::ptr best = calculation(ChessBoardAnalysis::ptr(new ChessBoardAnalysis(original)),
+			ChessBoardAnalysis::ptr best = calculation(originalAnalysis,
 				depth, -INFINITY, INFINITY, original->getTurn());
 
 			positionPreferences.emplace_front(best->chessPositionWeight(), best->getBoard());
