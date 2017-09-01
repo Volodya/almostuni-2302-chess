@@ -185,21 +185,21 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		auto pieceParam = moveParameters.at(*it);
 		auto moveArrayPos = toArrayPosition(board->getTurn());
 		auto pieceArrayPos = toArrayPosition(getColour(*it));
-		if(pieceParam.isDifferentMoveTypes)
+		if(pieceParam->isDifferentMoveTypes)
 		{
 			ChessMove::moveAttempts(functionNoTake[moveArrayPos][pieceArrayPos], emptyFunction,
 				*board, file, rank,
-				*pieceParam.noTakeMove, false);
+				*pieceParam->noTakeMove, false);
 			ChessMove::moveAttempts(functionTake[moveArrayPos][pieceArrayPos],
 				functionDefend[moveArrayPos][pieceArrayPos],
 				*board, file, rank,
-				*pieceParam.takeMove, true, false);
+				*pieceParam->takeMove, true, false);
 		}
 		else
 		{
 			ChessMove::moveAttempts(functionTake[moveArrayPos][pieceArrayPos],
 				functionDefend[moveArrayPos][pieceArrayPos],
-				*board, file, rank, *pieceParam.anyMove, true);
+				*board, file, rank, *pieceParam->anyMove, true);
 		}
 	}
 }

@@ -51,7 +51,7 @@ bool ChessMove::isMovePossible() const
 			{
 				continue;
 			}
-			const MoveTemplate* takeMove = moveParameters.at(*attackingPiece).takeMove;
+			const MoveTemplate* takeMove = moveParameters.at(*attackingPiece)->takeMove;
 			for(auto dir=takeMove->begin(); dir!=takeMove->end(); ++dir)
 			{
 				for(auto pos=dir->begin(); pos!=dir->end(); ++pos)

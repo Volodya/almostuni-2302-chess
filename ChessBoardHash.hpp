@@ -15,6 +15,6 @@ typedef std::array<unsigned long long, 2> ChessBoardHash;
 bool operator<(const ChessBoardHash& l, const ChessBoardHash& r);
 void operator^=(ChessBoardHash& l, const ChessBoardHash& r);
 
-ChessBoardHash generateRandomChessBoardHash();
+ChessBoardHash* generateRandomChessBoardHash();
 
 #endif

@@ -42,12 +42,12 @@ std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> copy(
 
 // class functions
 
-std::shared_ptr<std::map<ChessBoardPiece, ChessBoardHash>>
+std::shared_ptr<std::array<ChessBoardHash *, KNOWN_CHESS_PIECE_COUNT>>
 	ChessBoard::generatePieceHashes(ChessGameParameters::ptr param)
 {
-	auto result = std::make_shared<std::map<ChessBoardPiece, ChessBoardHash>>();
+	auto result = std::make_shared<std::array<ChessBoardHash *, KNOWN_CHESS_PIECE_COUNT>>(nullptr);
 	
-	auto log = Log::getInstance();
+	(*result)[EMPTY_CELL] = nullptr;
 	
 	auto possiblePieces = param->getPossiblePieces();
 	for(auto it=possiblePieces.begin(); it!=possiblePieces.end(); ++it)
@@ -55,8 +55,7 @@ std::shared_ptr<std::map<ChessBoardPiece, ChessBoardHash>>
 		for(size_t i=0, n=param->getCellCount(); i<n; ++i)
 		{
 			auto curHash = generateRandomChessBoardHash();
-			//log->log(Log::INFO, curHash.to_string());
-			result->emplace(ChessBoardPiece(*it, i), curHash);
+			(*result)[ChessBoardPiece(*it, i).toArrayPos(param->getCellCount())] = curHash;
 		}
 	}
 	
@@ -78,7 +77,7 @@ ChessBoard::ChessBoard(const ChessBoard& that)
 	: param(that.param), board(new ChessPiece[param->getCellCount()]),
 	  bitBoards(copy(that.bitBoards)),
 	  turn(that.turn), move(that.move),
-	  hash(that.hash), pieceHashes(that.pieceHashes)
+	  hash(new ChessBoardHash(*that.hash)), pieceHashes(that.pieceHashes)
 {
 	auto s = param->getCellCount();
 	std::copy(that.board, that.board+s, this->board);
@@ -214,8 +213,8 @@ void ChessBoard::placePiecePos(size_t file, size_t rank, ChessPiece piece)
 	// update hash
 	if(takenPiece != EMPTY_CELL)
 	{
-		assert(pieceHashes->count(ChessBoardPiece(takenPiece, pos))==1);
-		hash^=pieceHashes->at(ChessBoardPiece(takenPiece, pos));
+		assert(pieceHashes->at(ChessBoardPiece(takenPiece, pos).arrayPos())!=nullptr);
+		hash^=pieceHashes->at(ChessBoardPiece(takenPiece, pos).arrayPos());
 	}
 	if(piece != EMPTY_CELL)
 	{

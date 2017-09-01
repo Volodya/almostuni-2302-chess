@@ -15,3 +15,8 @@ bool ChessBoardPiece::operator <(const ChessBoardPiece &that) const
 {
 	return position < that.position || (position == that.position && piece < that.piece);
 }
+
+size_t ChessBoardPiece::toArrayPos(size_t boardSize) const
+{
+	return boardSize * (size_t)piece + position;
+}

@@ -17,6 +17,7 @@ struct ChessBoardPiece
 	ChessBoardPiece() = default;
 	ChessBoardPiece(ChessPiece piece_, size_t position);
 	bool operator<(const ChessBoardPiece &that) const;
+	size_t toArrayPos(size_t boardSize) const;
 };	
 
 #endif

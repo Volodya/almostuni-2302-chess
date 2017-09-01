@@ -9,8 +9,6 @@
 
 #include "RandomGenerator.hpp"
 
-#include <iostream>
-
 bool operator<(const ChessBoardHash& l, const ChessBoardHash& r)
 {
 	for(size_t i=0; i<l.size(); ++i)
@@ -39,9 +37,9 @@ void operator^=(ChessBoardHash& l, const ChessBoardHash& r)
 	}
 }
 
-ChessBoardHash generateRandomChessBoardHash()
+ChessBoardHash* generateRandomChessBoardHash()
 {
-	ChessBoardHash result;
+	ChessBoardHash* result = new ChessBoardHash;
 	
 	auto *rnd = RandomGenerator::getInstance();
 	static std::uniform_int_distribution<unsigned long long> dist(
@@ -51,7 +49,7 @@ ChessBoardHash generateRandomChessBoardHash()
 	
 	for(size_t i=0; i<result.size(); ++i)
 	{
-		result[i] = dist(rnd->gen);
+		(*result)[i] = dist(rnd->gen);
 	}
 	
 	return result;

@@ -36,16 +36,16 @@ public:
 private:
 	ChessGameParameters::ptr param;
 	ChessPiece* board; // [rank*w+file]
-	//std::map<ChessPiece, BitBoard> bitBoards;
 	std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> bitBoards;
 	
 	ChessPlayerColour turn;
 	
 	std::shared_ptr<ChessMove> move; // ChessMove::ptr
 	
-	ChessBoardHash hash;
-	std::shared_ptr<std::map<ChessBoardPiece, ChessBoardHash>> pieceHashes;
-	static std::shared_ptr<std::map<ChessBoardPiece, ChessBoardHash>> generatePieceHashes(ChessGameParameters::ptr param);
+	std::unique_ptr<ChessBoardHash> hash;
+	//std::shared_ptr<std::map<ChessBoardPiece, ChessBoardHash>> pieceHashes;
+	std::shared_ptr<std::array<ChessBoardHash *, KNOWN_CHESS_PIECE_COUNT>> pieceHashes;
+	static std::shared_ptr<std::array<ChessBoardHash *, KNOWN_CHESS_PIECE_COUNT>> generatePieceHashes(ChessGameParameters::ptr param);
 	
 	ChessBoard() = delete;
 	ChessBoard(ChessGameParameters::ptr param_);

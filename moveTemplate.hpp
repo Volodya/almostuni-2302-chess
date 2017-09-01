@@ -11,7 +11,8 @@
 #include "config.hpp"
 
 #include <vector>
-#include <map>
+//#include <map>
+#include <array>
 #include "ChessPiece.hpp"
 
 typedef std::vector<std::vector<std::pair<int, int>>> MoveTemplate;
@@ -146,20 +147,45 @@ struct ChessPieceParameters
 	ChessPieceParameters(const MoveTemplate* anyMove_);
 };
 
+/*
 const std::map<ChessPiece, const ChessPieceParameters> moveParameters =
 	{
-			{PAWN_WHITE,   ChessPieceParameters(&pawnWhiteMoveTake, &pawnWhiteMoveNoTake)},
-			{PAWN_BLACK,   ChessPieceParameters(&pawnBlackMoveTake, &pawnBlackMoveNoTake)},
-			{KNIGHT_WHITE, ChessPieceParameters(&knightMove)},
-			{KNIGHT_BLACK, ChessPieceParameters(&knightMove)},
-			{BISHOP_WHITE, ChessPieceParameters(&bishopMove)},
-			{BISHOP_BLACK, ChessPieceParameters(&bishopMove)},
-			{ROOK_WHITE,   ChessPieceParameters(&rookMove)},
-			{ROOK_BLACK,   ChessPieceParameters(&rookMove)},
-			{QUEEN_WHITE,  ChessPieceParameters(&queenMove)},
-			{QUEEN_BLACK,  ChessPieceParameters(&queenMove)},
-			{KING_WHITE,   ChessPieceParameters(&kingMove)},
-			{KING_BLACK,   ChessPieceParameters(&kingMove)}
+			{PAWN_WHITE,   },
+			{PAWN_BLACK,   },
+			{KNIGHT_WHITE, },
+			{KNIGHT_BLACK, },
+			{BISHOP_WHITE, },
+			{BISHOP_BLACK, },
+			{ROOK_WHITE,   },
+			{ROOK_BLACK,   },
+			{QUEEN_WHITE,  },
+			{QUEEN_BLACK,  },
+			{KING_WHITE,   },
+			{KING_BLACK,   }
+	};
+*/
+
+const std::array<const ChessPieceParameters * const, KNOWN_CHESS_PIECE_COUNT> moveParameters =
+	{
+		/* EMPTY_CELL =     */ nullptr,
+		/* PAWN_WHITE =     */ new ChessPieceParameters(&pawnWhiteMoveTake, &pawnWhiteMoveNoTake),
+		/* PAWN_BLACK =     */ new ChessPieceParameters(&pawnBlackMoveTake, &pawnBlackMoveNoTake),
+		/* ROOK_WHITE =     */ new ChessPieceParameters(&rookMove),
+		/* ROOK_BLACK =     */ new ChessPieceParameters(&rookMove),
+		/* KNIGHT_WHITE =   */ new ChessPieceParameters(&knightMove),
+		/* KNIGHT_BLACK =   */ new ChessPieceParameters(&knightMove),
+		/* BISHOP_WHITE =   */ new ChessPieceParameters(&bishopMove),
+		/* BISHOP_BLACK =   */ new ChessPieceParameters(&bishopMove),
+		/* KING_WHITE =     */ new ChessPieceParameters(&kingMove),
+		/* KING_BLACK =     */ new ChessPieceParameters(&kingMove),
+		/* QUEEN_WHITE =    */ new ChessPieceParameters(&queenMove),
+		/* QUEEN_BLACK =    */ new ChessPieceParameters(&queenMove),
+		/* PRINCESS_WHITE = */ new ChessPieceParameters(&princessMove),
+		/* PRINCESS_BLACK = */ new ChessPieceParameters(&princessMove),
+		/* EMPRESS_WHITE =  */ new ChessPieceParameters(&empressMove),
+		/* EMPRESS_BLACK =  */ new ChessPieceParameters(&empressMove),
+		/* AMAZON_WHITE =   */ new ChessPieceParameters(&amazonMove),
+		/* AMAZON_BLACK =   */ new ChessPieceParameters(&amazonMove)
 	};
 
 #endif
