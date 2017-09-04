@@ -69,8 +69,6 @@ void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int s
 ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr analysis, int depth,
 		double alpha, double beta, ChessPlayerColour maximizingPlayer)
 {
-	Log::ptr log = Log::getInstance();
-	log->log(Log::INFO, std::string("I have entered the calculation with depth ")+std::to_string(depth));
 	if(this->pleaseStop)
 	{
 		throw ChessEngineWorkerInterruptedException();
@@ -194,7 +192,6 @@ void ChessEngine::setCurPos(ChessBoard::ptr newPos)
 void ChessEngine::startNextMoveCalculation()
 {
 	worker.startNextMoveCalculation(curPos, START_DEPTH);
-	std::cout << "Thread started" << std::endl;
 }
 
 ChessBoard::ptr ChessEngine::getNextMove()

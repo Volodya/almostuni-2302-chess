@@ -17,7 +17,6 @@
 
 #include "ChessBoardIterator.hpp"
 #include "ChessPiece.hpp"
-#include "ChessBoardPiece.hpp"
 #include "ChessGameParameters.hpp"
 
 #include "BitBoard.hpp"
@@ -36,21 +35,21 @@ public:
 private:
 	ChessGameParameters::ptr param;
 	ChessPiece* board; // [rank*w+file]
-	std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> bitBoards;
+	//std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> bitBoards;
 	
 	ChessPlayerColour turn;
 	
 	std::shared_ptr<ChessMove> move; // ChessMove::ptr
 	
 	std::unique_ptr<ChessBoardHash> hash;
-	//std::shared_ptr<std::map<ChessBoardPiece, ChessBoardHash>> pieceHashes;
-	std::shared_ptr<std::array<ChessBoardHash *, KNOWN_CHESS_PIECE_COUNT>> pieceHashes;
-	static std::shared_ptr<std::array<ChessBoardHash *, KNOWN_CHESS_PIECE_COUNT>> generatePieceHashes(ChessGameParameters::ptr param);
+	static std::vector<ChessBoardHash *> pieceHashes;
+	void initialisePieceHashes();
 	
 	ChessBoard() = delete;
 	ChessBoard(ChessGameParameters::ptr param_);
 	
 	size_t getPos(size_t file, size_t rank) const;
+	size_t toPieceHashArrayPos(const ChessPiece &piece_, const size_t &position);
 public:
 	ChessBoard(const ChessBoard& that);
 	~ChessBoard();

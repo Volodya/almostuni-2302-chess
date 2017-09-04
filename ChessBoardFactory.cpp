@@ -9,12 +9,11 @@
 #include "ChessGameParameters.hpp"
 #include <memory>
 #include <cassert>
-#include <iostream>
+
+#include "Log.hpp"
 
 ChessBoard::ptr ChessBoardFactory::createBoard()
 {
-		std::cout << "I'm creating a new board from parameters" << std::endl;
-
 	ChessGameParameters::ptr param(new ChessGameParameters());
 	param->setWidth(8);
 	param->setHeight(8);
@@ -74,8 +73,9 @@ ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
 	param->setWidth(8);
 	param->setHeight(8);
 	param->addPossiblePieces(STANDARD_GAME_PIECES);
-
+	
 	ChessBoard::ptr cb(new ChessBoard(param));
+		
 	size_t file=0, rank=7;
 	for(auto it=fen.begin(); it!=fen.end(); ++it)
 	{

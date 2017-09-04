@@ -40,14 +40,16 @@ std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> copy(
 	return result;
 }
 
+// static data members
+
+std::vector<ChessBoardHash *> ChessBoard::pieceHashes;
+
 // class functions
 
-std::shared_ptr<std::array<ChessBoardHash *, KNOWN_CHESS_PIECE_COUNT>>
-	ChessBoard::generatePieceHashes(ChessGameParameters::ptr param)
+void ChessBoard::initialisePieceHashes()
 {
-	auto result = std::make_shared<std::array<ChessBoardHash *, KNOWN_CHESS_PIECE_COUNT>>(nullptr);
-	
-	(*result)[EMPTY_CELL] = nullptr;
+	pieceHashes.resize(KNOWN_CHESS_PIECE_COUNT * param->getCellCount());
+	pieceHashes[EMPTY_CELL] = nullptr;
 	
 	auto possiblePieces = param->getPossiblePieces();
 	for(auto it=possiblePieces.begin(); it!=possiblePieces.end(); ++it)
@@ -55,19 +57,21 @@ std::shared_ptr<std::array<ChessBoardHash *, KNOWN_CHESS_PIECE_COUNT>>
 		for(size_t i=0, n=param->getCellCount(); i<n; ++i)
 		{
 			auto curHash = generateRandomChessBoardHash();
-			(*result)[ChessBoardPiece(*it, i).toArrayPos(param->getCellCount())] = curHash;
+			pieceHashes[toPieceHashArrayPos(*it, i)] = curHash;
 		}
 	}
-	
-	return result;
+	pieceHashes.shrink_to_fit();
 }
 
 ChessBoard::ChessBoard(ChessGameParameters::ptr param_)
 	: param(param_), board(new ChessPiece[param->getCellCount()]),
-	  bitBoards(generateEmptyBitBoards(param)),
+	  //bitBoards(generateEmptyBitBoards(param)),
 	  turn(ChessPlayerColour::WHITE), move(nullptr),
-	  hash(generateRandomChessBoardHash()), pieceHashes(generatePieceHashes(param))
+	  hash(generateRandomChessBoardHash())
 {
+	Log::info("about to initialise hashes");
+	initialisePieceHashes(); // technically does not belong here
+	Log::info("hashes have been initialised");
 	auto s = param->getCellCount();
 	std::fill(board, board+s, EMPTY_CELL);
 	
@@ -75,9 +79,9 @@ ChessBoard::ChessBoard(ChessGameParameters::ptr param_)
 }
 ChessBoard::ChessBoard(const ChessBoard& that)
 	: param(that.param), board(new ChessPiece[param->getCellCount()]),
-	  bitBoards(copy(that.bitBoards)),
+	  //bitBoards(copy(that.bitBoards)),
 	  turn(that.turn), move(that.move),
-	  hash(new ChessBoardHash(*that.hash)), pieceHashes(that.pieceHashes)
+	  hash(new ChessBoardHash(*that.hash))
 {
 	auto s = param->getCellCount();
 	std::copy(that.board, that.board+s, this->board);
@@ -91,6 +95,10 @@ ChessBoard::~ChessBoard()
 size_t ChessBoard::getPos(size_t file, size_t rank) const
 {
 	return rank*param->getWidth()+file;
+}
+size_t ChessBoard::toPieceHashArrayPos(const ChessPiece &piece, const size_t &position)
+{
+	return param->getCellCount() * ((size_t)piece - (size_t)1) + position;
 }
 
 uint8_t ChessBoard::getHeight() const
@@ -201,25 +209,25 @@ void ChessBoard::placePiecePos(size_t file, size_t rank, ChessPiece piece)
 	// update BitBoards
 	if(takenPiece != EMPTY_CELL)
 	{
-		assert(bitBoards[takenPiece]!=nullptr);
-		bitBoards[takenPiece]->set(file, rank, false);
+		//assert(bitBoards[takenPiece]!=nullptr);
+		//bitBoards[takenPiece]->set(file, rank, false);
 	}
 	if(piece != EMPTY_CELL)
 	{
-		assert(bitBoards[piece]!=nullptr);
-		bitBoards[piece]->set(file, rank, true);
+		//assert(bitBoards[piece]!=nullptr);
+		//bitBoards[piece]->set(file, rank, true);
 	}
 	
 	// update hash
 	if(takenPiece != EMPTY_CELL)
 	{
-		assert(pieceHashes->at(ChessBoardPiece(takenPiece, pos).arrayPos())!=nullptr);
-		hash^=pieceHashes->at(ChessBoardPiece(takenPiece, pos).arrayPos());
+		assert(pieceHashes.at(toPieceHashArrayPos(takenPiece, pos))!=nullptr);
+		(*hash)^=*pieceHashes.at(toPieceHashArrayPos(takenPiece, pos));
 	}
 	if(piece != EMPTY_CELL)
 	{
-		assert(pieceHashes->count(ChessBoardPiece(piece, pos))==1);
-		hash^=pieceHashes->at(ChessBoardPiece(piece, pos));
+		assert(pieceHashes.at(toPieceHashArrayPos(piece, pos))!=nullptr);
+		(*hash)^=*pieceHashes.at(toPieceHashArrayPos(piece, pos));
 	}
 }
 ChessPiece ChessBoard::getPiece(char file, int rank) const
@@ -238,7 +246,7 @@ ChessMove::ptr ChessBoard::getMove() const
 
 ChessBoardHash ChessBoard::getHash() const
 {
-	return hash;
+	return *hash;
 }
 
 bool ChessBoard::isEmpty(char file, int rank) const

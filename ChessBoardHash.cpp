@@ -11,6 +11,7 @@
 
 bool operator<(const ChessBoardHash& l, const ChessBoardHash& r)
 {
+/*
 	for(size_t i=0; i<l.size(); ++i)
 	{
 		if(l[i] == r[i])
@@ -21,12 +22,14 @@ bool operator<(const ChessBoardHash& l, const ChessBoardHash& r)
 		{
 			return true;
 		}
-		if(l[i] > !r[i])
+		if(l[i] > r[i])
 		{
 			return false;
 		}
 	}
 	return false; // l==r
+*/
+	return l[0]==r[0] ? l[1] < r[1] : l[0] < r[0];
 }
 
 void operator^=(ChessBoardHash& l, const ChessBoardHash& r)
@@ -47,7 +50,7 @@ ChessBoardHash* generateRandomChessBoardHash()
 		std::numeric_limits<unsigned long long>::max()
 	);
 	
-	for(size_t i=0; i<result.size(); ++i)
+	for(size_t i=0; i<result->size(); ++i)
 	{
 		(*result)[i] = dist(rnd->gen);
 	}

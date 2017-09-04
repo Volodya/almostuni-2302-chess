@@ -7,6 +7,7 @@
 
 #include "Log.hpp"
 #include <string>
+#include <iostream>
 
 Log::ptr Log::self = nullptr;
 
@@ -40,4 +41,10 @@ constexpr const char* to_string(Log::LogSeverity severity)
 void Log::log(Log::LogSeverity severity, std::string text)
 {
 	logStream << to_string(severity) << ' ' << text << std::endl;
+}
+
+void Log::info(std::string text)
+{
+	getInstance()->log(Log::INFO, text);
+	std::cerr << "[INFO] " << text << std::endl;
 }

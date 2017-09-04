@@ -27,6 +27,7 @@ public:
 	};
 	static ptr getInstance();
 	void log(LogSeverity severity, std::string text);
+	static void info(std::string text);
 };
 
 #endif
