@@ -29,7 +29,7 @@ private:
 	ChessBoard::ptr from;
 	ChessBoard::wptr to;
 	
-	std::string notation;
+	//std::string notation;
 	int moveNum;
 	ChessMove(); // for initialisation in the factory
 

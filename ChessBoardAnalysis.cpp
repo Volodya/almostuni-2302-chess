@@ -37,6 +37,11 @@ constexpr double weightFromPiece(const ChessPiece cp)
 		0;
 }
 
+// static variables
+
+unsigned long long ChessBoardAnalysis::constructed=0;
+
+
 // class functions
 
 ChessBoardAnalysis::ChessBoardAnalysis(ChessBoard::ptr board_)
@@ -44,6 +49,7 @@ ChessBoardAnalysis::ChessBoardAnalysis(ChessBoard::ptr board_)
 {
 	assert(board!=nullptr);
 	this->calculatePossibleMoves();
+	++constructed;
 }
 
 ChessBoardAnalysis::~ChessBoardAnalysis()
@@ -238,7 +244,7 @@ double ChessBoardAnalysis::chessPiecesWeight() const
 		++count[*it];
 	}
 	
-	// todo: rewrite as a loop, create a 'ChessPiece.hpp'
+	// todo: rewrite as a loop
 	return
 		BOARD_PAWN_WEIGHT   * (count[PAWN_WHITE]   - count[PAWN_BLACK]) +
 		BOARD_KNIGHT_WEIGHT * (count[KNIGHT_WHITE] - count[KNIGHT_BLACK]) +

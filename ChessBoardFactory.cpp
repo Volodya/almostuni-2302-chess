@@ -15,11 +15,11 @@
 ChessBoard::ptr ChessBoardFactory::createBoard()
 {
 	ChessGameParameters::ptr param(new ChessGameParameters());
-	param->setWidth(8);
-	param->setHeight(8);
+	param->setDimentions(8, 8);
 	param->addPossiblePieces(STANDARD_GAME_PIECES);
 	
 	ChessBoard::ptr cb(new ChessBoard(param));
+	
 	// standard chess board
 	cb->placePiece('A', 2, PAWN_WHITE);
 	cb->placePiece('B', 2, PAWN_WHITE);
@@ -70,8 +70,7 @@ ChessBoard::ptr ChessBoardFactory::createBoard()
 ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
 {
 	ChessGameParameters::ptr param(new ChessGameParameters());
-	param->setWidth(8);
-	param->setHeight(8);
+	param->setDimentions(8, 8);
 	param->addPossiblePieces(STANDARD_GAME_PIECES);
 	
 	ChessBoard::ptr cb(new ChessBoard(param));
@@ -144,10 +143,12 @@ ChessBoard::ptr ChessBoardFactory::createBoard
 	curMove->previous=true;
 	curMove->from=fromBoard;
 	curMove->to=toBoard;
+	/*
 	curMove->notation=std::string("")+
 		chessPieceStrings[piece]+" "+
 		fileFrom+std::to_string(rankFrom)+" "+
 		fileTo+std::to_string(rankTo);
+		*/
 	curMove->moveNum=fromBoard->getMove()->moveNum+1;
 	toBoard->move=curMove;
 	toBoard->turn=!fromBoard->getTurn();

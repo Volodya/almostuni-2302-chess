@@ -9,13 +9,11 @@
 
 #include "Log.hpp"
 
-void ChessGameParameters::setHeight(uint8_t h)
-{
-	this->height=h;
-}
-void ChessGameParameters::setWidth(uint8_t w)
+void ChessGameParameters::setDimentions(uint8_t w, uint8_t h)
 {
 	this->width=w;
+	this->height=h;
+	this->cellCount = size_t(h)*size_t(w);
 }
 void ChessGameParameters::addPossiblePiece(ChessPiece cp)
 {
@@ -37,7 +35,7 @@ uint8_t ChessGameParameters::getWidth() const
 }
 size_t ChessGameParameters::getCellCount() const
 {
-	return size_t(height)*width;
+	return cellCount;
 }
 const std::vector<ChessPiece> ChessGameParameters::getPossiblePieces() const
 {

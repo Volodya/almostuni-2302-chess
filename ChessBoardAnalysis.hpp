@@ -30,7 +30,7 @@ class ChessBoardAnalysis
 {
 public:
 	typedef std::shared_ptr<ChessBoardAnalysis> ptr;
-	
+	static unsigned long long constructed;
 private:
 	ChessBoard::ptr board;
 	

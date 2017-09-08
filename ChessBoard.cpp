@@ -43,6 +43,7 @@ std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> copy(
 // static data members
 
 std::vector<ChessBoardHash *> ChessBoard::pieceHashes;
+ChessGameParameters::ptr ChessBoard::param = nullptr;
 
 // class functions
 
@@ -64,21 +65,21 @@ void ChessBoard::initialisePieceHashes()
 }
 
 ChessBoard::ChessBoard(ChessGameParameters::ptr param_)
-	: param(param_), board(new ChessPiece[param->getCellCount()]),
+	: board(new ChessPiece[param_->getCellCount()]),
 	  //bitBoards(generateEmptyBitBoards(param)),
 	  turn(ChessPlayerColour::WHITE), move(nullptr),
 	  hash(generateRandomChessBoardHash())
 {
+	ChessBoard::param = param_; // initialising with the first object
+
 	Log::info("about to initialise hashes");
 	initialisePieceHashes(); // technically does not belong here
 	Log::info("hashes have been initialised");
 	auto s = param->getCellCount();
 	std::fill(board, board+s, EMPTY_CELL);
-	
-	// generate hashes
 }
 ChessBoard::ChessBoard(const ChessBoard& that)
-	: param(that.param), board(new ChessPiece[param->getCellCount()]),
+	: board(new ChessPiece[param->getCellCount()]),
 	  //bitBoards(copy(that.bitBoards)),
 	  turn(that.turn), move(that.move),
 	  hash(new ChessBoardHash(*that.hash))

@@ -10,6 +10,7 @@
 #include "Log.hpp"
 
 ChessMove::ChessMove()
+	: from(nullptr)
 {}
 
 bool ChessMove::isMovePossible() const
@@ -110,7 +111,38 @@ ChessPlayerColour ChessMove::getTurn() const
 }
 std::string ChessMove::getNotation() const
 {
-	return notation;
+	std::string result ="";
+	
+	if(auto pTo = to.lock())
+	{
+		ChessPiece piece;
+		int rankFrom, rankTo;
+		char fileFrom, fileTo;
+		for(auto it=pTo->begin(); it!=pTo->end(); ++it)
+		{
+			if(*it == from->getPiece(it.getFile(), it.getRank()))
+			{
+				continue;
+			}
+			
+			if(*it==EMPTY_CELL)
+			{
+				fileFrom = it.getFile();
+				rankFrom = it.getRank();
+				piece = from->getPiece(fileFrom, rankFrom);
+			}
+			else
+			{
+				fileTo = it.getFile();
+				rankTo = it.getRank();
+			}
+		}
+		
+		result = chessPieceStrings[piece] + " " +
+			(char)fileFrom + std::to_string(rankFrom) + " " +
+			(char)fileTo + std::to_string(rankTo);
+	}
+	return result;
 }
 
 void ChessMove::moveAttempts(

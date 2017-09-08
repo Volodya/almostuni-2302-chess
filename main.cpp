@@ -15,6 +15,7 @@
 #include "ChessBoardAnalysis.hpp" // temporary
 
 #include <memory>
+#include <chrono>
 
 int main()
 {
@@ -24,9 +25,15 @@ int main()
 	
 	ChessEngine ce;
 	ce.setCurPos(cb);
+	auto start = std::chrono::high_resolution_clock::now();
 	ce.startNextMoveCalculation();
-	
 	std::cin.get();
+	auto end = std::chrono::high_resolution_clock::now();
+	long double duration = (end-start).count();
+	duration /= 1000000000;
+	
+	std::cout << ChessBoardAnalysis::constructed << '/' << duration << ' ' << ChessBoardAnalysis::constructed / duration << std::endl;
+	
 	std::cout << "Getting next move" << std::endl;
 	auto best = ce.getNextMove();
 	std::cout << "Next move has been received" << std::endl;
@@ -39,6 +46,8 @@ int main()
 			auto move = best->getMove();
 			std::cout << move->getNotation() << std::endl;
 			best=move->getFrom();
+			std::cout << move->hasPrevious() << std::endl;
+			Log::info(std::to_string((unsigned long long)(best.get())));
 		} while(best);
 	}
 	else

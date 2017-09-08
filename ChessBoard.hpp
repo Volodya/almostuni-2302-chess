@@ -33,7 +33,7 @@ public:
 	typedef std::weak_ptr<ChessBoard> wptr;
 
 private:
-	ChessGameParameters::ptr param;
+	static ChessGameParameters::ptr param;
 	ChessPiece* board; // [rank*w+file]
 	//std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> bitBoards;
 	

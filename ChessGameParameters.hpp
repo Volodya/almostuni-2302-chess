@@ -23,10 +23,10 @@ public:
 private:
 	uint8_t height;
 	uint8_t width;
+	size_t cellCount;
 	std::vector<ChessPiece> possiblePieces;
 public:
-	void setHeight(uint8_t h);
-	void setWidth(uint8_t w);
+	void setDimentions(uint8_t w, uint8_t h);
 	void addPossiblePiece(ChessPiece cp);
 	void addPossiblePieces(std::vector<ChessPiece> cp);
 	
