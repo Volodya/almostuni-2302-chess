@@ -6,6 +6,7 @@
  */
 
 #include <iostream>
+#include <cassert>
 #include "ChessBoard.hpp"
 #include "ChessBoardFactory.hpp"
 #include "ChessEngine.hpp"
@@ -22,11 +23,14 @@ int main()
 	ChessBoardFactory factory;
 	auto cb = factory.createBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 	//auto cb = factory.createBoard("4k3/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
-	
-	ChessEngine ce;
-	ce.setCurPos(cb);
+	assert(cb->getMove()->hasPrevious()==false);
+	assert(cb->getMove()->getFrom()==nullptr);
+	Log::info( std::to_string( (unsigned long long)(cb.get()) ));
+		
+	ChessEngine engine;
+	engine.setCurPos(cb);
 	auto start = std::chrono::high_resolution_clock::now();
-	ce.startNextMoveCalculation();
+	engine.startNextMoveCalculation();
 	std::cin.get();
 	auto end = std::chrono::high_resolution_clock::now();
 	long double duration = (end-start).count();
@@ -35,20 +39,21 @@ int main()
 	std::cout << ChessBoardAnalysis::constructed << '/' << duration << ' ' << ChessBoardAnalysis::constructed / duration << std::endl;
 	
 	std::cout << "Getting next move" << std::endl;
-	auto best = ce.getNextMove();
+	auto best = engine.getNextMove();
 	std::cout << "Next move has been received" << std::endl;
 	if(best)
 	{
 		best->debugPrint();
-		do
+		for(;;)
 		{
-			//best->debugPrint();
 			auto move = best->getMove();
+			if(!move->hasPrevious())
+			{
+				break;
+			}
 			std::cout << move->getNotation() << std::endl;
 			best=move->getFrom();
-			std::cout << move->hasPrevious() << std::endl;
-			Log::info(std::to_string((unsigned long long)(best.get())));
-		} while(best);
+		};
 	}
 	else
 	{

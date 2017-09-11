@@ -46,12 +46,13 @@ private:
 	void initialisePieceHashes();
 	
 	ChessBoard() = delete;
+	ChessBoard(const ChessBoard& that) = delete;
 	ChessBoard(ChessGameParameters::ptr param_);
+	ChessBoard(const ChessBoard& that, std::shared_ptr<ChessMove> move_);
 	
 	size_t getPos(size_t file, size_t rank) const;
 	size_t toPieceHashArrayPos(const ChessPiece &piece_, const size_t &position);
 public:
-	ChessBoard(const ChessBoard& that);
 	~ChessBoard();
 	
 	uint8_t getHeight() const;

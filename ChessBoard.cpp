@@ -78,10 +78,10 @@ ChessBoard::ChessBoard(ChessGameParameters::ptr param_)
 	auto s = param->getCellCount();
 	std::fill(board, board+s, EMPTY_CELL);
 }
-ChessBoard::ChessBoard(const ChessBoard& that)
+ChessBoard::ChessBoard(const ChessBoard& that, ChessMove::ptr move_)
 	: board(new ChessPiece[param->getCellCount()]),
 	  //bitBoards(copy(that.bitBoards)),
-	  turn(that.turn), move(that.move),
+	  turn(that.turn), move(move_),
 	  hash(new ChessBoardHash(*that.hash))
 {
 	auto s = param->getCellCount();

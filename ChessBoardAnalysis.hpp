@@ -40,6 +40,7 @@ private:
 	std::vector<ChessBoard::ptr> possibleMoves;
 	
 	bool check;
+	bool calculated;
 public:
 	ChessBoardAnalysis(ChessBoard::ptr board_);
 	~ChessBoardAnalysis();
@@ -54,7 +55,7 @@ public:
 	double chessCentreControlWeight() const;
 	
 	void calculatePossibleMoves();
-	std::vector<ChessBoard::ptr> getPossibleMoves() const;
+	std::vector<ChessBoard::ptr> getPossibleMoves() const; // call to this function is underfined without calculatePossibleMoves()
 	
 	ChessBoard::ptr getBoard() const;
 	ChessBoardHash getBoardHash() const;

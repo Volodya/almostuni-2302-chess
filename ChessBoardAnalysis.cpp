@@ -48,7 +48,6 @@ ChessBoardAnalysis::ChessBoardAnalysis(ChessBoard::ptr board_)
 	: board(board_)
 {
 	assert(board!=nullptr);
-	this->calculatePossibleMoves();
 	++constructed;
 }
 

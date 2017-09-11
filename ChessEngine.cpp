@@ -85,6 +85,7 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 	{
 		return analysis;
 	}
+	analysis->calculatePossibleMoves();
 	if(analysis->isCheckMate() /* || node.isDraw() */)
 	{
 		readyResults.emplace(curHash, DepthPosition(depth, analysis));

@@ -10,7 +10,7 @@
 #include "Log.hpp"
 
 ChessMove::ChessMove()
-	: from(nullptr)
+	: previous(false), from(nullptr)
 {}
 
 bool ChessMove::isMovePossible() const

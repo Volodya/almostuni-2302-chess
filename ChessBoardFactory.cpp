@@ -113,6 +113,7 @@ ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
 	cm->to=cb;
 	cm->moveNum=0;
 	cm->previous=false;
+	cm->from=nullptr;
 	cb->move=cm;
 	
 	return cb;
@@ -121,7 +122,12 @@ ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
 ChessBoard::ptr ChessBoardFactory::createBoard
   (ChessBoard::ptr fromBoard, char fileFrom, int rankFrom, char fileTo, int rankTo)
 {
-	ChessBoard::ptr toBoard(new ChessBoard(*fromBoard));
+	ChessMove::ptr curMove(new ChessMove);
+	
+	curMove->previous=true;
+	curMove->from=fromBoard;
+
+	ChessBoard::ptr toBoard(new ChessBoard(*fromBoard, curMove));
 	
 	// moving all pieces from the old board to new
 	/*
@@ -136,12 +142,6 @@ ChessBoard::ptr ChessBoardFactory::createBoard
 	toBoard->placePiece(fileTo, rankTo, piece);
 	toBoard->placePiece(fileFrom, rankFrom, EMPTY_CELL);
 	
-	
-
-	ChessMove::ptr curMove(new ChessMove);
-	
-	curMove->previous=true;
-	curMove->from=fromBoard;
 	curMove->to=toBoard;
 	/*
 	curMove->notation=std::string("")+
