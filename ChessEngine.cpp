@@ -169,9 +169,10 @@ void ChessEngineWorker::startNextMoveCalculationInternal(ChessBoard::ptr origina
 
 			positionPreferences.emplace_front(best->chessPositionWeight(), best->getBoard());
 			std::cout << "Depth " << depth << " has been calculated" << std::endl;
-			std::cout << " current best move is" << std::endl;
-			std::cout << " size of positionPreferences: " << positionPreferences.size() << std::endl;
-			positionPreferences.begin()->second->debugPrint();
+			std::cout << " the number of checked boards is " << ChessBoardAnalysis::constructed << std::endl;
+			//std::cout << " current best move is" << std::endl;
+			//std::cout << " size of positionPreferences: " << positionPreferences.size() << std::endl;
+			//positionPreferences.begin()->second->debugPrint();
 			++depth;
 		}
 		catch(std::bad_alloc& e)

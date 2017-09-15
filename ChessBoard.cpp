@@ -20,7 +20,7 @@ std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> generateEmptyBitB
 {
 	std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> result;
 	auto possiblePieces = param->getPossiblePieces();
-	for(auto it=possiblePieces.begin(); it!=possiblePieces.end(); ++it)
+	for(auto it=possiblePieces->begin(); it!=possiblePieces->end(); ++it)
 	{
 		result[*it] = std::unique_ptr<BitBoard>(new BitBoard(param));
 	}
@@ -43,19 +43,18 @@ std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> copy(
 // static data members
 
 std::vector<ChessBoardHash *> ChessBoard::pieceHashes;
-ChessGameParameters::ptr ChessBoard::param = nullptr;
+std::shared_ptr<std::vector<ChessPiece>> ChessBoard::possiblePieces = nullptr;
 
 // class functions
 
 void ChessBoard::initialisePieceHashes()
 {
-	pieceHashes.resize(KNOWN_CHESS_PIECE_COUNT * param->getCellCount());
+	pieceHashes.resize(KNOWN_CHESS_PIECE_COUNT * cellCount);
 	pieceHashes[EMPTY_CELL] = nullptr;
 	
-	auto possiblePieces = param->getPossiblePieces();
-	for(auto it=possiblePieces.begin(); it!=possiblePieces.end(); ++it)
+	for(auto it=possiblePieces->begin(); it!=possiblePieces->end(); ++it)
 	{
-		for(size_t i=0, n=param->getCellCount(); i<n; ++i)
+		for(size_t i=0; i<cellCount; ++i)
 		{
 			auto curHash = generateRandomChessBoardHash();
 			pieceHashes[toPieceHashArrayPos(*it, i)] = curHash;
@@ -64,28 +63,29 @@ void ChessBoard::initialisePieceHashes()
 	pieceHashes.shrink_to_fit();
 }
 
-ChessBoard::ChessBoard(ChessGameParameters::ptr param_)
-	: board(new ChessPiece[param_->getCellCount()]),
+ChessBoard::ChessBoard(ChessGameParameters::ptr param)
+	: cellCount(param->getCellCount()),
+	  width(param->getWidth()), height(param->getHeight()),
+	  board(new ChessPiece[cellCount]),
 	  //bitBoards(generateEmptyBitBoards(param)),
 	  turn(ChessPlayerColour::WHITE), move(nullptr),
 	  hash(generateRandomChessBoardHash())
 {
-	ChessBoard::param = param_; // initialising with the first object
-
-	Log::info("about to initialise hashes");
+	possiblePieces = param->getPossiblePieces();
+	
 	initialisePieceHashes(); // technically does not belong here
-	Log::info("hashes have been initialised");
-	auto s = param->getCellCount();
-	std::fill(board, board+s, EMPTY_CELL);
+
+	std::fill(board, board+cellCount, EMPTY_CELL);
 }
 ChessBoard::ChessBoard(const ChessBoard& that, ChessMove::ptr move_)
-	: board(new ChessPiece[param->getCellCount()]),
+	: cellCount(that.cellCount),
+	  width(that.width), height(that.height),
+	  board(new ChessPiece[cellCount]),
 	  //bitBoards(copy(that.bitBoards)),
 	  turn(that.turn), move(move_),
 	  hash(new ChessBoardHash(*that.hash))
 {
-	auto s = param->getCellCount();
-	std::copy(that.board, that.board+s, this->board);
+	std::copy(that.board, that.board+cellCount, this->board);
 }
 
 ChessBoard::~ChessBoard()
@@ -95,20 +95,24 @@ ChessBoard::~ChessBoard()
 
 size_t ChessBoard::getPos(size_t file, size_t rank) const
 {
-	return rank*param->getWidth()+file;
+	return rank*width+file;
 }
 size_t ChessBoard::toPieceHashArrayPos(const ChessPiece &piece, const size_t &position)
 {
-	return param->getCellCount() * ((size_t)piece - (size_t)1) + position;
+	return cellCount * ((size_t)piece - (size_t)1) + position;
 }
 
-uint8_t ChessBoard::getHeight() const
+size_t ChessBoard::getCellCount() const
 {
-	return param->getHeight();
+	return cellCount;
 }
-uint8_t ChessBoard::getWidth() const
+size_t ChessBoard::getHeight() const
 {
-	return param->getWidth();
+	return height;
+}
+size_t ChessBoard::getWidth() const
+{
+	return width;
 }
 
 
@@ -170,17 +174,17 @@ void ChessBoard::debugPrint() const
 		std::cout << "Black's turn" << std::endl;
 	}
 	std::cout << ' ';
-	for(uint8_t i=0; i<param->getWidth(); ++i)
+	for(size_t i=0; i<width; ++i)
 	{
 		std::cout << ' ' << (char)('A'+i);
 	}
 	std::cout << std::endl;
 	{
 		ChessPiece c;
-		for(uint8_t rank=param->getHeight(); rank>0; --rank)
+		for(size_t rank=height; rank>0; --rank)
 		{
 			std::cout << (int)rank;
-			for(uint8_t file=0; file<param->getWidth(); ++file)
+			for(size_t file=0; file<width; ++file)
 			{
 				c = board[getPos(file, rank-1)];
 				std::cout << ' ' << chessPieceStrings[c];

@@ -32,8 +32,10 @@ public:
 	typedef std::shared_ptr<ChessBoard> ptr;
 	typedef std::weak_ptr<ChessBoard> wptr;
 
+	static std::shared_ptr<std::vector<ChessPiece>> possiblePieces;
 private:
-	static ChessGameParameters::ptr param;
+	size_t cellCount;
+	size_t width, height;
 	ChessPiece* board; // [rank*w+file]
 	//std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> bitBoards;
 	
@@ -50,13 +52,13 @@ private:
 	ChessBoard(ChessGameParameters::ptr param_);
 	ChessBoard(const ChessBoard& that, std::shared_ptr<ChessMove> move_);
 	
-	size_t getPos(size_t file, size_t rank) const;
 	size_t toPieceHashArrayPos(const ChessPiece &piece_, const size_t &position);
 public:
 	~ChessBoard();
 	
-	uint8_t getHeight() const;
-	uint8_t getWidth() const;
+	size_t getCellCount() const;
+	size_t getHeight() const;
+	size_t getWidth() const;
 
 	bool isEmpty(char file, int rank) const;
 	bool isEmptyPos(size_t file, size_t rank) const;
@@ -68,6 +70,8 @@ public:
 	std::shared_ptr<ChessMove> getMove() const; // ChessMove::ptr
 	ChessBoardHash getHash() const;
 	
+	size_t getPos(size_t file, size_t rank) const;
+
 	void debugPrint() const;
 	
 	std::string toFEN() const;

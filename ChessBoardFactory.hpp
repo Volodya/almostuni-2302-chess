@@ -19,7 +19,10 @@ class ChessBoardFactory
 public:
 	ChessBoard::ptr createBoard();
 	ChessBoard::ptr createBoard(std::string fen);
-	ChessBoard::ptr createBoard(ChessBoard::ptr fromBoard, char fileFrom, int rankFrom, char fileTo, int rankTo);
+	ChessBoard::ptr createBoard(
+		ChessBoard::ptr fromBoard,
+		size_t fileFrom, size_t rankFrom,
+		size_t fileTo, size_t rankTo);
 };
 
 #endif

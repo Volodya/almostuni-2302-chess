@@ -16,16 +16,18 @@
 
 #include "Log.hpp"
 
+typedef ChessBoardAnalysis::weight_type weight_type;
+
 // helper
 
-constexpr double domination(int8_t white, int8_t black)
+constexpr weight_type domination(int8_t white, int8_t black)
 {
 	return
 		white==black ? 0 :
 		white>black ? 1 :
 		-1;
 }
-constexpr double weightFromPiece(const ChessPiece cp)
+constexpr weight_type weightFromPiece(const ChessPiece cp)
 {
 	return 
 		cp==PAWN_WHITE   || cp==PAWN_BLACK   ? BOARD_PAWN_WEIGHT :
@@ -48,11 +50,16 @@ ChessBoardAnalysis::ChessBoardAnalysis(ChessBoard::ptr board_)
 	: board(board_)
 {
 	assert(board!=nullptr);
+	underAttackByBlack = new int8_t[size_t(board->getWidth())*board->getHeight()];
+	underAttackByWhite = new int8_t[size_t(board->getWidth())*board->getHeight()];
 	++constructed;
 }
 
 ChessBoardAnalysis::~ChessBoardAnalysis()
-{}
+{
+	delete[] underAttackByBlack;
+	delete[] underAttackByWhite;
+}
 
 void ChessBoardAnalysis::calculatePossibleMoves()
 {
@@ -60,7 +67,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 	typedef ChessMove::ChessMoveRecordingFunction ChessMoveRecordingFunction;
 		// empty function
 	const static ChessMoveRecordingFunction emptyFunction =
-			[](char file, int rank, char newFile, int newRank) {};
+			[](size_t file, size_t rank, size_t newFile, size_t newRank) {};
 
 	
 		// take opponent's piece
@@ -71,7 +78,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		// white turn
 		{
 			//white
-			[this, &factory](char file, int rank, char newFile, int newRank) {
+			[this, &factory](size_t file, size_t rank, size_t newFile, size_t newRank) {
 				assert(this->board->getTurn()==ChessPlayerColour::WHITE);
 
 				auto nextBoard = factory.createBoard(this->board, file, rank, newFile, newRank);
@@ -86,10 +93,10 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				}
 			},
 			//black
-			[this](char file, int rank, char newFile, int newRank) {
+			[this](size_t file, size_t rank, size_t newFile, size_t newRank) {
 				//assert(maybeMove->getTurn()==ChessPlayerColour::BLACK);
 				
-				if(this->board->getPiece(newFile, newRank)==KING_BLACK)
+				if(this->board->getPiecePos(newFile, newRank)==KING_BLACK)
 				{
 					check=true;
 				}
@@ -98,16 +105,16 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		// black turn
 		{
 			// white
-			[this](char file, int rank, char newFile, int newRank) {
+			[this](size_t file, size_t rank, size_t newFile, size_t newRank) {
 				assert(this->board->getTurn()==ChessPlayerColour::BLACK);
 								
-				if(this->board->getPiece(newFile, newRank)==KING_WHITE)
+				if(this->board->getPiecePos(newFile, newRank)==KING_WHITE)
 				{
 					check=true;
 				}
 			},
 			// black
-			[this, &factory](char file, int rank, char newFile, int newRank) {
+			[this, &factory](size_t file, size_t rank, size_t newFile, size_t newRank) {
 				assert(this->board->getTurn()==ChessPlayerColour::BLACK);
 
 				auto nextBoard = factory.createBoard(this->board, file, rank, newFile, newRank);
@@ -150,31 +157,31 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		// white's turn
 		{
 			// white
-			[this](char file, int rank, char newFile, int newRank) {
+			[this](size_t file, size_t rank, size_t newFile, size_t newRank) {
 				//assert(maybeMove->getTurn()==ChessPlayerColour::WHITE);
 				
-				++underAttackByWhite[newRank-1][newFile-'A'];
+				++underAttackByWhite[this->board->getPos(newFile, newRank)];
 			},
 			// black
-			[this](char file, int rank, char newFile, int newRank) {
+			[this](size_t file, size_t rank, size_t newFile, size_t newRank) {
 				//assert(maybeMove->getTurn()==ChessPlayerColour::BLACK);
 
-				++underAttackByWhite[newRank-1][newFile-'A'];
+				++underAttackByWhite[this->board->getPos(newFile, newRank)];
 			}
 		},
 		// black's turn
 		{
 			// white
-			[this](char file, int rank, char newFile, int newRank) {
+			[this](size_t file, size_t rank, size_t newFile, size_t newRank) {
 				//assert(maybeMove->getTurn()==ChessPlayerColour::WHITE);
 				
-				++underAttackByBlack[newRank-1][newFile-'A'];
+				++underAttackByBlack[this->board->getPos(newFile, newRank)];
 			},
 			// black
-			[this](char file, int rank, char newFile, int newRank) {
+			[this](size_t file, size_t rank, size_t newFile, size_t newRank) {
 				//assert(maybeMove->getTurn()==ChessPlayerColour::BLACK);
 
-				++underAttackByBlack[newRank-1][newFile-'A'];
+				++underAttackByBlack[this->board->getPos(newFile, newRank)];
 			}
 		}
 	};
@@ -182,10 +189,10 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 	for(auto it = board->begin(); it != board->end(); ++it)
 	{
 		if(*it == EMPTY_CELL) continue;
-				
+		
 		// todo make size_t
-		int rank = it.getRank();
-		char file = it.getFile();
+		size_t rank = it.getRankPos();
+		size_t file = it.getFilePos();
 
 		auto pieceParam = moveParameters.at(*it);
 		auto moveArrayPos = toArrayPosition(board->getTurn());
@@ -209,18 +216,18 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 	}
 }
 
-double ChessBoardAnalysis::chessPositionWeight() const
+weight_type ChessBoardAnalysis::chessPositionWeight() const
 {
 //	Log::ptr log = Log::getInstance();
 //	log->log(Log::INFO, board->toFEN());
 	
-	double wIsCheckMate = (isCheckMate() ? getWeightMultiplier(board->getTurn()) * CHECKMATE_WEIGHT : 0);
+	weight_type wIsCheckMate = (isCheckMate() ? getWeightMultiplier(board->getTurn()) * CHECKMATE_WEIGHT : 0);
 //	log->log(Log::INFO, "wIsCheckMate=" + std::to_string(wIsCheckMate));
-	double wChessPieces = this->chessPiecesWeight();	// count pieces
+	weight_type wChessPieces = this->chessPiecesWeight();	// count pieces
 //	log->log(Log::INFO, "wChessPieces=" + std::to_string(wChessPieces));
-	double wChessPieceAttacked = this->chessPieceAttackedWeight(); // count attacked pieces
+	weight_type wChessPieceAttacked = this->chessPieceAttackedWeight(); // count attacked pieces
 //	log->log(Log::INFO, "wChessPieceAttacked=" + std::to_string(wChessPieceAttacked));
-	double wChessCentreControl = this->chessCentreControlWeight(); // control of the centre of the board
+	weight_type wChessCentreControl = this->chessCentreControlWeight(); // control of the centre of the board
 //	log->log(Log::INFO, "wChessCentreControl=" + std::to_string(wChessCentreControl));
 	
 	
@@ -235,7 +242,7 @@ double ChessBoardAnalysis::chessPositionWeight() const
 		;
 }
 
-double ChessBoardAnalysis::chessPiecesWeight() const
+weight_type ChessBoardAnalysis::chessPiecesWeight() const
 {
 	int count[KNOWN_CHESS_PIECE_COUNT] = { 0 };
 	for(auto it=board->begin(); it!=board->end(); ++it)
@@ -252,9 +259,9 @@ double ChessBoardAnalysis::chessPiecesWeight() const
 		BOARD_QUEEN_WEIGHT  * (count[QUEEN_WHITE]  - count[QUEEN_BLACK]);
 
 }
-double ChessBoardAnalysis::chessPieceAttackedWeight() const
+weight_type ChessBoardAnalysis::chessPieceAttackedWeight() const
 {
-	double result = 0;
+	weight_type result = 0;
 		
 	for(auto it=board->begin(); it!=board->end(); ++it)
 	{
@@ -262,8 +269,8 @@ double ChessBoardAnalysis::chessPieceAttackedWeight() const
 		
 		auto multiplierColour = getWeightMultiplier(getColour(*it));
 		auto dominator = domination( // who has more attacks -1 (black); 0 (neutral); 1 (white)
-			underAttackByWhite[it.getRankPos()][it.getFilePos()],
-			underAttackByBlack[it.getRankPos()][it.getFilePos()]
+			underAttackByWhite[it.getPos()],
+			underAttackByBlack[it.getPos()]
 			);
 		auto attackOrDefence = PIECE_ATTACK_MULTIPLIER;
 		if(multiplierColour==dominator)
@@ -277,10 +284,10 @@ double ChessBoardAnalysis::chessPieceAttackedWeight() const
 	return result;
 }
 
-double ChessBoardAnalysis::chessCentreControlWeight() const
+weight_type ChessBoardAnalysis::chessCentreControlWeight() const
 {
-	const static double CELL_WEIGHT_MULTIPLIER = 3.0;
-	const static double CELL_WEIGHT[8][8]
+	const static weight_type CELL_WEIGHT_MULTIPLIER = 3000;
+	const static weight_type CELL_WEIGHT[8][8]
 	{
 		{ 3, 3, 3, 3, 3, 3, 3, 3 },
 		{ 3, 3, 3, 3, 3, 3, 3, 3 },
@@ -292,13 +299,13 @@ double ChessBoardAnalysis::chessCentreControlWeight() const
 		{ 3, 3, 3, 3, 3, 3, 3, 3 }
 	};
 	
-	double result = 0;
+	weight_type result = 0;
 	for(auto it=board->begin(); it!=board->end(); ++it)
 	{
 		result +=
 			domination(
-				underAttackByWhite[it.getRankPos()][it.getFilePos()],
-				underAttackByBlack[it.getRankPos()][it.getFilePos()]
+				underAttackByWhite[it.getPos()],
+				underAttackByBlack[it.getPos()]
 				)
 			* CELL_WEIGHT[it.getRankPos()][it.getFilePos()]
 			* CELL_WEIGHT_MULTIPLIER;

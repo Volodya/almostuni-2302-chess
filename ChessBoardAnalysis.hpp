@@ -13,29 +13,18 @@
 #include "ChessBoard.hpp"
 #include "ChessMove.hpp"
 
-constexpr double
-	CHECKMATE_WEIGHT=-100000000, // mate is always more important
-	BOARD_PAWN_WEIGHT=100,
-	BOARD_KNIGHT_WEIGHT=300,
-	BOARD_BISHOP_WEIGHT=300,
-	BOARD_ROOK_WEIGHT=500,
-	BOARD_QUEEN_WEIGHT=700,
-	BOARD_KING_WEIGHT=400,
-	
-	PIECE_ATTACK_MULTIPLIER=0.20,
-	PIECE_DEFENCE_MUTIPLIER=0.05
-	;
 class ChessBoardAnalysis;
 class ChessBoardAnalysis
 {
 public:
 	typedef std::shared_ptr<ChessBoardAnalysis> ptr;
+	typedef signed long long weight_type;
 	static unsigned long long constructed;
 private:
 	ChessBoard::ptr board;
 	
-	int8_t underAttackByWhite[8][8]; // [rank][file]
-	int8_t underAttackByBlack[8][8]; // [rank][file]
+	int8_t *underAttackByWhite; // [rank*w+file]
+	int8_t *underAttackByBlack; // [rank*w+file]
 
 	std::vector<ChessBoard::ptr> possibleMoves;
 	
@@ -48,11 +37,11 @@ public:
 	bool isCheckMate() const;  // call to this function is underfined without calculatePossibleMoves()
 	bool isCheck() const; // call to this function is underfined without calculatePossibleMoves()
 
-	double chessPiecesWeight() const; // simple piece count (can be shown to user)
-	double chessPositionWeight() const; // analise the position, but not the tree
+	weight_type chessPiecesWeight() const; // simple piece count (can be shown to user)
+	weight_type chessPositionWeight() const; // analise the position, but not the tree
 	
-	double chessPieceAttackedWeight() const;
-	double chessCentreControlWeight() const;
+	weight_type chessPieceAttackedWeight() const;
+	weight_type chessCentreControlWeight() const;
 	
 	void calculatePossibleMoves();
 	std::vector<ChessBoard::ptr> getPossibleMoves() const; // call to this function is underfined without calculatePossibleMoves()
@@ -60,5 +49,18 @@ public:
 	ChessBoard::ptr getBoard() const;
 	ChessBoardHash getBoardHash() const;
 };
+
+constexpr ChessBoardAnalysis::weight_type
+	CHECKMATE_WEIGHT=-100000000000, // mate is always more important
+	BOARD_PAWN_WEIGHT=100000,
+	BOARD_KNIGHT_WEIGHT=300000,
+	BOARD_BISHOP_WEIGHT=300000,
+	BOARD_ROOK_WEIGHT=500000,
+	BOARD_QUEEN_WEIGHT=700000,
+	BOARD_KING_WEIGHT=400000,
+	
+	PIECE_ATTACK_MULTIPLIER=200,
+	PIECE_DEFENCE_MUTIPLIER=50
+	;
 
 #endif

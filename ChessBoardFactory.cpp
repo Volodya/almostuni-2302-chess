@@ -120,7 +120,7 @@ ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
 }
 
 ChessBoard::ptr ChessBoardFactory::createBoard
-  (ChessBoard::ptr fromBoard, char fileFrom, int rankFrom, char fileTo, int rankTo)
+  (ChessBoard::ptr fromBoard, size_t fileFrom, size_t rankFrom, size_t fileTo, size_t rankTo)
 {
 	ChessMove::ptr curMove(new ChessMove);
 	
@@ -138,9 +138,9 @@ ChessBoard::ptr ChessBoardFactory::createBoard
 	*/
 	// moving one of the pieces to the new position
 	assert(fileFrom!=fileTo || rankFrom!=rankTo);
-	auto piece = fromBoard->getPiece(fileFrom, rankFrom);
-	toBoard->placePiece(fileTo, rankTo, piece);
-	toBoard->placePiece(fileFrom, rankFrom, EMPTY_CELL);
+	auto piece = fromBoard->getPiecePos(fileFrom, rankFrom);
+	toBoard->placePiecePos(fileTo, rankTo, piece);
+	toBoard->placePiecePos(fileFrom, rankFrom, EMPTY_CELL);
 	
 	curMove->to=toBoard;
 	/*

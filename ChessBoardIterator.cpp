@@ -28,10 +28,10 @@ ChessBoardConstIterator ChessBoard::end() const
 }
 
 ChessBoardIterator::ChessBoardIterator(ChessBoard* cb_, size_t pos_)
-	: pos(pos_), cb(cb_)
+	: pos(pos_), cb(cb_), boardWidth(cb_->getWidth())
 {}
 ChessBoardConstIterator::ChessBoardConstIterator(const ChessBoard* cb_, size_t pos_)
-	: pos(pos_), cb(cb_)
+	: pos(pos_), cb(cb_), boardWidth(cb_->getWidth())
 {}
 
 bool ChessBoardIterator::operator!=(const ChessBoardIterator& that)
@@ -72,6 +72,15 @@ ChessBoardConstIterator& ChessBoardConstIterator::operator++()
 	return *this;
 }
 
+size_t ChessBoardIterator::getPos() const
+{
+	return pos;
+}
+size_t ChessBoardConstIterator::getPos() const
+{
+	return pos;
+}
+
 int ChessBoardIterator::getRank() const
 {
 	return getRankPos()+1;
@@ -83,11 +92,11 @@ int ChessBoardConstIterator::getRank() const
 
 size_t ChessBoardIterator::getRankPos() const
 {
-	return pos / cb->getWidth();
+	return pos / boardWidth;
 }
 size_t ChessBoardConstIterator::getRankPos() const
 {
-	return pos / cb->getWidth();
+	return pos / boardWidth;
 }
 
 char ChessBoardIterator::getFile() const
@@ -101,9 +110,9 @@ char ChessBoardConstIterator::getFile() const
 
 size_t ChessBoardIterator::getFilePos() const
 {
-	return pos % cb->getWidth();
+	return pos % boardWidth;
 }
 size_t ChessBoardConstIterator::getFilePos() const
 {
-	return pos % cb->getWidth();
+	return pos % boardWidth;
 }

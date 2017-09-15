@@ -45,8 +45,8 @@ bool ChessMove::isMovePossible() const
 				}
 			}
 		}
-		auto possiblePieces = pTo->param->getPossiblePieces();
-		for(auto attackingPiece = possiblePieces.begin(); attackingPiece != possiblePieces.end(); ++attackingPiece)
+		auto possiblePieces = ChessBoard::possiblePieces;
+		for(auto attackingPiece = possiblePieces->begin(); attackingPiece != possiblePieces->end(); ++attackingPiece)
 		{
 			if(*attackingPiece == EMPTY_CELL || getColour(*attackingPiece) == pTo->getTurn())
 			{
@@ -148,31 +148,31 @@ std::string ChessMove::getNotation() const
 void ChessMove::moveAttempts(
 	const ChessMoveRecordingFunction &recFunTake,
 	const ChessMoveRecordingFunction &recFunDefend,
-	const ChessBoard &cb, char file, int rank,
+	const ChessBoard &cb, size_t file, size_t rank,
 	const MoveTemplate& mt,
 	bool canTake, bool canMoveToEmpty)
 {
 	Log::ptr log = Log::getInstance();
 
-	char newFile;
-	int newRank;
+	size_t newFile;
+	size_t newRank;
 	for(auto direction = mt.begin(); direction != mt.end(); ++direction)
 	{
 		for(auto attempt = direction->begin(); attempt != direction->end(); ++attempt)
 		{
 			newFile = file + attempt->first;
-			newRank = rank+attempt->second;
-			if(newFile<'A' || newFile>'H' || newRank<1 || newRank >8)
+			newRank = rank + attempt->second;
+			if(newFile >= 8 || newRank >= 8) // TODO: make size of the board nonconst
 			{
 				break;
 			}
 			
-			if(!cb.isEmpty(newFile, newRank))
+			if(!cb.isEmptyPos(newFile, newRank))
 			{
 				if(canTake)
 				{
 					
-					if(getColour(cb.getPiece(newFile, newRank)) != cb.getTurn())
+					if(getColour(cb.getPiecePos(newFile, newRank)) != cb.getTurn())
 					{
 						recFunTake(file, rank, newFile, newRank);
 					}

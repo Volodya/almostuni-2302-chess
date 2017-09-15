@@ -17,12 +17,20 @@ void ChessGameParameters::setDimentions(uint8_t w, uint8_t h)
 }
 void ChessGameParameters::addPossiblePiece(ChessPiece cp)
 {
-	possiblePieces.push_back(cp);
+	if(!possiblePieces)
+	{
+		possiblePieces = std::make_shared<std::vector<ChessPiece>>();
+	}
+	possiblePieces->push_back(cp);
 }
 void ChessGameParameters::addPossiblePieces(std::vector<ChessPiece> cp)
 {
-	possiblePieces.reserve(possiblePieces.size()+cp.size());
-	std::copy(cp.begin(), cp.end(), std::back_inserter(possiblePieces));
+	if(!possiblePieces)
+	{
+		possiblePieces = std::make_shared<std::vector<ChessPiece>>();
+	}
+	possiblePieces->reserve(possiblePieces->size()+cp.size());
+	std::copy(cp.begin(), cp.end(), std::back_inserter(*possiblePieces));
 }
 
 uint8_t ChessGameParameters::getHeight() const
@@ -37,7 +45,7 @@ size_t ChessGameParameters::getCellCount() const
 {
 	return cellCount;
 }
-const std::vector<ChessPiece> ChessGameParameters::getPossiblePieces() const
+const std::shared_ptr<std::vector<ChessPiece>> ChessGameParameters::getPossiblePieces() const
 {
 	return possiblePieces;
 }
