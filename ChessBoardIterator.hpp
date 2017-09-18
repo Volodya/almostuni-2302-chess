@@ -20,6 +20,7 @@ class ChessBoardIterator : public std::iterator<std::input_iterator_tag, ChessPi
 {
 	size_t pos;
 	ChessBoard *cb;
+	ChessPiece *curPiece;
 	size_t boardWidth; // will come from uint8_t, but be stored in the same type as pos for speedup
 public:
 	ChessBoardIterator(const ChessBoardIterator& that) = default;
@@ -35,7 +36,7 @@ public:
 	char getFile() const;
 	size_t getFilePos() const;
 private:
-	ChessBoardIterator(ChessBoard* cb_, size_t pos_);
+	ChessBoardIterator(ChessBoard* cb_, size_t board_width, size_t pos_);
 	
 	friend ChessBoard;
 };
@@ -43,6 +44,7 @@ class ChessBoardConstIterator : public std::iterator<std::input_iterator_tag, Ch
 {
 	size_t pos;
 	const ChessBoard * cb;
+	const ChessPiece * curPiece;
 	size_t boardWidth; // will come from uint8_t, but be stored in the same type as pos for speedup
 public:
 	ChessBoardConstIterator(const ChessBoardConstIterator& that) = default;
@@ -58,7 +60,7 @@ public:
 	char getFile() const;
 	size_t getFilePos() const;
 private:
-	ChessBoardConstIterator(const ChessBoard* cb_, size_t pos_);
+	ChessBoardConstIterator(const ChessBoard* cb_, size_t board_width, size_t pos_);
 	
 	friend ChessBoard;
 };

@@ -11,27 +11,27 @@
 
 ChessBoardIterator ChessBoard::begin()
 {
-	return ChessBoardIterator(this, 0);
+	return ChessBoardIterator(this, width, 0);
 }
 ChessBoardConstIterator ChessBoard::begin() const
 {
-	return ChessBoardConstIterator(this, 0);
+	return ChessBoardConstIterator(this, width, 0);
 }
 
 ChessBoardIterator ChessBoard::end()
 {
-	return ChessBoardIterator(this, size_t(this->getHeight())*this->getWidth());
+	return ChessBoardIterator(this, width, cellCount);
 }
 ChessBoardConstIterator ChessBoard::end() const
 {
-	return ChessBoardConstIterator(this, size_t(this->getWidth())*this->getHeight());
+	return ChessBoardConstIterator(this, width, cellCount);
 }
 
-ChessBoardIterator::ChessBoardIterator(ChessBoard* cb_, size_t pos_)
-	: pos(pos_), cb(cb_), boardWidth(cb_->getWidth())
+ChessBoardIterator::ChessBoardIterator(ChessBoard* cb_, size_t boardWidth_, size_t pos_)
+	: pos(pos_), cb(cb_), curPiece(cb_->board + pos_), boardWidth(boardWidth_)
 {}
-ChessBoardConstIterator::ChessBoardConstIterator(const ChessBoard* cb_, size_t pos_)
-	: pos(pos_), cb(cb_), boardWidth(cb_->getWidth())
+ChessBoardConstIterator::ChessBoardConstIterator(const ChessBoard* cb_, size_t boardWidth_, size_t pos_)
+	: pos(pos_), cb(cb_), curPiece(cb_->board + pos_), boardWidth(boardWidth_)
 {}
 
 bool ChessBoardIterator::operator!=(const ChessBoardIterator& that)
@@ -54,21 +54,23 @@ bool ChessBoardConstIterator::operator==(const ChessBoardConstIterator& that)
 
 ChessBoardIterator::value_type ChessBoardIterator::operator*() const
 {
-	return cb->board[pos];
+	return *curPiece;
 }
 ChessBoardConstIterator::value_type ChessBoardConstIterator::operator*() const
 {
-	return cb->board[pos];
+	return *curPiece;
 }
 
 ChessBoardIterator& ChessBoardIterator::operator++()
 {
 	++pos;
+	++curPiece;
 	return *this;
 }
 ChessBoardConstIterator& ChessBoardConstIterator::operator++()
 {
 	++pos;
+	++curPiece;
 	return *this;
 }
 

@@ -20,7 +20,7 @@ std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> generateEmptyBitB
 {
 	std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> result;
 	auto possiblePieces = param->getPossiblePieces();
-	for(auto it=possiblePieces->begin(); it!=possiblePieces->end(); ++it)
+	for(auto it=possiblePieces->begin(), end=possiblePieces->end(); it!=end; ++it)
 	{
 		result[*it] = std::unique_ptr<BitBoard>(new BitBoard(param));
 	}
@@ -52,7 +52,7 @@ void ChessBoard::initialisePieceHashes()
 	pieceHashes.resize(KNOWN_CHESS_PIECE_COUNT * cellCount);
 	pieceHashes[EMPTY_CELL] = nullptr;
 	
-	for(auto it=possiblePieces->begin(); it!=possiblePieces->end(); ++it)
+	for(auto it=possiblePieces->begin(), end=possiblePieces->end(); it!=end; ++it)
 	{
 		for(size_t i=0; i<cellCount; ++i)
 		{

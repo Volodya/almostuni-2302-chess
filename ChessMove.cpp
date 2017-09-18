@@ -152,13 +152,11 @@ void ChessMove::moveAttempts(
 	const MoveTemplate& mt,
 	bool canTake, bool canMoveToEmpty)
 {
-	Log::ptr log = Log::getInstance();
-
 	size_t newFile;
 	size_t newRank;
-	for(auto direction = mt.begin(); direction != mt.end(); ++direction)
+	for(auto direction = mt.begin(), directionEnd=mt.end(); direction != directionEnd; ++direction)
 	{
-		for(auto attempt = direction->begin(); attempt != direction->end(); ++attempt)
+		for(auto attempt = direction->begin(), attemptEnd=direction->end(); attempt != attemptEnd; ++attempt)
 		{
 			newFile = file + attempt->first;
 			newRank = rank + attempt->second;

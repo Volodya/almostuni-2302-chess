@@ -29,15 +29,20 @@ bool operator<(const ChessBoardHash& l, const ChessBoardHash& r)
 	}
 	return false; // l==r
 */
-	return l[0]==r[0] ? l[1] < r[1] : l[0] < r[0];
+	//return l[0]==r[0] ? l[1] < r[1] : l[0] < r[0];
+	return l[0]<r[0] ? true : l[0]==r[0] ? l[1] < r[1] : false;
 }
 
 void operator^=(ChessBoardHash& l, const ChessBoardHash& r)
 {
+	/*
 	for(size_t i=0; i<l.size(); ++i)
 	{
 		l[i] ^= r[i];
 	}
+	*/
+	l[0] ^= r[0];
+	l[1] ^= r[1];
 }
 
 ChessBoardHash* generateRandomChessBoardHash()

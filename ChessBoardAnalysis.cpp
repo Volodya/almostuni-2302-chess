@@ -185,8 +185,8 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 			}
 		}
 	};
-	Log::ptr log = Log::getInstance();
-	for(auto it = board->begin(); it != board->end(); ++it)
+
+	for(auto it = board->begin(), end=board->end(); it != end; ++it)
 	{
 		if(*it == EMPTY_CELL) continue;
 		
@@ -218,17 +218,13 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 
 weight_type ChessBoardAnalysis::chessPositionWeight() const
 {
-//	Log::ptr log = Log::getInstance();
-//	log->log(Log::INFO, board->toFEN());
-	
 	weight_type wIsCheckMate = (isCheckMate() ? getWeightMultiplier(board->getTurn()) * CHECKMATE_WEIGHT : 0);
-//	log->log(Log::INFO, "wIsCheckMate=" + std::to_string(wIsCheckMate));
+
 	weight_type wChessPieces = this->chessPiecesWeight();	// count pieces
-//	log->log(Log::INFO, "wChessPieces=" + std::to_string(wChessPieces));
+
 	weight_type wChessPieceAttacked = this->chessPieceAttackedWeight(); // count attacked pieces
-//	log->log(Log::INFO, "wChessPieceAttacked=" + std::to_string(wChessPieceAttacked));
+
 	weight_type wChessCentreControl = this->chessCentreControlWeight(); // control of the centre of the board
-//	log->log(Log::INFO, "wChessCentreControl=" + std::to_string(wChessCentreControl));
 	
 	
 	return
@@ -245,12 +241,11 @@ weight_type ChessBoardAnalysis::chessPositionWeight() const
 weight_type ChessBoardAnalysis::chessPiecesWeight() const
 {
 	int count[KNOWN_CHESS_PIECE_COUNT] = { 0 };
-	for(auto it=board->begin(); it!=board->end(); ++it)
+	for(auto it=board->begin(), end=board->end(); it!=end; ++it)
 	{
-		++count[*it];
+		++count[*it]; // ChessPiece is a numerical constant
 	}
 	
-	// todo: rewrite as a loop
 	return
 		BOARD_PAWN_WEIGHT   * (count[PAWN_WHITE]   - count[PAWN_BLACK]) +
 		BOARD_KNIGHT_WEIGHT * (count[KNIGHT_WHITE] - count[KNIGHT_BLACK]) +
@@ -262,12 +257,14 @@ weight_type ChessBoardAnalysis::chessPiecesWeight() const
 weight_type ChessBoardAnalysis::chessPieceAttackedWeight() const
 {
 	weight_type result = 0;
-		
-	for(auto it=board->begin(); it!=board->end(); ++it)
+	
+	ChessPiece curPiece;
+	for(auto it=board->begin(), end=board->end(); it!=end; ++it)
 	{
-		if(*it == EMPTY_CELL) continue;
+		curPiece = *it;
+		if(curPiece == EMPTY_CELL) continue;
 		
-		auto multiplierColour = getWeightMultiplier(getColour(*it));
+		auto multiplierColour = getWeightMultiplier(getColour(curPiece));
 		auto dominator = domination( // who has more attacks -1 (black); 0 (neutral); 1 (white)
 			underAttackByWhite[it.getPos()],
 			underAttackByBlack[it.getPos()]
@@ -278,7 +275,7 @@ weight_type ChessBoardAnalysis::chessPieceAttackedWeight() const
 			attackOrDefence = PIECE_DEFENCE_MUTIPLIER; // defending own piece
 		}
 			
-		result += dominator * weightFromPiece(*it) * attackOrDefence;
+		result += dominator * weightFromPiece(curPiece) * attackOrDefence;
 	}
 	
 	return result;
@@ -300,7 +297,7 @@ weight_type ChessBoardAnalysis::chessCentreControlWeight() const
 	};
 	
 	weight_type result = 0;
-	for(auto it=board->begin(); it!=board->end(); ++it)
+	for(auto it=board->begin(), end=board->end(); it!=end; ++it)
 	{
 		result +=
 			domination(
@@ -362,5 +359,5 @@ ChessBoard::ptr ChessBoardAnalysis::getBoard() const
 
 ChessBoardHash ChessBoardAnalysis::getBoardHash() const
 {
-	return this->getBoard()->getHash();
+	return this->board->getHash();
 }

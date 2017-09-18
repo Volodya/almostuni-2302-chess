@@ -76,7 +76,7 @@ ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
 	ChessBoard::ptr cb(new ChessBoard(param));
 		
 	size_t file=0, rank=7;
-	for(auto it=fen.begin(); it!=fen.end(); ++it)
+	for(auto it=fen.begin(), end=fen.end(); it!=end; ++it)
 	{
 		if(*it==' ')
 		{

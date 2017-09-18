@@ -125,7 +125,7 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 		};
 	}
 
-	for(auto it=answers.begin(); it!=answers.end(); ++it)
+	for(auto it=answers.begin(), answersEnd=answers.end(); it!=answersEnd; ++it)
 	{
 		// check database if the analysis is already there (by hash+depth)
 		
