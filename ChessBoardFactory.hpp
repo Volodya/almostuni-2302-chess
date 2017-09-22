@@ -21,8 +21,7 @@ public:
 	ChessBoard::ptr createBoard(std::string fen);
 	ChessBoard::ptr createBoard(
 		ChessBoard::ptr fromBoard,
-		size_t fileFrom, size_t rankFrom,
-		size_t fileTo, size_t rankTo);
+		size_t posFrom, size_t posTo);
 };
 
 #endif

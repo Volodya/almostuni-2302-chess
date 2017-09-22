@@ -44,11 +44,11 @@ public:
 	
 	friend class ChessBoardFactory;
 
-	typedef std::function<void(size_t, size_t, size_t, size_t)> ChessMoveRecordingFunction;
+	typedef std::function<void(size_t, size_t)> ChessMoveRecordingFunction;
 	static void moveAttempts(
 		const ChessMoveRecordingFunction &recFunTake,
 		const ChessMoveRecordingFunction &recFunDefend,
-		const ChessBoard &cb, size_t file, size_t rank,
+		const ChessBoard &cb, size_t pos,
 		const MoveTemplate& mt,
 		bool canTake=true, bool canMoveToEmpty=true);
 

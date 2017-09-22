@@ -19,9 +19,6 @@
 #include "ChessPiece.hpp"
 #include "ChessGameParameters.hpp"
 
-#include "BitBoard.hpp"
-#include "ChessBoardHash.hpp"
-
 class ChessMove;
 
 class ChessBoard;
@@ -43,16 +40,10 @@ private:
 	
 	std::shared_ptr<ChessMove> move; // ChessMove::ptr
 	
-	std::unique_ptr<ChessBoardHash> hash;
-	static std::vector<ChessBoardHash *> pieceHashes;
-	void initialisePieceHashes();
-	
 	ChessBoard() = delete;
 	ChessBoard(const ChessBoard& that) = delete;
 	ChessBoard(ChessGameParameters::ptr param_);
 	ChessBoard(const ChessBoard& that, std::shared_ptr<ChessMove> move_);
-	
-	size_t toPieceHashArrayPos(const ChessPiece &piece_, const size_t &position);
 public:
 	~ChessBoard();
 	
@@ -62,13 +53,15 @@ public:
 
 	bool isEmpty(char file, int rank) const;
 	bool isEmptyPos(size_t file, size_t rank) const;
+	bool isEmptyPos(size_t pos) const;
 	void placePiece(char file, int rank, ChessPiece piece);
 	void placePiecePos(size_t file, size_t rank, ChessPiece piece);
+	void placePiecePos(size_t pos, ChessPiece piece);
 	ChessPiece getPiece(char file, int rank) const;
 	ChessPiece getPiecePos(size_t file, size_t rank) const;
+	ChessPiece getPiecePos(size_t pos) const;
 	ChessPlayerColour getTurn() const;
 	std::shared_ptr<ChessMove> getMove() const; // ChessMove::ptr
-	ChessBoardHash getHash() const;
 	
 	size_t getPos(size_t file, size_t rank) const;
 

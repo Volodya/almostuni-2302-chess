@@ -29,9 +29,7 @@ class ChessEngineWorker
 		DepthPosition(int depth_, ChessBoardAnalysis::ptr analysis_)
 			: depth(depth_), analysis(analysis_) {}
 	};
-	
-	std::map<ChessBoardHash, DepthPosition, std::function<bool(const ChessBoardHash&, const ChessBoardHash&)>> readyResults;
-	
+		
 	typedef std::pair<double, ChessBoard::ptr> WeightBoardPair;
 	
 	bool pleaseStop; // request to stop received

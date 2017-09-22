@@ -67,7 +67,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 	typedef ChessMove::ChessMoveRecordingFunction ChessMoveRecordingFunction;
 		// empty function
 	const static ChessMoveRecordingFunction emptyFunction =
-			[](size_t file, size_t rank, size_t newFile, size_t newRank) {};
+			[](size_t pos, size_t newPos) {};
 
 	
 		// take opponent's piece
@@ -78,10 +78,10 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		// white turn
 		{
 			//white
-			[this, &factory](size_t file, size_t rank, size_t newFile, size_t newRank) {
+			[this, &factory](size_t pos, size_t newPos) {
 				assert(this->board->getTurn()==ChessPlayerColour::WHITE);
 
-				auto nextBoard = factory.createBoard(this->board, file, rank, newFile, newRank);
+				auto nextBoard = factory.createBoard(this->board, pos, newPos);
 				auto maybeMove = nextBoard->getMove();
 				
 				assert(nextBoard->getTurn()==ChessPlayerColour::BLACK);
@@ -93,10 +93,10 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				}
 			},
 			//black
-			[this](size_t file, size_t rank, size_t newFile, size_t newRank) {
+			[this](size_t pos, size_t newPos) {
 				//assert(maybeMove->getTurn()==ChessPlayerColour::BLACK);
 				
-				if(this->board->getPiecePos(newFile, newRank)==KING_BLACK)
+				if(this->board->getPiecePos(newPos)==KING_BLACK)
 				{
 					check=true;
 				}
@@ -105,19 +105,19 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		// black turn
 		{
 			// white
-			[this](size_t file, size_t rank, size_t newFile, size_t newRank) {
+			[this](size_t pos, size_t newPos) {
 				assert(this->board->getTurn()==ChessPlayerColour::BLACK);
 								
-				if(this->board->getPiecePos(newFile, newRank)==KING_WHITE)
+				if(this->board->getPiecePos(newPos)==KING_WHITE)
 				{
 					check=true;
 				}
 			},
 			// black
-			[this, &factory](size_t file, size_t rank, size_t newFile, size_t newRank) {
+			[this, &factory](size_t pos, size_t newPos) {
 				assert(this->board->getTurn()==ChessPlayerColour::BLACK);
 
-				auto nextBoard = factory.createBoard(this->board, file, rank, newFile, newRank);
+				auto nextBoard = factory.createBoard(this->board, pos, newPos);
 				auto maybeMove = nextBoard->getMove();
 				
 				assert(nextBoard->getTurn()==ChessPlayerColour::WHITE);
@@ -157,31 +157,31 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		// white's turn
 		{
 			// white
-			[this](size_t file, size_t rank, size_t newFile, size_t newRank) {
+			[this](size_t pos, size_t newPos) {
 				//assert(maybeMove->getTurn()==ChessPlayerColour::WHITE);
 				
-				++underAttackByWhite[this->board->getPos(newFile, newRank)];
+				++underAttackByWhite[newPos];
 			},
 			// black
-			[this](size_t file, size_t rank, size_t newFile, size_t newRank) {
+			[this](size_t pos, size_t newPos) {
 				//assert(maybeMove->getTurn()==ChessPlayerColour::BLACK);
 
-				++underAttackByWhite[this->board->getPos(newFile, newRank)];
+				++underAttackByWhite[newPos];
 			}
 		},
 		// black's turn
 		{
 			// white
-			[this](size_t file, size_t rank, size_t newFile, size_t newRank) {
+			[this](size_t pos, size_t newPos) {
 				//assert(maybeMove->getTurn()==ChessPlayerColour::WHITE);
 				
-				++underAttackByBlack[this->board->getPos(newFile, newRank)];
+				++underAttackByBlack[newPos];
 			},
 			// black
-			[this](size_t file, size_t rank, size_t newFile, size_t newRank) {
+			[this](size_t pos, size_t newPos) {
 				//assert(maybeMove->getTurn()==ChessPlayerColour::BLACK);
 
-				++underAttackByBlack[this->board->getPos(newFile, newRank)];
+				++underAttackByBlack[newPos];
 			}
 		}
 	};
@@ -190,28 +190,26 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 	{
 		if(*it == EMPTY_CELL) continue;
 		
-		// todo make size_t
-		size_t rank = it.getRankPos();
-		size_t file = it.getFilePos();
-
+		size_t pos = it.getPos();
+		
 		auto pieceParam = moveParameters.at(*it);
 		auto moveArrayPos = toArrayPosition(board->getTurn());
 		auto pieceArrayPos = toArrayPosition(getColour(*it));
 		if(pieceParam->isDifferentMoveTypes)
 		{
 			ChessMove::moveAttempts(functionNoTake[moveArrayPos][pieceArrayPos], emptyFunction,
-				*board, file, rank,
+				*board, pos,
 				*pieceParam->noTakeMove, false);
 			ChessMove::moveAttempts(functionTake[moveArrayPos][pieceArrayPos],
 				functionDefend[moveArrayPos][pieceArrayPos],
-				*board, file, rank,
+				*board, pos,
 				*pieceParam->takeMove, true, false);
 		}
 		else
 		{
 			ChessMove::moveAttempts(functionTake[moveArrayPos][pieceArrayPos],
 				functionDefend[moveArrayPos][pieceArrayPos],
-				*board, file, rank, *pieceParam->anyMove, true);
+				*board, pos, *pieceParam->anyMove, true);
 		}
 	}
 }
@@ -284,27 +282,28 @@ weight_type ChessBoardAnalysis::chessPieceAttackedWeight() const
 weight_type ChessBoardAnalysis::chessCentreControlWeight() const
 {
 	const static weight_type CELL_WEIGHT_MULTIPLIER = 3000;
-	const static weight_type CELL_WEIGHT[8][8]
+	const static weight_type CELL_WEIGHT[64]
 	{
-		{ 3, 3, 3, 3, 3, 3, 3, 3 },
-		{ 3, 3, 3, 3, 3, 3, 3, 3 },
-		{ 2, 2, 7, 7, 7, 7, 2, 2 },
-		{ 1, 4, 6, 8, 8, 6, 4, 1 },
-		{ 1, 4, 6, 8, 8, 6, 4, 1 },
-		{ 2, 2, 7, 7, 7, 7, 2, 2 },
-		{ 3, 3, 3, 3, 3, 3, 3, 3 },
-		{ 3, 3, 3, 3, 3, 3, 3, 3 }
+		3, 3, 3, 3, 3, 3, 3, 3,
+		3, 3, 3, 3, 3, 3, 3, 3,
+		2, 2, 7, 7, 7, 7, 2, 2,
+		1, 4, 6, 8, 8, 6, 4, 1,
+		1, 4, 6, 8, 8, 6, 4, 1,
+		2, 2, 7, 7, 7, 7, 2, 2,
+		3, 3, 3, 3, 3, 3, 3, 3,
+		3, 3, 3, 3, 3, 3, 3, 3
 	};
 	
 	weight_type result = 0;
 	for(auto it=board->begin(), end=board->end(); it!=end; ++it)
 	{
+		auto pos = it.getPos();
 		result +=
 			domination(
-				underAttackByWhite[it.getPos()],
-				underAttackByBlack[it.getPos()]
+				underAttackByWhite[pos],
+				underAttackByBlack[pos]
 				)
-			* CELL_WEIGHT[it.getRankPos()][it.getFilePos()]
+			* CELL_WEIGHT[pos]
 			* CELL_WEIGHT_MULTIPLIER;
 	}
 	return result;
@@ -355,9 +354,4 @@ std::vector<ChessBoard::ptr> ChessBoardAnalysis::getPossibleMoves() const
 ChessBoard::ptr ChessBoardAnalysis::getBoard() const
 {
 	return board;
-}
-
-ChessBoardHash ChessBoardAnalysis::getBoardHash() const
-{
-	return this->board->getHash();
 }

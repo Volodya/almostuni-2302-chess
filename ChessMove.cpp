@@ -118,9 +118,10 @@ std::string ChessMove::getNotation() const
 		ChessPiece piece;
 		int rankFrom, rankTo;
 		char fileFrom, fileTo;
-		for(auto it=pTo->begin(); it!=pTo->end(); ++it)
+		for(auto it=pTo->begin(), end=pTo->end(); it!=end; ++it)
 		{
-			if(*it == from->getPiece(it.getFile(), it.getRank()))
+			auto pos = it.getPos();
+			if(*it == from->getPiecePos(pos))
 			{
 				continue;
 			}
@@ -129,7 +130,7 @@ std::string ChessMove::getNotation() const
 			{
 				fileFrom = it.getFile();
 				rankFrom = it.getRank();
-				piece = from->getPiece(fileFrom, rankFrom);
+				piece = from->getPiecePos(pos);
 			}
 			else
 			{
@@ -148,33 +149,35 @@ std::string ChessMove::getNotation() const
 void ChessMove::moveAttempts(
 	const ChessMoveRecordingFunction &recFunTake,
 	const ChessMoveRecordingFunction &recFunDefend,
-	const ChessBoard &cb, size_t file, size_t rank,
+	const ChessBoard &cb, const size_t pos,
 	const MoveTemplate& mt,
 	bool canTake, bool canMoveToEmpty)
 {
-	size_t newFile;
-	size_t newRank;
+	const size_t width = cb.getWidth();
+	
+	size_t newPos;
 	for(auto direction = mt.begin(), directionEnd=mt.end(); direction != directionEnd; ++direction)
 	{
 		for(auto attempt = direction->begin(), attemptEnd=direction->end(); attempt != attemptEnd; ++attempt)
 		{
-			newFile = file + attempt->first;
-			newRank = rank + attempt->second;
-			if(newFile >= 8 || newRank >= 8) // TODO: make size of the board nonconst
+			// TODO: potentially move to ChessBoard
+			newPos = pos  +  attempt->first  +  ( attempt->second * width );
+			
+			if( newPos >= cb.getCellCount() )
 			{
 				break;
 			}
 			
-			if(!cb.isEmptyPos(newFile, newRank))
+			if(!cb.isEmptyPos(newPos))
 			{
 				if(canTake)
 				{
 					
-					if(getColour(cb.getPiecePos(newFile, newRank)) != cb.getTurn())
+					if(getColour(cb.getPiecePos(newPos)) != cb.getTurn())
 					{
-						recFunTake(file, rank, newFile, newRank);
+						recFunTake(pos, newPos);
 					}
-					recFunDefend(file, rank, newFile, newRank);
+					recFunDefend(pos, newPos);
 				}
 				break; // stop if a cell isn't empty
 			}
@@ -182,9 +185,9 @@ void ChessMove::moveAttempts(
 			{
 				if(canMoveToEmpty)
 				{
-					recFunTake(file, rank, newFile, newRank);
+					recFunTake(pos, newPos);
 				}
-				recFunDefend(file, rank, newFile, newRank);
+				recFunDefend(pos, newPos);
 			}
 		}
 	}

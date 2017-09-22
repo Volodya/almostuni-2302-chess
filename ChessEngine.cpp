@@ -15,7 +15,7 @@
 #include <cassert>
 
 ChessEngineWorker::ChessEngineWorker()
-	: readyResults([](const ChessBoardHash& l, const ChessBoardHash& r){return l<r;}), pleaseStop(false)
+	: pleaseStop(false)
 {}
 
 void ChessEngineWorker::stop()
@@ -74,13 +74,6 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 		throw ChessEngineWorkerInterruptedException();
 	}
 	
-	auto curHash=analysis->getBoardHash();
-	if(this->readyResults.count(curHash)!=0 && this->readyResults.at(curHash).depth >= depth)
-	{
-		return this->readyResults.at(curHash).analysis;
-	}
-	
-	//analysis->getBoard()->debugPrint();
 	if(depth==0)
 	{
 		return analysis;
@@ -88,13 +81,11 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 	analysis->calculatePossibleMoves();
 	if(analysis->isCheckMate() /* || node.isDraw() */)
 	{
-		readyResults.emplace(curHash, DepthPosition(depth, analysis));
 		return analysis;
 	}
 	auto answers = analysis->getPossibleMoves();
 	if(answers.empty())
 	{
-		readyResults.emplace(curHash, DepthPosition(depth, analysis));
 		return analysis;
 	}
 	ChessBoardAnalysis::ptr res=nullptr;
@@ -150,7 +141,6 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 			break;
 		}
 	}
-		readyResults.emplace(curHash, DepthPosition(depth, res));
 	return res;
 };
 

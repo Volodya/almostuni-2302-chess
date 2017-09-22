@@ -15,75 +15,27 @@
 
 #include "Log.hpp"
 
-// helper
-std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> generateEmptyBitBoards(ChessGameParameters::ptr param)
-{
-	std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> result;
-	auto possiblePieces = param->getPossiblePieces();
-	for(auto it=possiblePieces->begin(), end=possiblePieces->end(); it!=end; ++it)
-	{
-		result[*it] = std::unique_ptr<BitBoard>(new BitBoard(param));
-	}
-	return result;
-}
-std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> copy(
-	const std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> &original)
-{
-	std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> result;
-	for(size_t i=0; i<KNOWN_CHESS_PIECE_COUNT; ++i)
-	{
-		if(original[i])
-		{
-			result[i] = std::unique_ptr<BitBoard>(new BitBoard(*original[i]));
-		}
-	}
-	return result;
-}
-
 // static data members
 
-std::vector<ChessBoardHash *> ChessBoard::pieceHashes;
 std::shared_ptr<std::vector<ChessPiece>> ChessBoard::possiblePieces = nullptr;
 
 // class functions
-
-void ChessBoard::initialisePieceHashes()
-{
-	pieceHashes.resize(KNOWN_CHESS_PIECE_COUNT * cellCount);
-	pieceHashes[EMPTY_CELL] = nullptr;
-	
-	for(auto it=possiblePieces->begin(), end=possiblePieces->end(); it!=end; ++it)
-	{
-		for(size_t i=0; i<cellCount; ++i)
-		{
-			auto curHash = generateRandomChessBoardHash();
-			pieceHashes[toPieceHashArrayPos(*it, i)] = curHash;
-		}
-	}
-	pieceHashes.shrink_to_fit();
-}
 
 ChessBoard::ChessBoard(ChessGameParameters::ptr param)
 	: cellCount(param->getCellCount()),
 	  width(param->getWidth()), height(param->getHeight()),
 	  board(new ChessPiece[cellCount]),
-	  //bitBoards(generateEmptyBitBoards(param)),
-	  turn(ChessPlayerColour::WHITE), move(nullptr),
-	  hash(generateRandomChessBoardHash())
+	  turn(ChessPlayerColour::WHITE), move(nullptr)
 {
 	possiblePieces = param->getPossiblePieces();
 	
-	initialisePieceHashes(); // technically does not belong here
-
 	std::fill(board, board+cellCount, EMPTY_CELL);
 }
 ChessBoard::ChessBoard(const ChessBoard& that, ChessMove::ptr move_)
 	: cellCount(that.cellCount),
 	  width(that.width), height(that.height),
 	  board(new ChessPiece[cellCount]),
-	  //bitBoards(copy(that.bitBoards)),
-	  turn(that.turn), move(move_),
-	  hash(new ChessBoardHash(*that.hash))
+	  turn(that.turn), move(move_)
 {
 	std::copy(that.board, that.board+cellCount, this->board);
 }
@@ -96,10 +48,6 @@ ChessBoard::~ChessBoard()
 size_t ChessBoard::getPos(size_t file, size_t rank) const
 {
 	return rank*width+file;
-}
-size_t ChessBoard::toPieceHashArrayPos(const ChessPiece &piece, const size_t &position)
-{
-	return cellCount * ((size_t)piece - (size_t)1) + position;
 }
 
 size_t ChessBoard::getCellCount() const
@@ -201,47 +149,31 @@ ChessPlayerColour ChessBoard::getTurn() const
 
 void ChessBoard::placePiece(char file, int rank, ChessPiece piece)
 {
+	//Log::info("placePiece called without pos");
 	this->placePiecePos(file-'A', rank-1, piece);
 }
 void ChessBoard::placePiecePos(size_t file, size_t rank, ChessPiece piece)
 {
-	auto pos = getPos(file, rank);
-	
-	// update board
-	ChessPiece takenPiece = board[pos];
+	//Log::info("placePiecePos called without pos");
+	this->placePiecePos(getPos(file, rank), piece);
+}
+void ChessBoard::placePiecePos(size_t pos, ChessPiece piece)
+{
 	board[pos] = piece;
-	
-	// update BitBoards
-	if(takenPiece != EMPTY_CELL)
-	{
-		//assert(bitBoards[takenPiece]!=nullptr);
-		//bitBoards[takenPiece]->set(file, rank, false);
-	}
-	if(piece != EMPTY_CELL)
-	{
-		//assert(bitBoards[piece]!=nullptr);
-		//bitBoards[piece]->set(file, rank, true);
-	}
-	
-	// update hash
-	if(takenPiece != EMPTY_CELL)
-	{
-		assert(pieceHashes.at(toPieceHashArrayPos(takenPiece, pos))!=nullptr);
-		(*hash)^=*pieceHashes.at(toPieceHashArrayPos(takenPiece, pos));
-	}
-	if(piece != EMPTY_CELL)
-	{
-		assert(pieceHashes.at(toPieceHashArrayPos(piece, pos))!=nullptr);
-		(*hash)^=*pieceHashes.at(toPieceHashArrayPos(piece, pos));
-	}
 }
 ChessPiece ChessBoard::getPiece(char file, int rank) const
 {
+	//Log::info("getPiece called without pos");
 	return this->getPiecePos(file-'A', rank-1);
 }
 ChessPiece ChessBoard::getPiecePos(size_t file, size_t rank) const
 {
-	return board[getPos(file, rank)];
+	//Log::info("getPiecePos called without pos");
+	return getPiecePos(getPos(file, rank));
+}
+ChessPiece ChessBoard::getPiecePos(size_t pos) const
+{
+	return board[pos];
 }
 
 ChessMove::ptr ChessBoard::getMove() const
@@ -249,16 +181,17 @@ ChessMove::ptr ChessBoard::getMove() const
 	return move;
 }
 
-ChessBoardHash ChessBoard::getHash() const
-{
-	return *hash;
-}
-
 bool ChessBoard::isEmpty(char file, int rank) const
 {
+	//Log::info("isEmpty called without pos");
 	return this->isEmptyPos(file-'A', rank-1);
 }
 bool ChessBoard::isEmptyPos(size_t file, size_t rank) const
 {
-	return board[getPos(file, rank)] == EMPTY_CELL;
+	//Log::info("isEmptyPos called without pos");
+	return isEmptyPos(getPos(file, rank));
+}
+bool ChessBoard::isEmptyPos(size_t pos) const
+{
+	return board[pos] == EMPTY_CELL;
 }

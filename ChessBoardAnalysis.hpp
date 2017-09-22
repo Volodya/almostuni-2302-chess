@@ -47,7 +47,6 @@ public:
 	std::vector<ChessBoard::ptr> getPossibleMoves() const; // call to this function is underfined without calculatePossibleMoves()
 	
 	ChessBoard::ptr getBoard() const;
-	ChessBoardHash getBoardHash() const;
 };
 
 constexpr ChessBoardAnalysis::weight_type
