@@ -181,20 +181,39 @@ void ChessEngine::setCurPos(ChessBoard::ptr newPos)
 	curPos = newPos;
 }
 
+void ChessEngine::makeMove(ChessBoard::ptr move)
+{
+	curPos->clearPossibleMoves();
+	curPos = move;
+	
+	worker.stop();
+	
+	startNextMoveCalculation();
+}
+
 void ChessEngine::startNextMoveCalculation()
 {
 	worker.startNextMoveCalculation(curPos, START_DEPTH);
 }
 
-ChessBoard::ptr ChessEngine::getNextMove()
+ChessBoard::ptr ChessEngine::getNextBestMove()
 {
-	// stop the calculation
-	worker.stop();
-	
 	// read the best position from worker.positionPreferences
 	if(worker.positionPreferences.empty())
 	{
 		return nullptr;
+	}
+	
+	ChessBoard::ptr result = worker.positionPreferences.begin()->second;
+	
+	for(;;)
+	{
+		auto previous = result->getMove()->getFrom();
+		assert(previous!=nullptr);
+		if(previous==curPos)
+		{
+			break;
+		}
 	}
 	
 	return worker.positionPreferences.begin()->second;

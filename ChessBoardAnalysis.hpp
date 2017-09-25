@@ -26,7 +26,7 @@ private:
 	int8_t *underAttackByWhite; // [rank*w+file]
 	int8_t *underAttackByBlack; // [rank*w+file]
 
-	std::vector<ChessBoard::ptr> possibleMoves;
+	std::vector<ChessBoard::ptr>* possibleMoves;
 	
 	bool check;
 	bool calculated;

@@ -29,35 +29,22 @@ int main()
 		
 	ChessEngine engine;
 	engine.setCurPos(cb);
-	auto start = std::chrono::high_resolution_clock::now();
 	engine.startNextMoveCalculation();
-	std::cin.get();
-	auto end = std::chrono::high_resolution_clock::now();
-	long double duration = (end-start).count();
-	duration /= 1000000000;
-	
-	std::cout << ChessBoardAnalysis::constructed << '/' << duration << ' ' << ChessBoardAnalysis::constructed / duration << std::endl;
-	
-	std::cout << "Getting next move" << std::endl;
-	auto best = engine.getNextMove();
-	std::cout << "Next move has been received" << std::endl;
-	if(best)
+	for(;;)
 	{
+		auto start = std::chrono::high_resolution_clock::now();
+		std::cin.get();
+		auto end = std::chrono::high_resolution_clock::now();
+		long double duration = (end-start).count();
+		duration /= 1000000000;
+		
+		std::cout << ChessBoardAnalysis::constructed << '/' << duration << ' ' << ChessBoardAnalysis::constructed / duration << std::endl;
+		
+		auto best = engine.getNextBestMove();
+		
 		best->debugPrint();
-		for(;;)
-		{
-			auto move = best->getMove();
-			if(!move->hasPrevious())
-			{
-				break;
-			}
-			std::cout << move->getNotation() << std::endl;
-			best=move->getFrom();
-		};
-	}
-	else
-	{
-		std::cout << "There's no best" << std::endl;
+		
+		engine.makeMove(best);
 	}
 	
 	return 0;

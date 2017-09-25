@@ -20,7 +20,7 @@ typedef ChessBoardAnalysis::weight_type weight_type;
 
 // helper
 
-constexpr weight_type domination(int8_t white, int8_t black)
+inline constexpr weight_type domination(int8_t white, int8_t black)
 {
 	return
 		white==black ? 0 :
@@ -63,6 +63,12 @@ ChessBoardAnalysis::~ChessBoardAnalysis()
 
 void ChessBoardAnalysis::calculatePossibleMoves()
 {
+	if(board->knownPossibleMoves)
+	{
+		possibleMoves=board->knownPossibleMoves;
+		return;
+	}
+	
 	ChessBoardFactory factory;
 	typedef ChessMove::ChessMoveRecordingFunction ChessMoveRecordingFunction;
 		// empty function
@@ -186,15 +192,14 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		}
 	};
 
-	for(auto it = board->begin(), end=board->end(); it != end; ++it)
+	for(size_t pos=0, end=board->getCellCount(); pos!=end; ++pos)
 	{
-		if(*it == EMPTY_CELL) continue;
+		auto curPiece = board->getPiecePos(pos);
+		if(curPiece == EMPTY_CELL) continue;
 		
-		size_t pos = it.getPos();
-		
-		auto pieceParam = moveParameters.at(*it);
+		auto pieceParam = moveParameters.at(curPiece);
 		auto moveArrayPos = toArrayPosition(board->getTurn());
-		auto pieceArrayPos = toArrayPosition(getColour(*it));
+		auto pieceArrayPos = toArrayPosition(getColour(curPiece));
 		if(pieceParam->isDifferentMoveTypes)
 		{
 			ChessMove::moveAttempts(functionNoTake[moveArrayPos][pieceArrayPos], emptyFunction,
@@ -212,6 +217,8 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				*board, pos, *pieceParam->anyMove, true);
 		}
 	}
+	
+	board->knownPossibleMoves = possibleMoves;
 }
 
 weight_type ChessBoardAnalysis::chessPositionWeight() const
@@ -239,9 +246,9 @@ weight_type ChessBoardAnalysis::chessPositionWeight() const
 weight_type ChessBoardAnalysis::chessPiecesWeight() const
 {
 	int count[KNOWN_CHESS_PIECE_COUNT] = { 0 };
-	for(auto it=board->begin(), end=board->end(); it!=end; ++it)
+	for(size_t pos=0, end=board->getCellCount(); pos!=end; ++pos)
 	{
-		++count[*it]; // ChessPiece is a numerical constant
+		++count[board->getPiecePos(pos)]; // ChessPiece is a numerical constant
 	}
 	
 	return
@@ -257,15 +264,15 @@ weight_type ChessBoardAnalysis::chessPieceAttackedWeight() const
 	weight_type result = 0;
 	
 	ChessPiece curPiece;
-	for(auto it=board->begin(), end=board->end(); it!=end; ++it)
+	for(size_t pos=0, end=board->getCellCount(); pos!=end; ++pos)
 	{
-		curPiece = *it;
+		curPiece = board->getPiecePos(pos);
 		if(curPiece == EMPTY_CELL) continue;
 		
 		auto multiplierColour = getWeightMultiplier(getColour(curPiece));
 		auto dominator = domination( // who has more attacks -1 (black); 0 (neutral); 1 (white)
-			underAttackByWhite[it.getPos()],
-			underAttackByBlack[it.getPos()]
+			underAttackByWhite[pos],
+			underAttackByBlack[pos]
 			);
 		auto attackOrDefence = PIECE_ATTACK_MULTIPLIER;
 		if(multiplierColour==dominator)
@@ -295,9 +302,8 @@ weight_type ChessBoardAnalysis::chessCentreControlWeight() const
 	};
 	
 	weight_type result = 0;
-	for(auto it=board->begin(), end=board->end(); it!=end; ++it)
+	for(size_t pos=0, end=board->getCellCount(); pos!=end; ++pos)
 	{
-		auto pos = it.getPos();
 		result +=
 			domination(
 				underAttackByWhite[pos],

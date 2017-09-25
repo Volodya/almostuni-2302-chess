@@ -74,7 +74,9 @@ public:
 	ChessBoardIterator end();
 	ChessBoardConstIterator end() const;
 	
+	void clearPossibleMoves();
 	
+	std::vector<ChessBoard::ptr>* knownPossibleMoves;	
 	
 	friend class ChessBoardFactory;
 	friend class ChessBoardIterator;

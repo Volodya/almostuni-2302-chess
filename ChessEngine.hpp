@@ -22,14 +22,6 @@ class ChessEngineWorker
 {
 	friend class ChessEngine;
 	
-	struct DepthPosition
-	{
-		int depth;
-		ChessBoardAnalysis::ptr analysis;
-		DepthPosition(int depth_, ChessBoardAnalysis::ptr analysis_)
-			: depth(depth_), analysis(analysis_) {}
-	};
-		
 	typedef std::pair<double, ChessBoard::ptr> WeightBoardPair;
 	
 	bool pleaseStop; // request to stop received
@@ -56,14 +48,15 @@ class ChessEngine
 	ChessBoard::ptr curPos;
 	ChessEngineWorker worker;
 	
-	int START_DEPTH = 0;
+	int START_DEPTH = 6;
 public:
 	void setCurPos(ChessBoard::ptr newPos);
+	void makeMove(ChessBoard::ptr move);
 	ChessBoard::ptr getCurPos() const;
 	
 	// TODO: implement calculation of the next move
 	void startNextMoveCalculation();
-	ChessBoard::ptr getNextMove();
+	ChessBoard::ptr getNextBestMove();
 	
 	friend ChessEngineWorker;
 };

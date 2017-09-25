@@ -25,7 +25,8 @@ ChessBoard::ChessBoard(ChessGameParameters::ptr param)
 	: cellCount(param->getCellCount()),
 	  width(param->getWidth()), height(param->getHeight()),
 	  board(new ChessPiece[cellCount]),
-	  turn(ChessPlayerColour::WHITE), move(nullptr)
+	  turn(ChessPlayerColour::WHITE), move(nullptr),
+	  knownPossibleMoves(nullptr)
 {
 	possiblePieces = param->getPossiblePieces();
 	
@@ -35,7 +36,8 @@ ChessBoard::ChessBoard(const ChessBoard& that, ChessMove::ptr move_)
 	: cellCount(that.cellCount),
 	  width(that.width), height(that.height),
 	  board(new ChessPiece[cellCount]),
-	  turn(that.turn), move(move_)
+	  turn(that.turn), move(move_),
+	  knownPossibleMoves(nullptr)
 {
 	std::copy(that.board, that.board+cellCount, this->board);
 }
@@ -194,4 +196,9 @@ bool ChessBoard::isEmptyPos(size_t file, size_t rank) const
 bool ChessBoard::isEmptyPos(size_t pos) const
 {
 	return board[pos] == EMPTY_CELL;
+}
+
+void ChessBoard::clearPossibleMoves()
+{
+	delete knownPossibleMoves;
 }

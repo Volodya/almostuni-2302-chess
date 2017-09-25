@@ -67,7 +67,7 @@ const std::vector<ChessPiece> CAPABLANCA_GAME_PIECES =
 constexpr ChessPlayerColour getColour(const ChessPiece &cp)
 {
 	return
-		(cp%2 == 1) ? ChessPlayerColour::WHITE : ChessPlayerColour::BLACK;
+		(cp & 1) ? ChessPlayerColour::WHITE : ChessPlayerColour::BLACK;
 }
 constexpr ChessPiece charToChessPiece(const char cp)
 {
