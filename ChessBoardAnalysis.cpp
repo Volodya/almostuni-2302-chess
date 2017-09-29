@@ -68,7 +68,11 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		possibleMoves=board->knownPossibleMoves;
 		return;
 	}
-	
+	else
+	{
+		possibleMoves=new std::vector<ChessBoard::ptr>();
+	}
+
 	ChessBoardFactory factory;
 	typedef ChessMove::ChessMoveRecordingFunction ChessMoveRecordingFunction;
 		// empty function
@@ -86,7 +90,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 			//white
 			[this, &factory](size_t pos, size_t newPos) {
 				assert(this->board->getTurn()==ChessPlayerColour::WHITE);
-
+				
 				auto nextBoard = factory.createBoard(this->board, pos, newPos);
 				auto maybeMove = nextBoard->getMove();
 				
@@ -95,7 +99,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				
 				if(maybeMove->isMovePossible())
 				{
-					possibleMoves.push_back(nextBoard);
+					this->possibleMoves->push_back(nextBoard);
 				}
 			},
 			//black
@@ -131,7 +135,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				
 				if(maybeMove->isMovePossible())
 				{
-					possibleMoves.push_back(nextBoard);
+					this->possibleMoves->push_back(nextBoard);
 				}
 			}
 		}
@@ -200,6 +204,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		auto pieceParam = moveParameters.at(curPiece);
 		auto moveArrayPos = toArrayPosition(board->getTurn());
 		auto pieceArrayPos = toArrayPosition(getColour(curPiece));
+
 		if(pieceParam->isDifferentMoveTypes)
 		{
 			ChessMove::moveAttempts(functionNoTake[moveArrayPos][pieceArrayPos], emptyFunction,
@@ -345,14 +350,14 @@ bool ChessBoardAnalysis::isCheckMate() const
 	
 	if(isCheck())
 	{
-		return possibleMoves.empty();
+		return possibleMoves->empty();
 	}
 	
 	return false;
 }
 
 
-std::vector<ChessBoard::ptr> ChessBoardAnalysis::getPossibleMoves() const
+const std::vector<ChessBoard::ptr> * const ChessBoardAnalysis::getPossibleMoves() const
 {
 	return possibleMoves;
 }

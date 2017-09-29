@@ -48,7 +48,7 @@ class ChessEngine
 	ChessBoard::ptr curPos;
 	ChessEngineWorker worker;
 	
-	int START_DEPTH = 6;
+	int START_DEPTH = 2;
 public:
 	void setCurPos(ChessBoard::ptr newPos);
 	void makeMove(ChessBoard::ptr move);

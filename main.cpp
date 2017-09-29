@@ -32,6 +32,7 @@ int main()
 	engine.startNextMoveCalculation();
 	for(;;)
 	{
+		ChessBoardAnalysis::constructed=0;
 		auto start = std::chrono::high_resolution_clock::now();
 		std::cin.get();
 		auto end = std::chrono::high_resolution_clock::now();

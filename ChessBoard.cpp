@@ -44,7 +44,9 @@ ChessBoard::ChessBoard(const ChessBoard& that, ChessMove::ptr move_)
 
 ChessBoard::~ChessBoard()
 {
+	Log::info("~ChessBoard");
 	delete[] board;
+	if(knownPossibleMoves) delete knownPossibleMoves;
 }
 
 size_t ChessBoard::getPos(size_t file, size_t rank) const
@@ -200,5 +202,11 @@ bool ChessBoard::isEmptyPos(size_t pos) const
 
 void ChessBoard::clearPossibleMoves()
 {
+	Log::info("clearPossibleMoves");
+	for(auto it=knownPossibleMoves->begin(), end=knownPossibleMoves->end(); it!=end; ++it)
+	{
+		std::cout << "count=" << it->use_count() << std::endl;
+	}
 	delete knownPossibleMoves;
+	knownPossibleMoves=nullptr;
 }

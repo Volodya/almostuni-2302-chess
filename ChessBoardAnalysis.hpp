@@ -44,7 +44,7 @@ public:
 	weight_type chessCentreControlWeight() const;
 	
 	void calculatePossibleMoves();
-	std::vector<ChessBoard::ptr> getPossibleMoves() const; // call to this function is underfined without calculatePossibleMoves()
+	const std::vector<ChessBoard::ptr> * const getPossibleMoves() const; // call to this function is underfined without calculatePossibleMoves()
 	
 	ChessBoard::ptr getBoard() const;
 };

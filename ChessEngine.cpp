@@ -63,6 +63,7 @@ void ChessEngineWorker::stop()
 */
 void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int startDepth)
 {
+	pleaseStop=false;
 	thread = std::thread( &ChessEngineWorker::startNextMoveCalculationInternal, this, original, startDepth);
 }
 
@@ -71,6 +72,7 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 {
 	if(this->pleaseStop)
 	{
+		Log::info("throwing an exception");
 		throw ChessEngineWorkerInterruptedException();
 	}
 	
@@ -84,7 +86,7 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 		return analysis;
 	}
 	auto answers = analysis->getPossibleMoves();
-	if(answers.empty())
+	if(answers->empty())
 	{
 		return analysis;
 	}
@@ -116,7 +118,7 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 		};
 	}
 
-	for(auto it=answers.begin(), answersEnd=answers.end(); it!=answersEnd; ++it)
+	for(auto it=answers->begin(), answersEnd=answers->end(); it!=answersEnd; ++it)
 	{
 		// check database if the analysis is already there (by hash+depth)
 		
@@ -205,16 +207,16 @@ ChessBoard::ptr ChessEngine::getNextBestMove()
 	}
 	
 	ChessBoard::ptr result = worker.positionPreferences.begin()->second;
-	
+	auto next = result;
 	for(;;)
 	{
-		auto previous = result->getMove()->getFrom();
+		auto previous = next->getMove()->getFrom();
 		assert(previous!=nullptr);
 		if(previous==curPos)
 		{
 			break;
 		}
+		next = previous;
 	}
-	
-	return worker.positionPreferences.begin()->second;
+	return next;
 }
