@@ -63,7 +63,7 @@ public:
 	ChessPlayerColour getTurn() const;
 	std::shared_ptr<ChessMove> getMove() const; // ChessMove::ptr
 	
-	size_t getPos(size_t file, size_t rank) const;
+	size_t getPos(const size_t &file, const size_t &rank) const;
 
 	void debugPrint() const;
 	
@@ -75,6 +75,7 @@ public:
 	ChessBoardConstIterator end() const;
 	
 	void clearPossibleMoves();
+	void clearPossibleMoves(ChessBoard::ptr toKeep);
 	
 	std::vector<ChessBoard::ptr>* knownPossibleMoves;	
 	

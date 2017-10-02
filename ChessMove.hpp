@@ -27,12 +27,16 @@ public:
 private:
 	bool previous;
 	ChessBoard::ptr from;
-	ChessBoard::wptr to;
+	ChessBoard::ptr to;
+	
+	ChessPlayerColour turn;
 	
 	//std::string notation;
 	int moveNum;
-	ChessMove(); // for initialisation in the factory
-
+	// for initialisation in the factory
+	ChessMove();
+	void setFrom(ChessBoard::ptr from_);
+	void setTo(ChessBoard::ptr to_);
 public:
 	bool isMovePossible() const;
 	bool hasPrevious() const;

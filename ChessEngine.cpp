@@ -175,6 +175,7 @@ void ChessEngineWorker::startNextMoveCalculationInternal(ChessBoard::ptr origina
 		catch(ChessEngineWorkerInterruptedException& e)
 		{
 		}
+		//pleaseStop=true;
 	} while(!pleaseStop);
 }
 
@@ -185,7 +186,8 @@ void ChessEngine::setCurPos(ChessBoard::ptr newPos)
 
 void ChessEngine::makeMove(ChessBoard::ptr move)
 {
-	curPos->clearPossibleMoves();
+	assert(move!=nullptr);
+	curPos->clearPossibleMoves(move);
 	curPos = move;
 	
 	worker.stop();

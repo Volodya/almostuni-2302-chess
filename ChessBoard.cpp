@@ -44,12 +44,11 @@ ChessBoard::ChessBoard(const ChessBoard& that, ChessMove::ptr move_)
 
 ChessBoard::~ChessBoard()
 {
-	Log::info("~ChessBoard");
 	delete[] board;
-	if(knownPossibleMoves) delete knownPossibleMoves;
+	clearPossibleMoves();
 }
 
-size_t ChessBoard::getPos(size_t file, size_t rank) const
+size_t ChessBoard::getPos(const size_t &file, const size_t &rank) const
 {
 	return rank*width+file;
 }
@@ -200,12 +199,24 @@ bool ChessBoard::isEmptyPos(size_t pos) const
 	return board[pos] == EMPTY_CELL;
 }
 
-void ChessBoard::clearPossibleMoves()
+void ChessBoard::clearPossibleMoves(ChessBoard::ptr toKeep)
 {
-	Log::info("clearPossibleMoves");
 	for(auto it=knownPossibleMoves->begin(), end=knownPossibleMoves->end(); it!=end; ++it)
 	{
-		std::cout << "count=" << it->use_count() << std::endl;
+		if(*it != toKeep)
+		{
+			(*it)->clearPossibleMoves();
+		}
+	}
+	knownPossibleMoves->resize(1);
+	(*knownPossibleMoves)[0]=toKeep; 
+}
+void ChessBoard::clearPossibleMoves()
+{
+	if(!knownPossibleMoves) return;
+	for(auto it=knownPossibleMoves->begin(), end=knownPossibleMoves->end(); it!=end; ++it)
+	{
+		(*it)->clearPossibleMoves();
 	}
 	delete knownPossibleMoves;
 	knownPossibleMoves=nullptr;

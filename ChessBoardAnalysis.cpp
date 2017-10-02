@@ -63,7 +63,7 @@ ChessBoardAnalysis::~ChessBoardAnalysis()
 
 void ChessBoardAnalysis::calculatePossibleMoves()
 {
-	if(board->knownPossibleMoves)
+	if(board->knownPossibleMoves != nullptr)
 	{
 		possibleMoves=board->knownPossibleMoves;
 		return;

@@ -110,10 +110,9 @@ ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
 	
 	ChessMove::ptr cm(new ChessMove);
 	
-	cm->to=cb;
+	cm->setTo(cb);
 	cm->moveNum=0;
 	cm->previous=false;
-	cm->from=nullptr;
 	cb->move=cm;
 	
 	return cb;
@@ -125,7 +124,7 @@ ChessBoard::ptr ChessBoardFactory::createBoard
 	ChessMove::ptr curMove(new ChessMove);
 	
 	curMove->previous=true;
-	curMove->from=fromBoard;
+	curMove->setFrom(fromBoard);
 
 	ChessBoard::ptr toBoard(new ChessBoard(*fromBoard, curMove));
 	
@@ -134,11 +133,11 @@ ChessBoard::ptr ChessBoardFactory::createBoard
 	auto piece = fromBoard->getPiecePos(posFrom);
 	toBoard->placePiecePos(posTo, piece);
 	toBoard->placePiecePos(posFrom, EMPTY_CELL);
+	toBoard->turn=!fromBoard->getTurn();
 	
-	curMove->to=toBoard;
+	curMove->setTo(toBoard);
 	curMove->moveNum=fromBoard->getMove()->moveNum+1;
 	toBoard->move=curMove;
-	toBoard->turn=!fromBoard->getTurn();
 	
 	assert(fromBoard->getTurn()!=toBoard->getTurn());
 	assert(fromBoard->getTurn()==curMove->getTurn());

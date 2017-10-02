@@ -7,16 +7,17 @@
 
 #include "ChessMove.hpp"
 
+#include <cassert>
 #include "Log.hpp"
 
 ChessMove::ChessMove()
-	: previous(false), from(nullptr)
+	: previous(false), to(nullptr), from(nullptr)
 {}
 
 bool ChessMove::isMovePossible() const
 {
 	return true;
-	if(ChessBoard::ptr pTo = to.lock())
+/*	if(ChessBoard::ptr pTo = to.lock())
 	{
 		ChessPiece kingPiece;
 		if(pTo->getTurn()==ChessPlayerColour::WHITE)
@@ -84,41 +85,46 @@ bool ChessMove::isMovePossible() const
 	{
 		return false;
 	}
+	*/
 }
 
 bool ChessMove::hasPrevious() const
 {
 	return previous;
 }
+
+void ChessMove::setFrom(ChessBoard::ptr from_)
+{
+	from = from_;
+}
+void ChessMove::setTo(ChessBoard::ptr to_)
+{
+	to = to_;
+	turn = !to_->getTurn();
+}
+
 ChessBoard::ptr ChessMove::getFrom() const
 {
 	return from;
 }
 ChessBoard::ptr ChessMove::getTo() const
 {
-	if(ChessBoard::ptr pTo = to.lock())
-	{
-		return pTo;
-	}
-	else
-	{
-		return nullptr;
-	}
+	return to;
 }
 ChessPlayerColour ChessMove::getTurn() const
 {
-	return !getTo()->getTurn();
+	return turn;
 }
 std::string ChessMove::getNotation() const
 {
 	std::string result ="";
 	
-	if(auto pTo = to.lock())
+	if(from)
 	{
 		ChessPiece piece;
 		int rankFrom, rankTo;
 		char fileFrom, fileTo;
-		for(auto it=pTo->begin(), end=pTo->end(); it!=end; ++it)
+		for(auto it=to->begin(), end=to->end(); it!=end; ++it)
 		{
 			auto pos = it.getPos();
 			if(*it == from->getPiecePos(pos))
@@ -155,13 +161,27 @@ void ChessMove::moveAttempts(
 {
 	const size_t width = cb.getWidth();
 	
+	const size_t rank = pos / width;
+	const size_t file = pos % width;
+	
 	size_t newPos;
+	
 	for(auto direction = mt.begin(), directionEnd=mt.end(); direction != directionEnd; ++direction)
 	{
 		for(auto attempt = direction->begin(), attemptEnd=direction->end(); attempt != attemptEnd; ++attempt)
 		{
-			// TODO: potentially move to ChessBoard
-			newPos = pos  +  attempt->first  +  ( attempt->second * width );
+			const int& rankShift = attempt->second;
+			const int& fileShift = attempt->first;
+			
+			size_t newFile = (int)file + fileShift;
+			size_t newRank = (int)rank + rankShift;
+			
+			if( newFile >= width )
+			{
+				break;
+			}
+			
+			newPos = cb.getPos(newFile, newRank);
 			
 			if( newPos >= cb.getCellCount() )
 			{
