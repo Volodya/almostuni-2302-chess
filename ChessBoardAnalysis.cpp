@@ -47,7 +47,7 @@ unsigned long long ChessBoardAnalysis::constructed=0;
 // class functions
 
 ChessBoardAnalysis::ChessBoardAnalysis(ChessBoard::ptr board_)
-	: board(board_)
+	: board(board_), possibleMoves(nullptr)
 {
 	assert(board!=nullptr);
 	underAttackByBlack = new int8_t[size_t(board->getWidth())*board->getHeight()];
@@ -65,13 +65,13 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 {
 	if(board->knownPossibleMoves != nullptr)
 	{
+		Log::info("Using old possibleMoves");
 		possibleMoves=board->knownPossibleMoves;
 		return;
 	}
-	else
-	{
-		possibleMoves=new std::vector<ChessBoard::ptr>();
-	}
+
+	Log::info("Creating new possibleMoves");
+	possibleMoves=new std::vector<ChessBoard::ptr>();
 
 	ChessBoardFactory factory;
 	typedef ChessMove::ChessMoveRecordingFunction ChessMoveRecordingFunction;
@@ -106,7 +106,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 			[this](size_t pos, size_t newPos) {
 				//assert(maybeMove->getTurn()==ChessPlayerColour::BLACK);
 				
-				if(this->board->getPiecePos(newPos)==KING_BLACK)
+				if(this->board->getPiecePos(newPos)==KING_WHITE)
 				{
 					check=true;
 				}
@@ -118,7 +118,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 			[this](size_t pos, size_t newPos) {
 				assert(this->board->getTurn()==ChessPlayerColour::BLACK);
 								
-				if(this->board->getPiecePos(newPos)==KING_WHITE)
+				if(this->board->getPiecePos(newPos)==KING_BLACK)
 				{
 					check=true;
 				}
@@ -228,14 +228,11 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 
 weight_type ChessBoardAnalysis::chessPositionWeight() const
 {
+
 	weight_type wIsCheckMate = (isCheckMate() ? getWeightMultiplier(board->getTurn()) * CHECKMATE_WEIGHT : 0);
-
 	weight_type wChessPieces = this->chessPiecesWeight();	// count pieces
-
 	weight_type wChessPieceAttacked = this->chessPieceAttackedWeight(); // count attacked pieces
-
 	weight_type wChessCentreControl = this->chessCentreControlWeight(); // control of the centre of the board
-	
 	
 	return
 		wIsCheckMate
@@ -342,7 +339,7 @@ bool ChessBoardAnalysis::isCheckMate() const
 			return getColour(onBoard)==ChessPlayerColour::BLACK;
 		});
 	}
-	
+
 	if(count==0)
 	{
 		return true;
@@ -350,6 +347,7 @@ bool ChessBoardAnalysis::isCheckMate() const
 	
 	if(isCheck())
 	{
+		Log::info("I am here");
 		return possibleMoves->empty();
 	}
 	

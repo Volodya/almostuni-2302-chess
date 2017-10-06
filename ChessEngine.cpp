@@ -63,6 +63,7 @@ void ChessEngineWorker::stop()
 */
 void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int startDepth)
 {
+	assert(original!=nullptr);
 	pleaseStop=false;
 	thread = std::thread( &ChessEngineWorker::startNextMoveCalculationInternal, this, original, startDepth);
 }
@@ -72,17 +73,17 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 {
 	if(this->pleaseStop)
 	{
-		Log::info("throwing an exception");
 		throw ChessEngineWorkerInterruptedException();
 	}
 	
+	analysis->calculatePossibleMoves(); // must be first, even before depth check
 	if(depth==0)
 	{
 		return analysis;
 	}
-	analysis->calculatePossibleMoves();
 	if(analysis->isCheckMate() /* || node.isDraw() */)
 	{
+		Log::info("checkmate");
 		return analysis;
 	}
 	auto answers = analysis->getPossibleMoves();
@@ -120,10 +121,9 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 
 	for(auto it=answers->begin(), answersEnd=answers->end(); it!=answersEnd; ++it)
 	{
-		// check database if the analysis is already there (by hash+depth)
-		
 		// make new analysis
 		ChessBoardAnalysis::ptr analysis(new ChessBoardAnalysis(*it));
+
 		// we are changing res only if v also changes
 		auto potentialRes = calculation(std::move(analysis), depth-1, alpha, beta, maximizingPlayer);
 		auto potentialV = potentialRes->chessPositionWeight()*getWeightMultiplier(maximizingPlayer);
@@ -148,34 +148,30 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 
 void ChessEngineWorker::startNextMoveCalculationInternal(ChessBoard::ptr original, int startDepth)
 {
+	assert(original!=nullptr);
 	int depth = startDepth;
 	auto originalAnalysis = ChessBoardAnalysis::ptr(new ChessBoardAnalysis(original));
 	
 	do
 	{
-		std::cout << "i am thinking" << std::endl;
+		Log::info("i am thinking");
 		try
 		{
 			ChessBoardAnalysis::ptr best = calculation(originalAnalysis,
 				depth, -INFINITY, INFINITY, original->getTurn());
 
+			Log::info("found best move");
 			positionPreferences.emplace_front(best->chessPositionWeight(), best->getBoard());
-			std::cout << "Depth " << depth << " has been calculated" << std::endl;
-			std::cout << " the number of checked boards is " << ChessBoardAnalysis::constructed << std::endl;
-			//std::cout << " current best move is" << std::endl;
-			//std::cout << " size of positionPreferences: " << positionPreferences.size() << std::endl;
-			//positionPreferences.begin()->second->debugPrint();
 			++depth;
 		}
 		catch(std::bad_alloc& e)
 		{
-			std::cerr << "i ran out of memory. depth was " << depth << std::endl;
+			Log::info(std::string("i ran out of memory. depth was ")+std::to_string(depth));
 			pleaseStop=true;
 		}
 		catch(ChessEngineWorkerInterruptedException& e)
 		{
 		}
-		//pleaseStop=true;
 	} while(!pleaseStop);
 }
 
@@ -187,10 +183,11 @@ void ChessEngine::setCurPos(ChessBoard::ptr newPos)
 void ChessEngine::makeMove(ChessBoard::ptr move)
 {
 	assert(move!=nullptr);
+
+	worker.stop();
+	
 	curPos->clearPossibleMoves(move);
 	curPos = move;
-	
-	worker.stop();
 	
 	startNextMoveCalculation();
 }

@@ -46,5 +46,5 @@ void Log::log(Log::LogSeverity severity, std::string text)
 void Log::info(std::string text)
 {
 	getInstance()->log(Log::INFO, text);
-	std::cerr << "[INFO] " << text << std::endl;
+	//std::cerr << "[INFO] " << text << std::endl;
 }

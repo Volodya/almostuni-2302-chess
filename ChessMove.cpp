@@ -16,76 +16,73 @@ ChessMove::ChessMove()
 
 bool ChessMove::isMovePossible() const
 {
-	return true;
-/*	if(ChessBoard::ptr pTo = to.lock())
+	assert(to!=nullptr);
+
+	ChessPiece kingPiece;
+	auto width = to->getWidth();
+	auto height = to->getHeight();
+	if(to->getTurn()==ChessPlayerColour::WHITE)
 	{
-		ChessPiece kingPiece;
-		if(pTo->getTurn()==ChessPlayerColour::WHITE)
+		// if it's white to move, we are looking for a black king
+		kingPiece = KING_BLACK;
+	}
+	else
+	{
+		kingPiece = KING_WHITE;
+	}
+	size_t king[2]={}; // TODO: change this monstrocity!!!!
+	bool found=false;
+	for(size_t pos=0, end=to->getCellCount(); pos<end; ++pos)
+	{
+		if(to->getPiecePos(pos)==kingPiece)
 		{
-			// if it's white to move, we are looking for a black king
-			kingPiece = KING_BLACK;
+			found = true;
+			king[0] = pos / width;
+			king[1] = pos % width;
+			break;
 		}
-		else
+	}
+	auto possiblePieces = ChessBoard::possiblePieces;
+	for(
+		auto attackingPiece = possiblePieces->begin(), end=possiblePieces->end();
+		attackingPiece != end;
+		++attackingPiece )
+	{
+		if(*attackingPiece == EMPTY_CELL || getColour(*attackingPiece) != turn)
 		{
-			kingPiece = KING_WHITE;
+			continue;
 		}
-		size_t king[2]={}; // TODO: change this monstrocity!!!!
-		bool found=false;
-		for(size_t rank=0; !found && rank<8; ++rank)
+		const MoveTemplate* takeMove = moveParameters.at(*attackingPiece)->takeMove;
+		for(auto dir=takeMove->begin(); dir!=takeMove->end(); ++dir)
 		{
-			for(size_t file=0; file<8; ++file)
+			for(auto pos=dir->begin(); pos!=dir->end(); ++pos)
 			{
-				if(
-					(pTo->getPiecePos(file, rank)==kingPiece)
-				  )
+				size_t rank = (int)king[0] - (int)pos->first;
+				size_t file = (int)king[1] - (int)pos->second;
+				if(rank >= height || file >= width ) // TODO: change to board dimentions
 				{
-					found = true;
-					king[0] = rank;
-					king[1] = file;
+					break;
+				}
+				auto piece = to->getPiecePos(file, rank);
+				
+				if(piece==*attackingPiece)
+				{
+					// white pawns are ganging up on white king!!!
+					Log::info(std::to_string((int)*attackingPiece));
+					Log::info("returning false");
+					return false;
+				}
+
+				if(piece!=EMPTY_CELL)
+				{
 					break;
 				}
 			}
 		}
-		auto possiblePieces = ChessBoard::possiblePieces;
-		for(auto attackingPiece = possiblePieces->begin(); attackingPiece != possiblePieces->end(); ++attackingPiece)
-		{
-			if(*attackingPiece == EMPTY_CELL || getColour(*attackingPiece) == pTo->getTurn())
-			{
-				continue;
-			}
-			const MoveTemplate* takeMove = moveParameters.at(*attackingPiece)->takeMove;
-			for(auto dir=takeMove->begin(); dir!=takeMove->end(); ++dir)
-			{
-				for(auto pos=dir->begin(); pos!=dir->end(); ++pos)
-				{
-					int rank = king[0] - pos->first;
-					int file = king[1] - pos->second;
-					if(rank < 0 || file < 0 || rank >= 8 || file >= 8 ) // TODO: change to board dimentions
-					{
-						break;
-					}
-					auto piece = pTo->getPiecePos(file, rank);
-					
-					if(piece==*attackingPiece)
-					{
-						return false;
-					}
-
-					if(piece!=EMPTY_CELL)
-					{
-						break;
-					}
-				}
-			}
-		}
-		
-		return true;
 	}
-	else
-	{
-		return false;
-	}
-	*/
+	
+	Log::info("returning true");
+	return true;
 }
 
 bool ChessMove::hasPrevious() const
