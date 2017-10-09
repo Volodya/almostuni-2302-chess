@@ -213,6 +213,7 @@ void ChessBoard::clearPossibleMoves(ChessBoard::ptr toKeep)
 }
 void ChessBoard::clearPossibleMoves()
 {
+	move.reset();
 	if(!knownPossibleMoves) return;
 	for(auto it=knownPossibleMoves->begin(), end=knownPossibleMoves->end(); it!=end; ++it)
 	{

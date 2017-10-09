@@ -27,7 +27,7 @@ inline constexpr weight_type domination(int8_t white, int8_t black)
 		white>black ? 1 :
 		-1;
 }
-constexpr weight_type weightFromPiece(const ChessPiece cp)
+constexpr weight_type weightFromPiece(const ChessPiece &cp)
 {
 	return 
 		cp==PAWN_WHITE   || cp==PAWN_BLACK   ? BOARD_PAWN_WEIGHT :
@@ -47,7 +47,7 @@ unsigned long long ChessBoardAnalysis::constructed=0;
 // class functions
 
 ChessBoardAnalysis::ChessBoardAnalysis(ChessBoard::ptr board_)
-	: board(board_), possibleMoves(nullptr)
+	: board(std::move(board_)), possibleMoves(nullptr)
 {
 	assert(board!=nullptr);
 	underAttackByBlack = new int8_t[size_t(board->getWidth())*board->getHeight()];
@@ -65,12 +65,10 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 {
 	if(board->knownPossibleMoves != nullptr)
 	{
-		Log::info("Using old possibleMoves");
 		possibleMoves=board->knownPossibleMoves;
 		return;
 	}
 
-	Log::info("Creating new possibleMoves");
 	possibleMoves=new std::vector<ChessBoard::ptr>();
 
 	ChessBoardFactory factory;
@@ -228,12 +226,17 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 
 weight_type ChessBoardAnalysis::chessPositionWeight() const
 {
-
 	weight_type wIsCheckMate = (isCheckMate() ? getWeightMultiplier(board->getTurn()) * CHECKMATE_WEIGHT : 0);
 	weight_type wChessPieces = this->chessPiecesWeight();	// count pieces
 	weight_type wChessPieceAttacked = this->chessPieceAttackedWeight(); // count attacked pieces
 	weight_type wChessCentreControl = this->chessCentreControlWeight(); // control of the centre of the board
-	
+
+/*	
+	Log::info(std::string("wIsCheckMate: ")+std::to_string(wIsCheckMate));
+	Log::info(std::string("wChessPieces: ")+std::to_string(wChessPieces));
+	Log::info(std::string("wChessPieceAttacked: ")+std::to_string(wChessPieceAttacked));
+	Log::info(std::string("wChessCentreControl: ")+std::to_string(wChessCentreControl));
+*/
 	return
 		wIsCheckMate
 		+
@@ -254,11 +257,13 @@ weight_type ChessBoardAnalysis::chessPiecesWeight() const
 	}
 	
 	return
+		PIECE_PRESENT_MILTIPLIER * (
 		BOARD_PAWN_WEIGHT   * (count[PAWN_WHITE]   - count[PAWN_BLACK]) +
 		BOARD_KNIGHT_WEIGHT * (count[KNIGHT_WHITE] - count[KNIGHT_BLACK]) +
 		BOARD_BISHOP_WEIGHT * (count[BISHOP_WHITE] - count[BISHOP_BLACK]) +
 		BOARD_ROOK_WEIGHT   * (count[ROOK_WHITE]   - count[ROOK_BLACK]) +
-		BOARD_QUEEN_WEIGHT  * (count[QUEEN_WHITE]  - count[QUEEN_BLACK]);
+		BOARD_QUEEN_WEIGHT  * (count[QUEEN_WHITE]  - count[QUEEN_BLACK])
+		);
 
 }
 weight_type ChessBoardAnalysis::chessPieceAttackedWeight() const
@@ -347,7 +352,6 @@ bool ChessBoardAnalysis::isCheckMate() const
 	
 	if(isCheck())
 	{
-		Log::info("I am here");
 		return possibleMoves->empty();
 	}
 	

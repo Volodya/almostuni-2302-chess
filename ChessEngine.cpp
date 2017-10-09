@@ -83,7 +83,6 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 	}
 	if(analysis->isCheckMate() /* || node.isDraw() */)
 	{
-		Log::info("checkmate");
 		return analysis;
 	}
 	auto answers = analysis->getPossibleMoves();
@@ -149,30 +148,42 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 void ChessEngineWorker::startNextMoveCalculationInternal(ChessBoard::ptr original, int startDepth)
 {
 	assert(original!=nullptr);
-	int depth = startDepth;
-	auto originalAnalysis = ChessBoardAnalysis::ptr(new ChessBoardAnalysis(original));
 	
-	do
+	try
 	{
-		Log::info("i am thinking");
-		try
+		int depth = startDepth;
+		auto originalAnalysis = ChessBoardAnalysis::ptr(new ChessBoardAnalysis(original));
+		
+		do
 		{
-			ChessBoardAnalysis::ptr best = calculation(originalAnalysis,
-				depth, -INFINITY, INFINITY, original->getTurn());
+			Log::info("i am thinking");
+			try
+			{
+				ChessBoardAnalysis::ptr best = calculation(originalAnalysis,
+					depth, -INFINITY, INFINITY, original->getTurn());
 
-			Log::info("found best move");
-			positionPreferences.emplace_front(best->chessPositionWeight(), best->getBoard());
-			++depth;
-		}
-		catch(std::bad_alloc& e)
-		{
-			Log::info(std::string("i ran out of memory. depth was ")+std::to_string(depth));
-			pleaseStop=true;
-		}
-		catch(ChessEngineWorkerInterruptedException& e)
-		{
-		}
-	} while(!pleaseStop);
+				Log::info("found best move");
+				positionPreferences.emplace_front(best->chessPositionWeight(), best->getBoard());
+				++depth;
+			}
+			catch(std::bad_alloc& e)
+			{
+				Log::info(std::string("i ran out of memory. depth was ")+std::to_string(depth));
+				pleaseStop=true;
+			}
+			catch(ChessEngineWorkerInterruptedException& e)
+			{
+			}
+		} while(!pleaseStop);
+	}
+	catch(std::exception &e)
+	{
+		std::cerr << "Worker Thread: An exception has been thrown: " << e.what() << std::endl;
+	}
+	catch(...)
+	{
+		std::cerr << "Worker Thread: Some unknown exception has been thrown." << std::endl;
+	}
 }
 
 void ChessEngine::setCurPos(ChessBoard::ptr newPos)
@@ -184,12 +195,18 @@ void ChessEngine::makeMove(ChessBoard::ptr move)
 {
 	assert(move!=nullptr);
 
+	Log::info("about to stop worker");
 	worker.stop();
+	Log::info("worker has stopped");
 	
+	Log::info("about to clear the memory");
 	curPos->clearPossibleMoves(move);
+	Log::info("memory has been cleared");
 	curPos = move;
 	
+	Log::info("starting next move calculation");
 	startNextMoveCalculation();
+	Log::info("next move calculation has started");
 }
 
 void ChessEngine::startNextMoveCalculation()
@@ -205,11 +222,19 @@ ChessBoard::ptr ChessEngine::getNextBestMove()
 		return nullptr;
 	}
 	
+	Log::info(std::string("weight: ") + std::to_string(worker.positionPreferences.begin()->first));
 	ChessBoard::ptr result = worker.positionPreferences.begin()->second;
+	if(result==curPos) // nothing has been found since the previous time
+	{
+		Log::info("No new result has been found");
+		return nullptr;
+	}
 	auto next = result;
 	for(;;)
 	{
-		auto previous = next->getMove()->getFrom();
+		auto move = next->getMove();
+		//Log::info(move->getNotation());
+		auto previous = move->getFrom();
 		assert(previous!=nullptr);
 		if(previous==curPos)
 		{

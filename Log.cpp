@@ -41,10 +41,11 @@ constexpr const char* to_string(Log::LogSeverity severity)
 void Log::log(Log::LogSeverity severity, std::string text)
 {
 	logStream << to_string(severity) << ' ' << text << std::endl;
+	logStream << std::flush;
 }
 
 void Log::info(std::string text)
 {
 	getInstance()->log(Log::INFO, text);
-	//std::cerr << "[INFO] " << text << std::endl;
+	std::cerr << "[INFO] " << text << std::endl;
 }

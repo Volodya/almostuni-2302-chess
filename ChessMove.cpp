@@ -11,7 +11,7 @@
 #include "Log.hpp"
 
 ChessMove::ChessMove()
-	: previous(false), to(nullptr), from(nullptr)
+	: previous(false), from(nullptr), to(nullptr)
 {}
 
 bool ChessMove::isMovePossible() const
@@ -21,7 +21,7 @@ bool ChessMove::isMovePossible() const
 	ChessPiece kingPiece;
 	auto width = to->getWidth();
 	auto height = to->getHeight();
-	if(to->getTurn()==ChessPlayerColour::WHITE)
+	if(turn==ChessPlayerColour::BLACK)
 	{
 		// if it's white to move, we are looking for a black king
 		kingPiece = KING_BLACK;
@@ -31,12 +31,10 @@ bool ChessMove::isMovePossible() const
 		kingPiece = KING_WHITE;
 	}
 	size_t king[2]={}; // TODO: change this monstrocity!!!!
-	bool found=false;
 	for(size_t pos=0, end=to->getCellCount(); pos<end; ++pos)
 	{
 		if(to->getPiecePos(pos)==kingPiece)
 		{
-			found = true;
 			king[0] = pos / width;
 			king[1] = pos % width;
 			break;
@@ -48,7 +46,7 @@ bool ChessMove::isMovePossible() const
 		attackingPiece != end;
 		++attackingPiece )
 	{
-		if(*attackingPiece == EMPTY_CELL || getColour(*attackingPiece) != turn)
+		if(*attackingPiece == EMPTY_CELL || getColour(*attackingPiece) == turn)
 		{
 			continue;
 		}
@@ -68,8 +66,6 @@ bool ChessMove::isMovePossible() const
 				if(piece==*attackingPiece)
 				{
 					// white pawns are ganging up on white king!!!
-					Log::info(std::to_string((int)*attackingPiece));
-					Log::info("returning false");
 					return false;
 				}
 
@@ -81,7 +77,6 @@ bool ChessMove::isMovePossible() const
 		}
 	}
 	
-	Log::info("returning true");
 	return true;
 }
 

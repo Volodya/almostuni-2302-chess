@@ -20,33 +20,43 @@
 
 int main()
 {
-	ChessBoardFactory factory;
-	auto cb = factory.createBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-	//auto cb = factory.createBoard("4k3/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
-	assert(cb->getMove()->hasPrevious()==false);
-	assert(cb->getMove()->getFrom()==nullptr);
-	Log::info( std::to_string( (unsigned long long)(cb.get()) ));
-		
-	ChessEngine engine;
-	engine.setCurPos(cb);
-	engine.startNextMoveCalculation();
-	for(;;)
+	try
 	{
-		ChessBoardAnalysis::constructed=0;
-		auto start = std::chrono::high_resolution_clock::now();
-		std::cin.get();
-		auto end = std::chrono::high_resolution_clock::now();
-		long double duration = (end-start).count();
-		duration /= 1000000000;
-		
-		std::cout << ChessBoardAnalysis::constructed << '/' << duration << ' ' << ChessBoardAnalysis::constructed / duration << std::endl;
-		
-		auto best = engine.getNextBestMove();
-		
-		best->debugPrint();
-		
-		engine.makeMove(best);
+		ChessBoardFactory factory;
+		auto cb = factory.createBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+		//auto cb = factory.createBoard("4k3/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
+		assert(cb->getMove()->hasPrevious()==false);
+		assert(cb->getMove()->getFrom()==nullptr);
+		Log::info( std::to_string( (unsigned long long)(cb.get()) ));
+			
+		ChessEngine engine;
+		engine.setCurPos(cb);
+		engine.startNextMoveCalculation();
+		for(;;)
+		{
+			ChessBoardAnalysis::constructed=0;
+			auto start = std::chrono::high_resolution_clock::now();
+			std::cin.get();
+			auto end = std::chrono::high_resolution_clock::now();
+			long double duration = (end-start).count();
+			duration /= 1000000000;
+			
+			std::cout << ChessBoardAnalysis::constructed << '/' << duration << ' ' << ChessBoardAnalysis::constructed / duration << std::endl;
+			
+			auto best = engine.getNextBestMove();
+			
+			best->debugPrint();
+			
+			engine.makeMove(best);
+		}
 	}
-	
+	catch(std::exception &e)
+	{
+		std::cerr << "An exception has been thrown: " << e.what() << std::endl;
+	}
+	catch(...)
+	{
+		std::cerr << "Some unknown exception has been thrown." << std::endl;
+	}
 	return 0;
 }
