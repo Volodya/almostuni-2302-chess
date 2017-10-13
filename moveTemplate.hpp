@@ -38,7 +38,7 @@ const MoveTemplate pawnBlackMoveTake =
 	{ std::pair<int, int>(-1,-1) }
 };
 
-const MoveTemplate knightMove =
+const MoveTemplate knightMove = // one move per direction, because it cannot be blocked
 {
 	{ std::pair<int, int>(1, 2) },
 	{ std::pair<int, int>(-1, 2) },

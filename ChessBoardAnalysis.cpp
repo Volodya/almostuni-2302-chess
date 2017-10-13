@@ -295,7 +295,7 @@ weight_type ChessBoardAnalysis::chessPieceAttackedWeight() const
 
 weight_type ChessBoardAnalysis::chessCentreControlWeight() const
 {
-	const static weight_type CELL_WEIGHT_MULTIPLIER = 3000;
+	const static weight_type CELL_WEIGHT_MULTIPLIER = 300;
 	const static weight_type CELL_WEIGHT[64]
 	{
 		3, 3, 3, 3, 3, 3, 3, 3,
@@ -329,6 +329,7 @@ bool ChessBoardAnalysis::isCheck() const
 
 bool ChessBoardAnalysis::isCheckMate() const
 {
+	/*
 	int count=0;
 	if(board->getTurn()==ChessPlayerColour::BLACK)
 	{
@@ -349,6 +350,7 @@ bool ChessBoardAnalysis::isCheckMate() const
 	{
 		return true;
 	}
+	*/
 	
 	if(isCheck())
 	{

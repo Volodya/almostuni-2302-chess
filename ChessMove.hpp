@@ -55,6 +55,8 @@ public:
 		const ChessBoard &cb, size_t pos,
 		const MoveTemplate& mt,
 		bool canTake=true, bool canMoveToEmpty=true);
+	
+	static std::string generateCompleteMoveChain(ChessBoard::ptr finalBoard);
 
 };
 

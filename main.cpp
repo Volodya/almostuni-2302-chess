@@ -23,8 +23,21 @@ int main()
 	try
 	{
 		ChessBoardFactory factory;
-		auto cb = factory.createBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-		//auto cb = factory.createBoard("4k3/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
+		//auto cb = factory.createBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+		auto cb = factory.createBoard("R3k3/7R/8/8/8/8/8/4K3 b KQkq - 0 1");
+		cb->debugPrint();
+		
+		ChessBoardAnalysis analysis(cb);
+		analysis.calculatePossibleMoves();
+		std::cout << std::boolalpha << "isCheck " << << analysis.isCheck() << std::endl;
+		std::cout << std::boolalpha << "isCheckMate " << analysis.isCheckMate() << std::endl;
+		std::cout << "Chess Pieces Weight " << analysis.chessPiecesWeight() << std::endl;
+		std::cout << "Chess Pieces Attacked Weight " << analysis.chessPieceAttackedWeight() << std::endl;
+		std::cout << "Chess Control Weight " << analysis.chessCentreControlWeight() << std::endl;
+		std::cout << "Chess Position Weight " << analysis.chessPositionWeight() << std::endl;
+		
+		return 0;
+		
 		assert(cb->getMove()->hasPrevious()==false);
 		assert(cb->getMove()->getFrom()==nullptr);
 		Log::info( std::to_string( (unsigned long long)(cb.get()) ));

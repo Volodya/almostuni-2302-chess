@@ -83,11 +83,13 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 	}
 	if(analysis->isCheckMate() /* || node.isDraw() */)
 	{
+		Log::info("i found a checkmate!");
 		return analysis;
 	}
 	auto answers = analysis->getPossibleMoves();
 	if(answers->empty())
 	{
+		
 		return analysis;
 	}
 	ChessBoardAnalysis::ptr res=nullptr;
@@ -156,13 +158,13 @@ void ChessEngineWorker::startNextMoveCalculationInternal(ChessBoard::ptr origina
 		
 		do
 		{
-			Log::info("i am thinking");
 			try
 			{
 				ChessBoardAnalysis::ptr best = calculation(originalAnalysis,
 					depth, -INFINITY, INFINITY, original->getTurn());
 
 				Log::info("found best move");
+				Log::info(ChessMove::generateCompleteMoveChain(best->getBoard()));
 				positionPreferences.emplace_front(best->chessPositionWeight(), best->getBoard());
 				++depth;
 			}
@@ -195,18 +197,12 @@ void ChessEngine::makeMove(ChessBoard::ptr move)
 {
 	assert(move!=nullptr);
 
-	Log::info("about to stop worker");
 	worker.stop();
-	Log::info("worker has stopped");
 	
-	Log::info("about to clear the memory");
 	curPos->clearPossibleMoves(move);
-	Log::info("memory has been cleared");
 	curPos = move;
 	
-	Log::info("starting next move calculation");
 	startNextMoveCalculation();
-	Log::info("next move calculation has started");
 }
 
 void ChessEngine::startNextMoveCalculation()
@@ -222,7 +218,7 @@ ChessBoard::ptr ChessEngine::getNextBestMove()
 		return nullptr;
 	}
 	
-	Log::info(std::string("weight: ") + std::to_string(worker.positionPreferences.begin()->first));
+	Log::info(std::string("weight: ") + std::to_string(worker.positionPreferences.begin()->first/1000000));
 	ChessBoard::ptr result = worker.positionPreferences.begin()->second;
 	if(result==curPos) // nothing has been found since the previous time
 	{

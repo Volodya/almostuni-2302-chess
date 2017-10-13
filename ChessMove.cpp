@@ -65,7 +65,6 @@ bool ChessMove::isMovePossible() const
 				
 				if(piece==*attackingPiece)
 				{
-					// white pawns are ganging up on white king!!!
 					return false;
 				}
 
@@ -203,4 +202,23 @@ void ChessMove::moveAttempts(
 			}
 		}
 	}
+}
+
+std::string ChessMove::generateCompleteMoveChain(ChessBoard::ptr finalBoard)
+{
+	if(finalBoard==nullptr)
+	{
+		return std::string("");
+	}
+	
+	ptr move = finalBoard->getMove();
+	if(!move->from)
+	{
+		return std::string("");
+	}
+	
+	return
+		generateCompleteMoveChain(move->from) + 
+		std::to_string(move->moveNum) + std::string(" ") +
+		move->getNotation() + std::string(" | ");
 }
