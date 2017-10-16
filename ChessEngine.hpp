@@ -22,7 +22,8 @@ class ChessEngineWorker
 {
 	friend class ChessEngine;
 	
-	typedef std::pair<double, ChessBoard::ptr> WeightBoardPair;
+	typedef ChessBoardAnalysis::weight_type weight_type;
+	typedef std::pair<weight_type, ChessBoard::ptr> WeightBoardPair;
 	
 	bool pleaseStop; // request to stop received
 	ChessBoard::ptr original;
@@ -38,7 +39,7 @@ class ChessEngineWorker
 	void startNextMoveCalculationInternal(ChessBoard::ptr original, int startDepth); // this is what performs execution
 	
 	ChessBoardAnalysis::ptr calculation(ChessBoardAnalysis::ptr analysis, int depth,
-		double alpha, double beta, ChessPlayerColour maximizingPlayer);
+		weight_type alpha, weight_type beta, ChessPlayerColour maximizingPlayer);
 };
 class ChessEngineWorkerInterruptedException
 {};

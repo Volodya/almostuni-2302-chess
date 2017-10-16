@@ -106,6 +106,10 @@ ChessPlayerColour ChessMove::getTurn() const
 {
 	return turn;
 }
+int ChessMove::getMoveNum() const
+{
+	return moveNum;
+}
 std::string ChessMove::getNotation() const
 {
 	std::string result ="";
@@ -184,7 +188,7 @@ void ChessMove::moveAttempts(
 				if(canTake)
 				{
 					
-					if(getColour(cb.getPiecePos(newPos)) != cb.getTurn())
+					if(getColour(cb.getPiecePos(newPos)) != getColour(cb.getPiecePos(pos)))
 					{
 						recFunTake(pos, newPos);
 					}

@@ -47,11 +47,11 @@ unsigned long long ChessBoardAnalysis::constructed=0;
 // class functions
 
 ChessBoardAnalysis::ChessBoardAnalysis(ChessBoard::ptr board_)
-	: board(std::move(board_)), possibleMoves(nullptr)
+	: board(std::move(board_)), possibleMoves(nullptr), check(false)
 {
 	assert(board!=nullptr);
-	underAttackByBlack = new int8_t[size_t(board->getWidth())*board->getHeight()];
-	underAttackByWhite = new int8_t[size_t(board->getWidth())*board->getHeight()];
+	underAttackByBlack = new int8_t[size_t(board->getWidth())*board->getHeight()]{};
+	underAttackByWhite = new int8_t[size_t(board->getWidth())*board->getHeight()]{};
 	++constructed;
 }
 
@@ -115,7 +115,6 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 			// white
 			[this](size_t pos, size_t newPos) {
 				assert(this->board->getTurn()==ChessPlayerColour::BLACK);
-								
 				if(this->board->getPiecePos(newPos)==KING_BLACK)
 				{
 					check=true;
@@ -226,26 +225,28 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 
 weight_type ChessBoardAnalysis::chessPositionWeight() const
 {
-	weight_type wIsCheckMate = (isCheckMate() ? getWeightMultiplier(board->getTurn()) * CHECKMATE_WEIGHT : 0);
-	weight_type wChessPieces = this->chessPiecesWeight();	// count pieces
-	weight_type wChessPieceAttacked = this->chessPieceAttackedWeight(); // count attacked pieces
-	weight_type wChessCentreControl = this->chessCentreControlWeight(); // control of the centre of the board
+	if(isCheckMate())
+	{
+		weight_type wIsCheckMate = getWeightMultiplier(board->getTurn()) * CHECKMATE_WEIGHT;
+		weight_type wMoveNum = getWeightMultiplier(board->getTurn())*board->getMove()->getMoveNum();
+		
+		return wIsCheckMate + wMoveNum;
+	}
+	else
+	{
+		weight_type wChessPieces = this->chessPiecesWeight();	// count pieces
+		weight_type wChessPieceAttacked = this->chessPieceAttackedWeight(); // count attacked pieces
+		weight_type wChessCentreControl = this->chessCentreControlWeight(); // control of the centre of the board
 
 /*	
 	Log::info(std::string("wIsCheckMate: ")+std::to_string(wIsCheckMate));
 	Log::info(std::string("wChessPieces: ")+std::to_string(wChessPieces));
 	Log::info(std::string("wChessPieceAttacked: ")+std::to_string(wChessPieceAttacked));
 	Log::info(std::string("wChessCentreControl: ")+std::to_string(wChessCentreControl));
+	Log::info(std::string("wMoveNum: ")+std::to_string(wMoveNum));
 */
-	return
-		wIsCheckMate
-		+
-		wChessPieces
-		+
-		wChessPieceAttacked
-		+
-		wChessCentreControl
-		;
+		return wChessPieces + wChessPieceAttacked + wChessCentreControl;
+	}
 }
 
 weight_type ChessBoardAnalysis::chessPiecesWeight() const
@@ -273,6 +274,7 @@ weight_type ChessBoardAnalysis::chessPieceAttackedWeight() const
 	ChessPiece curPiece;
 	for(size_t pos=0, end=board->getCellCount(); pos!=end; ++pos)
 	{
+		// get non-empty cells
 		curPiece = board->getPiecePos(pos);
 		if(curPiece == EMPTY_CELL) continue;
 		
@@ -286,7 +288,7 @@ weight_type ChessBoardAnalysis::chessPieceAttackedWeight() const
 		{
 			attackOrDefence = PIECE_DEFENCE_MUTIPLIER; // defending own piece
 		}
-			
+		
 		result += dominator * weightFromPiece(curPiece) * attackOrDefence;
 	}
 	

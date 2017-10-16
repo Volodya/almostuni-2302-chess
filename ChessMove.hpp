@@ -43,6 +43,7 @@ public:
 	
 	ChessBoard::ptr getFrom() const;
 	ChessBoard::ptr getTo() const;
+	int getMoveNum() const;
 	ChessPlayerColour getTurn() const;
 	std::string getNotation() const;
 	
