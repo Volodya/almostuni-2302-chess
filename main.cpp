@@ -23,8 +23,8 @@ int main()
 	try
 	{
 		ChessBoardFactory factory;
-		//auto cb = factory.createBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-		auto cb = factory.createBoard("4k3/7R/8/8/8/8/8/R3K3 w KQkq - 0 1");
+		auto cb = factory.createBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+		//auto cb = factory.createBoard("4k3/7R/8/8/8/8/8/R3K3 w KQkq - 0 1");
 		cb->debugPrint();
 		
 		ChessBoardAnalysis analysis(cb);
@@ -40,7 +40,6 @@ int main()
 		
 		assert(cb->getMove()->hasPrevious()==false);
 		assert(cb->getMove()->getFrom()==nullptr);
-		Log::info( std::to_string( (unsigned long long)(cb.get()) ));
 			
 		ChessEngine engine;
 		engine.setCurPos(cb);

@@ -77,7 +77,8 @@ public:
 	void clearPossibleMoves();
 	void clearPossibleMoves(ChessBoard::ptr toKeep);
 	
-	std::vector<ChessBoard::ptr>* knownPossibleMoves;	
+	std::vector<ChessBoard::ptr>* knownPossibleMoves;
+	bool knownCheck;	
 	
 	friend class ChessBoardFactory;
 	friend class ChessBoardIterator;

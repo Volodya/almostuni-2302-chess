@@ -71,6 +71,8 @@ void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int s
 ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr analysis, int depth,
 		weight_type alpha, weight_type beta, ChessPlayerColour maximizingPlayer)
 {
+	//Log::info(std::string("start calculation. depth=") + std::to_string(depth) + std::string(" player=") + std::to_string((int)maximizingPlayer));
+	//Log::info(std::string("board turn=") + std::to_string((int)analysis->getBoard()->getTurn()));
 	if(this->pleaseStop)
 	{
 		throw ChessEngineWorkerInterruptedException();
@@ -79,16 +81,18 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 	analysis->calculatePossibleMoves(); // must be first, even before depth check
 	if(depth==0)
 	{
+		//Log::info("depth 0");
 		return analysis;
 	}
 	if(analysis->isCheckMate() /* || node.isDraw() */)
 	{
-		Log::info("i found a checkmate!");
+		//Log::info("i found a checkmate!");
 		return analysis;
 	}
 	auto answers = analysis->getPossibleMoves();
 	if(answers->empty())
 	{
+		//Log::info("no possible moves");
 		return analysis;
 	}
 	ChessBoardAnalysis::ptr res=nullptr;
@@ -98,8 +102,9 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 	std::function<weight_type(weight_type, weight_type)> newAlpha, newBeta;
 	if(maximizingPlayer == analysis->getBoard()->getTurn())
 	{
+		//Log::info("first set");
 		v = ChessBoardAnalysis::MIN_WEIGHT;
-		testBetterV = std::less<weight_type>();
+		testBetterV = std::greater<weight_type>();
 		newAlpha = [](weight_type alpha, weight_type v) {
 			return std::max(alpha, v);
 		};
@@ -109,8 +114,9 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 	}
 	else
 	{
+		//Log::info("second set");
 		v = ChessBoardAnalysis::MAX_WEIGHT;
-		testBetterV = std::greater<weight_type>();
+		testBetterV = std::less<weight_type>();
 		newAlpha = [](weight_type alpha, weight_type v) {
 			return alpha;
 		};
@@ -121,21 +127,19 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 
 	for(auto it=answers->begin(), answersEnd=answers->end(); it!=answersEnd; ++it)
 	{
+		//Log::info("for-loop start");
 		// make new analysis
 		ChessBoardAnalysis::ptr analysis(new ChessBoardAnalysis(*it));
 
 		// we are changing res only if v also changes
 		auto potentialRes = calculation(std::move(analysis), depth-1, alpha, beta, maximizingPlayer);
 		auto potentialV = potentialRes->chessPositionWeight()*getWeightMultiplier(maximizingPlayer);
+		//Log::info(std::string("welcome back with the v=")+std::to_string(potentialV));
 		
-		if(potentialV==-99999999999ll)
+		//Log::info(std::string("test ")+std::to_string(potentialV)+std::string(" ")+std::to_string(v)+std::string(" ")+std::to_string(testBetterV(potentialV, v)));
+		if(testBetterV(potentialV, v))
 		{
-			Log::info("found 99999999999");
-		}
-		// record the weight+depth+hash if it's new
-		
-		if(testBetterV(v, potentialV))
-		{
+			//Log::info("test for better v passed");
 			res = std::move(potentialRes);
 			v = potentialV;
 		}
@@ -147,6 +151,8 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 			break;
 		}
 	}
+	//Log::info("end calculation. depth=" + std::to_string(depth) + std::string(" player=") + std::to_string((int)maximizingPlayer));
+	assert(res!=nullptr);
 	return res;
 };
 
@@ -167,7 +173,7 @@ void ChessEngineWorker::startNextMoveCalculationInternal(ChessBoard::ptr origina
 					ChessBoardAnalysis::MIN_WEIGHT, ChessBoardAnalysis::MAX_WEIGHT,
 					original->getTurn());
 
-				Log::info("found best move");
+				Log::info(std::string("found best move. depth=")+std::to_string(depth));
 				Log::info(ChessMove::generateCompleteMoveChain(best->getBoard()));
 				Log::info(std::to_string(best->chessPositionWeight()));
 

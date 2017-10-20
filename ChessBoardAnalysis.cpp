@@ -66,6 +66,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 	if(board->knownPossibleMoves != nullptr)
 	{
 		possibleMoves=board->knownPossibleMoves;
+		check=board->knownCheck;
 		return;
 	}
 
@@ -221,6 +222,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 	}
 	
 	board->knownPossibleMoves = possibleMoves;
+	board->knownCheck = check;
 }
 
 weight_type ChessBoardAnalysis::chessPositionWeight() const
