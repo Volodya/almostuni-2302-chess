@@ -21,7 +21,9 @@ class ChessBoardAnalysis
 public:
 	typedef std::shared_ptr<ChessBoardAnalysis> ptr;
 	typedef signed long long weight_type;
-	static const weight_type INFINITE_WEIGHT=std::numeric_limits<weight_type>::max();
+	static const weight_type MIN_WEIGHT=std::numeric_limits<weight_type>::min();
+	static const weight_type MAX_WEIGHT=std::numeric_limits<weight_type>::max();
+
 	static unsigned long long constructed;
 private:
 	ChessBoard::ptr board;

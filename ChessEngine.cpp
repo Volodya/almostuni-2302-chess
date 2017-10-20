@@ -98,7 +98,7 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 	std::function<weight_type(weight_type, weight_type)> newAlpha, newBeta;
 	if(maximizingPlayer == analysis->getBoard()->getTurn())
 	{
-		v = -ChessBoardAnalysis::INFINITE_WEIGHT;
+		v = ChessBoardAnalysis::MIN_WEIGHT;
 		testBetterV = std::less<weight_type>();
 		newAlpha = [](weight_type alpha, weight_type v) {
 			return std::max(alpha, v);
@@ -109,7 +109,7 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 	}
 	else
 	{
-		v = ChessBoardAnalysis::INFINITE_WEIGHT;
+		v = ChessBoardAnalysis::MAX_WEIGHT;
 		testBetterV = std::greater<weight_type>();
 		newAlpha = [](weight_type alpha, weight_type v) {
 			return alpha;
@@ -164,8 +164,8 @@ void ChessEngineWorker::startNextMoveCalculationInternal(ChessBoard::ptr origina
 			try
 			{
 				ChessBoardAnalysis::ptr best = calculation(originalAnalysis, depth,
-					-ChessBoardAnalysis::INFINITE_WEIGHT, ChessBoardAnalysis::INFINITE_WEIGHT,
-					!original->getTurn());
+					ChessBoardAnalysis::MIN_WEIGHT, ChessBoardAnalysis::MAX_WEIGHT,
+					original->getTurn());
 
 				Log::info("found best move");
 				Log::info(ChessMove::generateCompleteMoveChain(best->getBoard()));
