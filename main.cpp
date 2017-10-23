@@ -23,7 +23,8 @@ int main()
 	try
 	{
 		ChessBoardFactory factory;
-		auto cb = factory.createBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+		//auto cb = factory.createBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+		auto cb = factory.createBoard("7k/8/8/6Pp/8/8/8/7K b KQkq - 0 1");
 		//auto cb = factory.createBoard("4k3/7R/8/8/8/8/8/R3K3 w KQkq - 0 1");
 		cb->debugPrint();
 		
@@ -36,7 +37,13 @@ int main()
 		std::cout << "Chess Control Weight " << analysis.chessCentreControlWeight() << std::endl;
 		std::cout << "Chess Position Weight " << analysis.chessPositionWeight() << std::endl;
 		
-		//return 0;
+		auto possible = analysis.getPossibleMoves();
+		for(auto it=possible->begin(); it!=possible->end(); ++it)
+		{
+			(*it)->debugPrint();
+		}
+		
+		return 0;
 		
 		assert(cb->getMove()->hasPrevious()==false);
 		assert(cb->getMove()->getFrom()==nullptr);

@@ -221,6 +221,134 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		}
 	}
 	
+	if(board->getTurn()==ChessPlayerColour::WHITE)
+	{
+		// process white pawns on first ranks
+		for(size_t pos = 0, end=board->getWidth()*2; pos<end; ++pos)
+		{
+			auto curPiece = board->getPiecePos(pos);
+			if(curPiece != PAWN_WHITE) continue;
+			
+			auto enPassan=pos+board->getWidth();
+			if(board->getPiecePos(enPassan) == EMPTY_CELL)
+			{
+				auto newPos = pos+2*board->getWidth();
+				if(board->getPiecePos(newPos)==EMPTY_CELL)
+				{
+					auto nextBoard = factory.createBoard(this->board, pos, newPos);
+					auto maybeMove = nextBoard->getMove();
+					
+					if(maybeMove->isMovePossible())
+					{
+						nextBoard->enPassan=enPassan;
+						this->possibleMoves->push_back(nextBoard);
+					}
+				}
+			}
+		}
+		if(board->enPassan!=board->cellCount)
+		{
+			// test left
+			if(board->enPassan % board->width != 0)
+			{
+				auto pos = board->enPassan - board->width - 1;
+				if(board->getPiecePos(pos)==PAWN_WHITE)
+				{
+					auto nextBoard = factory.createBoard(this->board, pos, board->enPassan);
+					auto maybeMove = nextBoard->getMove();
+					
+					if(maybeMove->isMovePossible())
+					{
+						++underAttackByWhite[pos+1];
+						nextBoard->placePiecePos(pos+1, EMPTY_CELL);
+						this->possibleMoves->push_back(nextBoard);
+					}
+				}
+			}
+			// test right
+			if(board->enPassan % board->width != board->width-1)
+			{
+				auto pos = board->enPassan - board->width + 1;
+				if(board->getPiecePos(pos)==PAWN_WHITE)
+				{
+					auto nextBoard = factory.createBoard(this->board, pos, board->enPassan);
+					auto maybeMove = nextBoard->getMove();
+					
+					if(maybeMove->isMovePossible())
+					{
+						++underAttackByWhite[pos-1];
+						nextBoard->placePiecePos(pos-1, EMPTY_CELL);
+						this->possibleMoves->push_back(nextBoard);
+					}
+				}
+			}
+		}
+	}
+	else // if ChessPlayerColour::Black
+	{
+		// process black pawns on first ranks
+		for(size_t pos = board->getCellCount()-1, end=board->getCellCount() - (board->getWidth()*2) -1; pos>=end; --pos)
+		{
+			
+			auto curPiece = board->getPiecePos(pos);
+			if(curPiece != PAWN_BLACK) continue;
+			
+			auto enPassan=pos-board->getWidth();
+			if(board->getPiecePos(enPassan) == EMPTY_CELL)
+			{
+				auto newPos = pos-2*board->getWidth();
+				if(board->getPiecePos(newPos)==EMPTY_CELL)
+				{
+					auto nextBoard = factory.createBoard(this->board, pos, newPos);
+					auto maybeMove = nextBoard->getMove();
+					
+					if(maybeMove->isMovePossible())
+					{
+						nextBoard->enPassan=enPassan;
+						this->possibleMoves->push_back(nextBoard);
+					}
+				}
+			}
+		}
+		if(board->enPassan!=board->cellCount)
+		{
+			// test left
+			if(board->enPassan % board->width != 0)
+			{
+				auto pos = board->enPassan + board->width - 1;
+				if(board->getPiecePos(pos)==PAWN_BLACK)
+				{
+					auto nextBoard = factory.createBoard(this->board, pos, board->enPassan);
+					auto maybeMove = nextBoard->getMove();
+					
+					if(maybeMove->isMovePossible())
+					{
+						++underAttackByBlack[pos+1];
+						nextBoard->placePiecePos(pos+1, EMPTY_CELL);
+						this->possibleMoves->push_back(nextBoard);
+					}
+				}
+			}
+			// test right
+			if(board->enPassan % board->width != board->width-1)
+			{
+				auto pos = board->enPassan + board->width + 1;
+
+				if(board->getPiecePos(pos)==PAWN_BLACK)
+				{
+					auto nextBoard = factory.createBoard(this->board, pos, board->enPassan);
+					auto maybeMove = nextBoard->getMove();
+					
+					if(maybeMove->isMovePossible())
+					{
+						++underAttackByBlack[pos-1];
+						nextBoard->placePiecePos(pos-1, EMPTY_CELL);
+						this->possibleMoves->push_back(nextBoard);
+					}
+				}
+			}
+		}
+	}
 	board->knownPossibleMoves = possibleMoves;
 	board->knownCheck = check;
 }

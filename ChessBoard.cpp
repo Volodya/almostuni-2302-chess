@@ -25,6 +25,7 @@ ChessBoard::ChessBoard(ChessGameParameters::ptr param)
 	: cellCount(param->getCellCount()),
 	  width(param->getWidth()), height(param->getHeight()),
 	  board(new ChessPiece[cellCount]),
+	  enPassan(cellCount),
 	  turn(ChessPlayerColour::WHITE), move(nullptr),
 	  knownPossibleMoves(nullptr)
 {
@@ -36,6 +37,7 @@ ChessBoard::ChessBoard(const ChessBoard& that, ChessMove::ptr move_)
 	: cellCount(that.cellCount),
 	  width(that.width), height(that.height),
 	  board(new ChessPiece[cellCount]),
+	  enPassan(cellCount),
 	  turn(that.turn), move(move_),
 	  knownPossibleMoves(nullptr)
 {
@@ -138,7 +140,14 @@ void ChessBoard::debugPrint() const
 			for(size_t file=0; file<width; ++file)
 			{
 				c = board[getPos(file, rank-1)];
-				std::cout << ' ' << chessPieceStrings[c];
+				if(getPos(file, rank-1)==enPassan)
+				{
+					std::cout << ' ' << '*';
+				}
+				else
+				{
+					std::cout << ' ' << chessPieceStrings[c];
+				}
 			}
 			std::cout << std::endl;
 		}

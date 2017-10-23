@@ -115,6 +115,8 @@ ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
 	cm->previous=false;
 	cb->move=cm;
 	
+	cb->enPassan=30;
+	
 	return cb;
 }
 

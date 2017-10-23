@@ -20,6 +20,7 @@
 #include "ChessGameParameters.hpp"
 
 class ChessMove;
+class ChessBoardAnalysis;
 
 class ChessBoard;
 
@@ -34,11 +35,14 @@ private:
 	size_t cellCount;
 	size_t width, height;
 	ChessPiece* board; // [rank*w+file]
-	//std::array<std::unique_ptr<BitBoard>, KNOWN_CHESS_PIECE_COUNT> bitBoards;
+	size_t enPassan;
 	
 	ChessPlayerColour turn;
 	
 	std::shared_ptr<ChessMove> move; // ChessMove::ptr
+	
+	std::vector<ChessBoard::ptr>* knownPossibleMoves;
+	bool knownCheck;	
 	
 	ChessBoard() = delete;
 	ChessBoard(const ChessBoard& that) = delete;
@@ -77,13 +81,11 @@ public:
 	void clearPossibleMoves();
 	void clearPossibleMoves(ChessBoard::ptr toKeep);
 	
-	std::vector<ChessBoard::ptr>* knownPossibleMoves;
-	bool knownCheck;	
-	
 	friend class ChessBoardFactory;
 	friend class ChessBoardIterator;
 	friend class ChessBoardConstIterator;
 	friend class ChessMove;
+	friend class ChessBoardAnalysis;
 };
 
 #endif
