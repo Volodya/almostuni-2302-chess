@@ -32,6 +32,10 @@ ChessBoard::ChessBoard(ChessGameParameters::ptr param)
 	possiblePieces = param->getPossiblePieces();
 	
 	std::fill(board, board+cellCount, EMPTY_CELL);
+	std::fill(whiteKingPos, whiteKingPos+3, cellCount);
+	std::fill(blackKingPos, blackKingPos+3, cellCount);
+	
+	whiteCastling[0] = whiteCastling[1] = blackCastling[0] = blackCastling[1] = cellCount;
 }
 ChessBoard::ChessBoard(const ChessBoard& that, ChessMove::ptr move_)
 	: cellCount(that.cellCount),
@@ -42,6 +46,12 @@ ChessBoard::ChessBoard(const ChessBoard& that, ChessMove::ptr move_)
 	  knownPossibleMoves(nullptr)
 {
 	std::copy(that.board, that.board+cellCount, this->board);
+
+	std::copy(that.whiteKingPos, that.whiteKingPos+3, this->whiteKingPos);
+	std::copy(that.blackKingPos, that.blackKingPos+3, this->blackKingPos);
+
+	std::copy(that.whiteCastling, that.whiteCastling+2, this->whiteCastling);
+	std::copy(that.blackCastling, that.blackCastling+2, this->blackCastling);
 }
 
 ChessBoard::~ChessBoard()

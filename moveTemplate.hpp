@@ -147,24 +147,6 @@ struct ChessPieceParameters
 	ChessPieceParameters(const MoveTemplate* anyMove_);
 };
 
-/*
-const std::map<ChessPiece, const ChessPieceParameters> moveParameters =
-	{
-			{PAWN_WHITE,   },
-			{PAWN_BLACK,   },
-			{KNIGHT_WHITE, },
-			{KNIGHT_BLACK, },
-			{BISHOP_WHITE, },
-			{BISHOP_BLACK, },
-			{ROOK_WHITE,   },
-			{ROOK_BLACK,   },
-			{QUEEN_WHITE,  },
-			{QUEEN_BLACK,  },
-			{KING_WHITE,   },
-			{KING_BLACK,   }
-	};
-*/
-
 const std::array<const ChessPieceParameters * const, KNOWN_CHESS_PIECE_COUNT> moveParameters =
 	{
 		/* EMPTY_CELL =     */ nullptr,

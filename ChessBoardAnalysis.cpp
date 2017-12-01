@@ -246,6 +246,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				}
 			}
 		}
+		// process en passan rules
 		if(board->enPassan!=board->cellCount)
 		{
 			// test left
@@ -282,6 +283,11 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 					}
 				}
 			}
+		}
+		// process castling rules
+		if(board->whiteCastling[0]!=board->cellCount) // if can castle left
+		{
+			
 		}
 	}
 	else // if ChessPlayerColour::Black

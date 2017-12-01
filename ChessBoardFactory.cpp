@@ -74,7 +74,10 @@ ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
 	param->addPossiblePieces(STANDARD_GAME_PIECES);
 	
 	ChessBoard::ptr cb(new ChessBoard(param));
-		
+	
+	bool hadBlackKing = false;
+	bool hadWhiteKing = false;
+	
 	size_t file=0, rank=7;
 	for(auto it=fen.begin(), end=fen.end(); it!=end; ++it)
 	{
@@ -103,7 +106,27 @@ ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
 		}
 		else
 		{
-			cb->placePiecePos(file, rank, charToChessPiece(*it));
+			auto piece = charToChessPiece(*it);
+			auto pos = cb->getPos(file, rank);
+			cb->placePiecePos(pos, piece);
+			
+			// TODO: find how to realise this in FEN to make random chess work
+			if(piece==ROOK_WHITE && rank==0)
+			{
+				cb->whiteCastling[ hadWhiteKing ? 1 : 0 ] = pos;
+			}
+			else if(piece==KING_WHITE)
+			{
+				hadWhiteKing = true;
+			}
+			else if(piece==ROOK_BLACK && rank==7)
+			{
+				cb->blackCastling[ hadBlackKing ? 1 : 0 ] = pos;
+			}
+			else if(piece==KING_BLACK)
+			{
+				hadBlackKing = true;
+			}
 			++file;
 		}
 	}
@@ -114,14 +137,12 @@ ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
 	cm->moveNum=0;
 	cm->previous=false;
 	cb->move=cm;
-	
-	cb->enPassan=30;
-	
+		
 	return cb;
 }
 
 ChessBoard::ptr ChessBoardFactory::createBoard
-  (ChessBoard::ptr fromBoard, size_t posFrom, size_t posTo)
+  (ChessBoard::ptr fromBoard)
 {
 	ChessMove::ptr curMove(new ChessMove);
 	
@@ -130,19 +151,86 @@ ChessBoard::ptr ChessBoardFactory::createBoard
 
 	ChessBoard::ptr toBoard(new ChessBoard(*fromBoard, curMove));
 	
-	// moving one of the pieces to the new position
-	assert(posFrom!=posTo);
-	auto piece = fromBoard->getPiecePos(posFrom);
-	toBoard->placePiecePos(posTo, piece);
-	toBoard->placePiecePos(posFrom, EMPTY_CELL);
-	toBoard->turn=!fromBoard->getTurn();
-	
 	curMove->setTo(toBoard);
 	curMove->moveNum=fromBoard->getMove()->moveNum+1;
 	toBoard->move=curMove;
 	
+	toBoard->turn=!fromBoard->getTurn();
+	
 	assert(fromBoard->getTurn()!=toBoard->getTurn());
 	assert(fromBoard->getTurn()==curMove->getTurn());
+	
+	return toBoard;
+}
+
+ChessBoard::ptr ChessBoardFactory::createBoard
+  (ChessBoard::ptr fromBoard, size_t posFrom, size_t posTo)
+{
+	ChessBoard::ptr toBoard = this->createBoard(fromBoard);
+	
+	// moving one of the pieces to the new position
+	assert(posFrom!=posTo);
+	auto piece = fromBoard->getPiecePos(posFrom);
+	toBoard->placePiecePos(posFrom, EMPTY_CELL);
+	toBoard->placePiecePos(posTo, piece);
+	
+	if(piece==KING_WHITE)
+	{
+		// change king's position
+		toBoard->whiteKingPos[0]=posTo;
+		toBoard->whiteKingPos[1]=posTo % toBoard->width;
+		toBoard->whiteKingPos[2]=posTo / toBoard->width;
+		
+		// disallow castling both sides
+		toBoard->whiteCastling[0] = toBoard->whiteCastling[1] = toBoard->cellCount;
+	}
+	else if(piece==KING_BLACK)
+	{
+		// change king's position
+		toBoard->blackKingPos[0]=posTo;
+		toBoard->blackKingPos[1]=posTo % toBoard->width;
+		toBoard->blackKingPos[2]=posTo / toBoard->width;
+		
+		// disallow castling both sides
+		toBoard->blackCastling[0] = toBoard->blackCastling[1] = toBoard->cellCount;
+	}
+	
+	// if one of the rooks, that could castle, has moved, disallow castling with it
+	// if one of the rooks, that could castle, was captured, disallow castling with it
+	if(posFrom == toBoard->whiteCastling[0] || posTo == toBoard->whiteCastling[0])
+	{
+		toBoard->whiteCastling[0] = toBoard->cellCount;
+	}
+	else if(posFrom == toBoard->whiteCastling[1] || posTo == toBoard->whiteCastling[1]) 
+	{
+		toBoard->whiteCastling[1] = toBoard->cellCount;
+	}
+	else if(posFrom == toBoard->blackCastling[0] || posTo == toBoard->blackCastling[0])
+	{
+		toBoard->blackCastling[0] = toBoard->cellCount;
+	}
+	else if(posFrom == toBoard->blackCastling[1] || posTo == toBoard->blackCastling[1])
+	{
+		toBoard->blackCastling[1] = toBoard->cellCount;
+	}
+	
+	return toBoard;
+}
+
+ChessBoard::ptr ChessBoardFactory::createBoard
+  (ChessBoard::ptr fromBoard, size_t posFrom1, size_t posTo1, size_t posFrom2, size_t posTo2)
+{
+	ChessBoard::ptr toBoard = this->createBoard(fromBoard);
+	
+	// moving one of the pieces to the new position
+	assert(posFrom1!=posTo1);
+	assert(posFrom2!=posTo2);
+	auto piece1 = fromBoard->getPiecePos(posFrom1);
+	auto piece2 = fromBoard->getPiecePos(posFrom2);
+	toBoard->placePiecePos(posFrom1, EMPTY_CELL);
+	toBoard->placePiecePos(posFrom2, EMPTY_CELL);
+	toBoard->placePiecePos(posTo1, piece1);
+	toBoard->placePiecePos(posTo2, piece2);
 	
 	return toBoard;
 }

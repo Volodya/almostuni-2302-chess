@@ -36,6 +36,10 @@ private:
 	size_t width, height;
 	ChessPiece* board; // [rank*w+file]
 	size_t enPassan;
+	size_t whiteKingPos[3]; // position, file, rank
+	size_t blackKingPos[3]; // position, file, rank
+	size_t whiteCastling[2];
+	size_t blackCastling[2];
 	
 	ChessPlayerColour turn;
 	
