@@ -118,6 +118,9 @@ ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
 			else if(piece==KING_WHITE)
 			{
 				hadWhiteKing = true;
+				cb->whiteKingPos[0] = pos;
+				cb->whiteKingPos[1] = pos % cb->width;
+				cb->whiteKingPos[2] = pos / cb->width;
 			}
 			else if(piece==ROOK_BLACK && rank==7)
 			{
@@ -126,6 +129,9 @@ ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
 			else if(piece==KING_BLACK)
 			{
 				hadBlackKing = true;
+				cb->blackKingPos[0] = pos;
+				cb->blackKingPos[1] = pos % cb->width;
+				cb->blackKingPos[2] = pos / cb->width;
 			}
 			++file;
 		}
@@ -151,11 +157,11 @@ ChessBoard::ptr ChessBoardFactory::createBoard
 
 	ChessBoard::ptr toBoard(new ChessBoard(*fromBoard, curMove));
 	
+	toBoard->turn=!fromBoard->getTurn();
+	
 	curMove->setTo(toBoard);
 	curMove->moveNum=fromBoard->getMove()->moveNum+1;
 	toBoard->move=curMove;
-	
-	toBoard->turn=!fromBoard->getTurn();
 	
 	assert(fromBoard->getTurn()!=toBoard->getTurn());
 	assert(fromBoard->getTurn()==curMove->getTurn());
@@ -232,5 +238,46 @@ ChessBoard::ptr ChessBoardFactory::createBoard
 	toBoard->placePiecePos(posTo1, piece1);
 	toBoard->placePiecePos(posTo2, piece2);
 	
+	if(piece1==KING_WHITE)
+	{
+		// change king's position
+		toBoard->whiteKingPos[0]=posTo1;
+		toBoard->whiteKingPos[1]=posTo1 % toBoard->width;
+		toBoard->whiteKingPos[2]=posTo1 / toBoard->width;
+		
+		// disallow castling both sides
+		toBoard->whiteCastling[0] = toBoard->whiteCastling[1] = toBoard->cellCount;
+	}
+	else if(piece2==KING_WHITE)
+	{
+		// change king's position
+		toBoard->whiteKingPos[0]=posTo2;
+		toBoard->whiteKingPos[1]=posTo2 % toBoard->width;
+		toBoard->whiteKingPos[2]=posTo2 / toBoard->width;
+		
+		// disallow castling both sides
+		toBoard->whiteCastling[0] = toBoard->whiteCastling[1] = toBoard->cellCount;
+	}
+	else if(piece1==KING_BLACK)
+	{
+		// change king's position
+		toBoard->blackKingPos[0]=posTo1;
+		toBoard->blackKingPos[1]=posTo1 % toBoard->width;
+		toBoard->blackKingPos[2]=posTo1 / toBoard->width;
+		
+		// disallow castling both sides
+		toBoard->blackCastling[0] = toBoard->blackCastling[1] = toBoard->cellCount;
+	}
+	else if(piece2==KING_BLACK)
+	{
+		// change king's position
+		toBoard->blackKingPos[0]=posTo2;
+		toBoard->blackKingPos[1]=posTo2 % toBoard->width;
+		toBoard->blackKingPos[2]=posTo2 / toBoard->width;
+		
+		// disallow castling both sides
+		toBoard->blackCastling[0] = toBoard->blackCastling[1] = toBoard->cellCount;
+	}
+
 	return toBoard;
 }

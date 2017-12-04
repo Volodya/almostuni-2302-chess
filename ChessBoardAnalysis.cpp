@@ -287,7 +287,87 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		// process castling rules
 		if(board->whiteCastling[0]!=board->cellCount) // if can castle left
 		{
-			
+			assert(board->getPiecePos(board->whiteCastling[0])==ROOK_WHITE);
+			if(
+				underAttackByBlack[board->whiteKingPos[0]] == 0 &&
+				underAttackByBlack[board->whiteKingPos[0]-1] == 0)
+			{
+				if(board->whiteKingPos[1] >=2) // farther than 2 files from the edge
+				{
+					bool allEmpty = true;
+					for(size_t cell = board->whiteCastling[0]+1; cell<board->whiteKingPos[0]; ++cell)
+					{
+						if(board->getPiecePos(cell)!=EMPTY_CELL)
+						{
+							allEmpty=false;
+							break;
+						}
+					}
+					if(allEmpty && underAttackByBlack[board->whiteKingPos[0]-2] == 0)
+					{
+						auto nextBoard = factory.createBoard(this->board, 
+							board->whiteKingPos[0], board->whiteKingPos[0]-2, // move king
+							board->whiteCastling[0], board->whiteKingPos[0]-1 // move rook
+							);
+						if(nextBoard->getMove()->isMovePossible())
+						{
+							this->possibleMoves->push_back(nextBoard);
+						}
+					}
+				}
+				else
+				{
+					auto nextBoard = factory.createBoard(this->board, 
+						board->whiteKingPos[0], board->whiteKingPos[0]-1, // move king
+						board->whiteCastling[0], board->whiteKingPos[0] // move rook
+						);
+					// not checking if move is possible, because we know that the cell on the left isn't
+					// being attacked. note, that it cannot be assumed in the normal castling
+					this->possibleMoves->push_back(nextBoard);
+				}
+			}
+		}
+		if(board->whiteCastling[1]!=board->cellCount) // if can castle right
+		{
+			assert(board->getPiecePos(board->whiteCastling[1])==ROOK_WHITE);
+			if(
+				underAttackByBlack[board->whiteKingPos[0]] == 0 &&
+				underAttackByBlack[board->whiteKingPos[0]+1] == 0)
+			{
+				if(board->whiteKingPos[1] < board->width-2) // farther than 2 files from the edge
+				{
+					bool allEmpty = true;
+					for(size_t cell = board->whiteCastling[0]+1; cell<board->whiteKingPos[0]; ++cell)
+					{
+						if(board->getPiecePos(cell)!=EMPTY_CELL)
+						{
+							allEmpty=false;
+							break;
+						}
+					}
+					if(allEmpty &&underAttackByBlack[board->whiteKingPos[0]+2] == 0)
+					{
+						auto nextBoard = factory.createBoard(this->board, 
+							board->whiteKingPos[0], board->whiteKingPos[0]+2, // move king
+							board->whiteCastling[1], board->whiteKingPos[0]+1 // move rook
+							);
+						if(nextBoard->getMove()->isMovePossible())
+						{
+							this->possibleMoves->push_back(nextBoard);
+						}
+					}
+				}
+				else
+				{
+					auto nextBoard = factory.createBoard(this->board, 
+						board->whiteKingPos[0], board->whiteKingPos[0]+1, // move king
+						board->whiteCastling[1], board->whiteKingPos[0] // move rook
+						);
+					// not checking if move is possible, because we know that the cell on the left isn't
+					// being attacked. note, that it cannot be assumed in the normal castling
+					this->possibleMoves->push_back(nextBoard);
+				}
+			}
 		}
 	}
 	else // if ChessPlayerColour::Black
@@ -351,6 +431,91 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 						nextBoard->placePiecePos(pos-1, EMPTY_CELL);
 						this->possibleMoves->push_back(nextBoard);
 					}
+				}
+			}
+		}
+		// process castling rules
+		if(board->blackCastling[0]!=board->cellCount) // if can castle left
+		{
+			assert(board->getPiecePos(board->blackCastling[0])==ROOK_BLACK);
+			if(
+				underAttackByWhite[board->blackKingPos[0]] == 0 &&
+				underAttackByWhite[board->blackKingPos[0]-1] == 0)
+			{
+				if(board->blackKingPos[1] >=2) // farther than 2 files from the edge
+				{
+					bool allEmpty = true;
+					for(size_t cell = board->blackCastling[0]+1; cell<board->blackKingPos[0]; ++cell)
+					{
+						if(board->getPiecePos(cell)!=EMPTY_CELL)
+						{
+							allEmpty=false;
+							break;
+						}
+					}
+					if(allEmpty && underAttackByWhite[board->blackKingPos[0]-2] == 0)
+					{
+						auto nextBoard = factory.createBoard(this->board, 
+							board->blackKingPos[0], board->blackKingPos[0]-2, // move king
+							board->blackCastling[0], board->blackKingPos[0]-1 // move rook
+							);
+						if(nextBoard->getMove()->isMovePossible())
+						{
+							this->possibleMoves->push_back(nextBoard);
+						}
+					}
+				}
+				else
+				{
+					auto nextBoard = factory.createBoard(this->board, 
+						board->blackKingPos[0], board->blackKingPos[0]-1, // move king
+						board->blackCastling[0], board->blackKingPos[0] // move rook
+						);
+					// not checking if move is possible, because we know that the cell on the left isn't
+					// being attacked. note, that it cannot be assumed in the normal castling
+					this->possibleMoves->push_back(nextBoard);
+				}
+			}
+		}
+		if(board->blackCastling[1]!=board->cellCount) // if can castle right
+		{
+			assert(board->getPiecePos(board->blackCastling[1])==ROOK_BLACK);
+			if(
+				underAttackByWhite[board->blackKingPos[0]] == 0 &&
+				underAttackByWhite[board->blackKingPos[0]+1] == 0)
+			{
+				if(board->blackKingPos[1] < board->width-2) // farther than 2 files from the edge
+				{
+					bool allEmpty = true;
+					for(size_t cell = board->blackCastling[0]+1; cell<board->blackKingPos[0]; ++cell)
+					{
+						if(board->getPiecePos(cell)!=EMPTY_CELL)
+						{
+							allEmpty=false;
+							break;
+						}
+					}
+					if(allEmpty && underAttackByWhite[board->blackKingPos[0]+2] == 0)
+					{
+						auto nextBoard = factory.createBoard(this->board, 
+							board->blackKingPos[0], board->blackKingPos[0]+2, // move king
+							board->blackCastling[1], board->blackKingPos[0]+1 // move rook
+							);
+						if(nextBoard->getMove()->isMovePossible())
+						{
+							this->possibleMoves->push_back(nextBoard);
+						}
+					}
+				}
+				else
+				{
+					auto nextBoard = factory.createBoard(this->board, 
+						board->blackKingPos[0], board->blackKingPos[0]+1, // move king
+						board->blackCastling[1], board->blackKingPos[0] // move rook
+						);
+					// not checking if move is possible, because we know that the cell on the left isn't
+					// being attacked. note, that it cannot be assumed in the normal castling
+					this->possibleMoves->push_back(nextBoard);
 				}
 			}
 		}

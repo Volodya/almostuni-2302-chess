@@ -18,28 +18,19 @@ bool ChessMove::isMovePossible() const
 {
 	assert(to!=nullptr);
 
-	ChessPiece kingPiece;
+	size_t *king = nullptr;
 	auto width = to->getWidth();
 	auto height = to->getHeight();
 	if(turn==ChessPlayerColour::BLACK)
 	{
 		// if it's white to move, we are looking for a black king
-		kingPiece = KING_BLACK;
+		king = to->blackKingPos;
 	}
 	else
 	{
-		kingPiece = KING_WHITE;
+		king = to->whiteKingPos;
 	}
-	size_t king[2]={}; // TODO: change this monstrocity!!!!
-	for(size_t pos=0, end=to->getCellCount(); pos<end; ++pos)
-	{
-		if(to->getPiecePos(pos)==kingPiece)
-		{
-			king[0] = pos / width;
-			king[1] = pos % width;
-			break;
-		}
-	}
+	
 	auto possiblePieces = ChessBoard::possiblePieces;
 	for(
 		auto attackingPiece = possiblePieces->begin(), end=possiblePieces->end();
@@ -55,14 +46,13 @@ bool ChessMove::isMovePossible() const
 		{
 			for(auto pos=dir->begin(); pos!=dir->end(); ++pos)
 			{
-				size_t rank = (int)king[0] - (int)pos->first;
-				size_t file = (int)king[1] - (int)pos->second;
-				if(rank >= height || file >= width ) // TODO: change to board dimentions
+				size_t file = (int)king[1] - (int)pos->first;
+				size_t rank = (int)king[2] - (int)pos->second;
+				if(rank >= height || file >= width )
 				{
 					break;
 				}
 				auto piece = to->getPiecePos(file, rank);
-				
 				if(piece==*attackingPiece)
 				{
 					return false;
