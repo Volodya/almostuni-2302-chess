@@ -77,7 +77,6 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 	{
 		throw ChessEngineWorkerInterruptedException();
 	}
-	
 	analysis->calculatePossibleMoves(); // must be first, even before depth check
 	if(depth==0)
 	{
@@ -219,6 +218,7 @@ void ChessEngine::makeMove(ChessBoard::ptr move)
 
 void ChessEngine::startNextMoveCalculation()
 {
+	worker.positionPreferences.resize(0);
 	worker.startNextMoveCalculation(curPos, START_DEPTH);
 }
 
@@ -251,4 +251,10 @@ ChessBoard::ptr ChessEngine::getNextBestMove()
 		next = previous;
 	}
 	return next;
+}
+
+void ChessEngine::stop()
+{
+	worker.positionPreferences.resize(0);
+	worker.stop();
 }

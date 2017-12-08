@@ -30,24 +30,58 @@ int main()
 		
 		ChessBoardAnalysis analysis(cb);
 		analysis.calculatePossibleMoves();
-		std::cout << std::boolalpha << "isCheck " << analysis.isCheck() << std::endl;
-		std::cout << std::boolalpha << "isCheckMate " << analysis.isCheckMate() << std::endl;
-		std::cout << "Chess Pieces Weight " << analysis.chessPiecesWeight() << std::endl;
-		std::cout << "Chess Pieces Attacked Weight " << analysis.chessPieceAttackedWeight() << std::endl;
-		std::cout << "Chess Control Weight " << analysis.chessCentreControlWeight() << std::endl;
-		std::cout << "Chess Position Weight " << analysis.chessPositionWeight() << std::endl;
-		
+		//std::cout << std::boolalpha << "isCheck " << analysis.isCheck() << std::endl;
+		//std::cout << std::boolalpha << "isCheckMate " << analysis.isCheckMate() << std::endl;
+		//std::cout << "Chess Pieces Weight " << analysis.chessPiecesWeight() << std::endl;
+		//std::cout << "Chess Pieces Attacked Weight " << analysis.chessPieceAttackedWeight() << std::endl;
+		//std::cout << "Chess Control Weight " << analysis.chessCentreControlWeight() << std::endl;
+		//std::cout << "Chess Position Weight " << analysis.chessPositionWeight() << std::endl;
+		/*
 		auto possible = analysis.getPossibleMoves();
 		for(auto it=possible->begin(); it!=possible->end(); ++it)
 		{
-			(*it)->debugPrint();
+			ChessBoardAnalysis a(*it);
+			a.calculatePossibleMoves();
 		}
 		
+		std::cout << "ChessBoardCount " << ChessBoard::chessBoardCount << std::endl;
+		std::cout << "ChessMoveCount " << ChessMove::chessMoveCount << std::endl;
+		
+		cb->clearPossibleMoves();
+		
+		std::cout << "ChessBoardCount " << ChessBoard::chessBoardCount << std::endl;
+		std::cout << "ChessMoveCount " << ChessMove::chessMoveCount << std::endl;
+		{
+			ChessEngine engine;
+			engine.setCurPos(cb);
+			engine.startNextMoveCalculation();
+			std::cin.get();
+			engine.stop();
+			
+			std::cout << "ChessBoardCount " << ChessBoard::chessBoardCount << std::endl;
+			std::cout << "ChessMoveCount " << ChessMove::chessMoveCount << std::endl;
+
+			cb->clearPossibleMoves();
+			
+			std::cout << "ChessBoardCount " << ChessBoard::chessBoardCount << std::endl;
+			std::cout << "ChessMoveCount " << ChessMove::chessMoveCount << std::endl;
+		}
+		
+		for(auto it=ChessBoardFactory::allBoards.begin(); it!=ChessBoardFactory::allBoards.end(); ++it)
+		{
+			if(auto cb=it->lock())
+			{
+				cb->debugPrint();
+				std::cout << cb->getMove() << std::endl;
+			}
+		}
+		*/
+
 		//return 0;
 		
 		assert(cb->getMove()->hasPrevious()==false);
 		assert(cb->getMove()->getFrom()==nullptr);
-			
+		
 		ChessEngine engine;
 		engine.setCurPos(cb);
 		engine.startNextMoveCalculation();

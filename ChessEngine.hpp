@@ -59,6 +59,8 @@ public:
 	void startNextMoveCalculation();
 	ChessBoard::ptr getNextBestMove();
 	
+	void stop();
+	
 	friend ChessEngineWorker;
 };
 

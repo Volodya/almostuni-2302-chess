@@ -31,6 +31,8 @@ public:
 	typedef std::weak_ptr<ChessBoard> wptr;
 
 	static std::shared_ptr<std::vector<ChessPiece>> possiblePieces;
+	
+	static int chessBoardCount;
 private:
 	size_t cellCount;
 	size_t width, height;
@@ -82,8 +84,7 @@ public:
 	ChessBoardIterator end();
 	ChessBoardConstIterator end() const;
 	
-	void clearPossibleMoves();
-	void clearPossibleMoves(ChessBoard::ptr toKeep);
+	void clearPossibleMoves(ChessBoard::ptr toKeep = nullptr);
 	
 	friend class ChessBoardFactory;
 	friend class ChessBoardIterator;

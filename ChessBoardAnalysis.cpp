@@ -100,6 +100,11 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				{
 					this->possibleMoves->push_back(nextBoard);
 				}
+				else
+				{
+					nextBoard->move.reset();
+					nextBoard.reset();
+				}
 			},
 			//black
 			[this](size_t pos, size_t newPos) {
@@ -134,6 +139,11 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				if(maybeMove->isMovePossible())
 				{
 					this->possibleMoves->push_back(nextBoard);
+				}
+				else
+				{
+					nextBoard->move.reset();
+					nextBoard.reset();
 				}
 			}
 		}
@@ -202,7 +212,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		auto pieceParam = moveParameters.at(curPiece);
 		auto moveArrayPos = toArrayPosition(board->getTurn());
 		auto pieceArrayPos = toArrayPosition(getColour(curPiece));
-
+		
 		if(pieceParam->isDifferentMoveTypes)
 		{
 			ChessMove::moveAttempts(functionNoTake[moveArrayPos][pieceArrayPos], emptyFunction,
@@ -220,7 +230,6 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				*board, pos, *pieceParam->anyMove, true);
 		}
 	}
-	
 	if(board->getTurn()==ChessPlayerColour::WHITE)
 	{
 		// process white pawns on first ranks
@@ -243,6 +252,11 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 						nextBoard->enPassan=enPassan;
 						this->possibleMoves->push_back(nextBoard);
 					}
+					else
+					{
+						nextBoard->move.reset();
+						nextBoard.reset();
+					}
 				}
 			}
 		}
@@ -264,6 +278,11 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 						nextBoard->placePiecePos(pos+1, EMPTY_CELL);
 						this->possibleMoves->push_back(nextBoard);
 					}
+					else
+					{
+						nextBoard->move.reset();
+						nextBoard.reset();
+					}
 				}
 			}
 			// test right
@@ -280,6 +299,11 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 						++underAttackByWhite[pos-1];
 						nextBoard->placePiecePos(pos-1, EMPTY_CELL);
 						this->possibleMoves->push_back(nextBoard);
+					}
+					else
+					{
+						nextBoard->move.reset();
+						nextBoard.reset();
 					}
 				}
 			}
@@ -312,6 +336,11 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 						if(nextBoard->getMove()->isMovePossible())
 						{
 							this->possibleMoves->push_back(nextBoard);
+						}
+						else
+						{
+							nextBoard->move.reset();
+							nextBoard.reset();
 						}
 					}
 				}
@@ -355,6 +384,11 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 						{
 							this->possibleMoves->push_back(nextBoard);
 						}
+						else
+						{
+							nextBoard->move.reset();
+							nextBoard.reset();
+						}
 					}
 				}
 				else
@@ -393,6 +427,11 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 						nextBoard->enPassan=enPassan;
 						this->possibleMoves->push_back(nextBoard);
 					}
+					else
+					{
+						nextBoard->move.reset();
+						nextBoard.reset();
+					}
 				}
 			}
 		}
@@ -413,6 +452,11 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 						nextBoard->placePiecePos(pos+1, EMPTY_CELL);
 						this->possibleMoves->push_back(nextBoard);
 					}
+					else
+					{
+						nextBoard->move.reset();
+						nextBoard.reset();
+					}
 				}
 			}
 			// test right
@@ -430,6 +474,11 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 						++underAttackByBlack[pos-1];
 						nextBoard->placePiecePos(pos-1, EMPTY_CELL);
 						this->possibleMoves->push_back(nextBoard);
+					}
+					else
+					{
+						nextBoard->move.reset();
+						nextBoard.reset();
 					}
 				}
 			}
@@ -462,6 +511,11 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 						if(nextBoard->getMove()->isMovePossible())
 						{
 							this->possibleMoves->push_back(nextBoard);
+						}
+						else
+						{
+							nextBoard->move.reset();
+							nextBoard.reset();
 						}
 					}
 				}
@@ -504,6 +558,11 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 						if(nextBoard->getMove()->isMovePossible())
 						{
 							this->possibleMoves->push_back(nextBoard);
+						}
+						else
+						{
+							nextBoard->move.reset();
+							nextBoard.reset();
 						}
 					}
 				}

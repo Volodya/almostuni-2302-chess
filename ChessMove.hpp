@@ -23,7 +23,7 @@ class ChessMove
 {
 public:
 	typedef std::shared_ptr<ChessMove> ptr;
-
+	static int chessMoveCount;
 private:
 	bool previous;
 	ChessBoard::ptr from;
@@ -38,6 +38,8 @@ private:
 	void setFrom(ChessBoard::ptr from_);
 	void setTo(ChessBoard::ptr to_);
 public:
+	~ChessMove();
+
 	bool isMovePossible() const;
 	bool hasPrevious() const;
 	

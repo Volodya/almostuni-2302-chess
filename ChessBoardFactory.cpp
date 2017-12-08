@@ -12,6 +12,8 @@
 
 #include "Log.hpp"
 
+std::vector<std::weak_ptr<ChessBoard>> ChessBoardFactory::allBoards;
+
 ChessBoard::ptr ChessBoardFactory::createBoard()
 {
 	ChessGameParameters::ptr param(new ChessGameParameters());
@@ -62,7 +64,9 @@ ChessBoard::ptr ChessBoardFactory::createBoard()
 	cb->move=cm;
 	
 	assert(cb->getTurn()==ChessPlayerColour::WHITE);
-	
+
+	allBoards.push_back(cb);
+
 	return cb;
 }
 
@@ -143,6 +147,8 @@ ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
 	cm->moveNum=0;
 	cm->previous=false;
 	cb->move=cm;
+	
+	allBoards.push_back(cb);
 		
 	return cb;
 }
@@ -165,6 +171,8 @@ ChessBoard::ptr ChessBoardFactory::createBoard
 	
 	assert(fromBoard->getTurn()!=toBoard->getTurn());
 	assert(fromBoard->getTurn()==curMove->getTurn());
+	
+	allBoards.push_back(toBoard);
 	
 	return toBoard;
 }

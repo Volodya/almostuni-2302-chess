@@ -19,6 +19,8 @@
 
 std::shared_ptr<std::vector<ChessPiece>> ChessBoard::possiblePieces = nullptr;
 
+int ChessBoard::chessBoardCount = 0;
+
 // class functions
 
 ChessBoard::ChessBoard(ChessGameParameters::ptr param)
@@ -29,6 +31,8 @@ ChessBoard::ChessBoard(ChessGameParameters::ptr param)
 	  turn(ChessPlayerColour::WHITE), move(nullptr),
 	  knownPossibleMoves(nullptr)
 {
+	++chessBoardCount;
+	
 	possiblePieces = param->getPossiblePieces();
 	
 	std::fill(board, board+cellCount, EMPTY_CELL);
@@ -45,6 +49,8 @@ ChessBoard::ChessBoard(const ChessBoard& that, ChessMove::ptr move_)
 	  turn(that.turn), move(move_),
 	  knownPossibleMoves(nullptr)
 {
+	++chessBoardCount;
+	
 	std::copy(that.board, that.board+cellCount, this->board);
 
 	std::copy(that.whiteKingPos, that.whiteKingPos+3, this->whiteKingPos);
@@ -56,6 +62,8 @@ ChessBoard::ChessBoard(const ChessBoard& that, ChessMove::ptr move_)
 
 ChessBoard::~ChessBoard()
 {
+	--chessBoardCount;
+	
 	delete[] board;
 	clearPossibleMoves();
 }
@@ -220,24 +228,23 @@ bool ChessBoard::isEmptyPos(size_t pos) const
 
 void ChessBoard::clearPossibleMoves(ChessBoard::ptr toKeep)
 {
+	if(!knownPossibleMoves) return;
 	for(auto it=knownPossibleMoves->begin(), end=knownPossibleMoves->end(); it!=end; ++it)
 	{
 		if(*it != toKeep)
 		{
+			(*it)->move.reset();
 			(*it)->clearPossibleMoves();
 		}
 	}
-	knownPossibleMoves->resize(1);
-	(*knownPossibleMoves)[0]=toKeep; 
-}
-void ChessBoard::clearPossibleMoves()
-{
-	move.reset();
-	if(!knownPossibleMoves) return;
-	for(auto it=knownPossibleMoves->begin(), end=knownPossibleMoves->end(); it!=end; ++it)
+	if(toKeep)
 	{
-		(*it)->clearPossibleMoves();
+		knownPossibleMoves->resize(1);
+		(*knownPossibleMoves)[0]=toKeep;
 	}
-	delete knownPossibleMoves;
-	knownPossibleMoves=nullptr;
+	else
+	{
+		delete knownPossibleMoves;
+		knownPossibleMoves=nullptr;
+	}
 }

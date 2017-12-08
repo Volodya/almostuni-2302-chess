@@ -10,9 +10,18 @@
 #include <cassert>
 #include "Log.hpp"
 
+int ChessMove::chessMoveCount = 0;
+
 ChessMove::ChessMove()
 	: previous(false), from(nullptr), to(nullptr)
-{}
+{
+	++chessMoveCount;
+}
+
+ChessMove::~ChessMove()
+{
+	--chessMoveCount;
+}
 
 bool ChessMove::isMovePossible() const
 {
@@ -151,8 +160,10 @@ void ChessMove::moveAttempts(
 	
 	size_t newPos;
 	
+	//Log::info("starting to precess directions");
 	for(auto direction = mt.begin(), directionEnd=mt.end(); direction != directionEnd; ++direction)
 	{
+		//Log::info("starting to process attempts");
 		for(auto attempt = direction->begin(), attemptEnd=direction->end(); attempt != attemptEnd; ++attempt)
 		{
 			const int& rankShift = attempt->second;
@@ -175,9 +186,10 @@ void ChessMove::moveAttempts(
 			
 			if(!cb.isEmptyPos(newPos))
 			{
+				//Log::info("not isEmptyPos(newPos)");
 				if(canTake)
 				{
-					
+					//Log::info("canTake");
 					if(getColour(cb.getPiecePos(newPos)) != getColour(cb.getPiecePos(pos)))
 					{
 						recFunTake(pos, newPos);
@@ -188,8 +200,10 @@ void ChessMove::moveAttempts(
 			}
 			else // if empty
 			{
+				//Log::info("isEmptyPos(newPos)");
 				if(canMoveToEmpty)
 				{
+					//Log::info("canMoveToEmpty");
 					recFunTake(pos, newPos);
 				}
 				recFunDefend(pos, newPos);
