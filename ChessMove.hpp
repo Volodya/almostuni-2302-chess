@@ -25,7 +25,6 @@ public:
 	typedef std::shared_ptr<ChessMove> ptr;
 	static int chessMoveCount;
 private:
-	bool previous;
 	ChessBoard::ptr from;
 	ChessBoard::ptr to;
 	
@@ -51,11 +50,11 @@ public:
 	
 	friend class ChessBoardFactory;
 
-	typedef std::function<void(size_t, size_t)> ChessMoveRecordingFunction;
+	typedef std::function<void(ChessBoard::BoardPosition_t, ChessBoard::BoardPosition_t)> ChessMoveRecordingFunction;
 	static void moveAttempts(
 		const ChessMoveRecordingFunction &recFunTake,
 		const ChessMoveRecordingFunction &recFunDefend,
-		const ChessBoard &cb, size_t pos,
+		const ChessBoard &cb, ChessBoard::BoardPosition_t pos,
 		const MoveTemplate& mt,
 		bool canTake=true, bool canMoveToEmpty=true);
 	

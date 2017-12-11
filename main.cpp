@@ -84,17 +84,20 @@ int main()
 		
 		ChessEngine engine;
 		engine.setCurPos(cb);
-		engine.startNextMoveCalculation();
 		for(;;)
 		{
-			ChessBoardAnalysis::constructed=0;
-			auto start = std::chrono::high_resolution_clock::now();
-			std::cin.get();
-			auto end = std::chrono::high_resolution_clock::now();
-			long double duration = (end-start).count();
-			duration /= 1000000000;
+			engine.startNextMoveCalculation();
 			
-			std::cout << ChessBoardAnalysis::constructed << '/' << duration << ' ' << ChessBoardAnalysis::constructed / duration << std::endl;
+			ChessBoardAnalysis::constructed=0;
+			//auto start = std::chrono::high_resolution_clock::now();
+			std::cin.get();
+			//auto end = std::chrono::high_resolution_clock::now();
+			engine.stop();
+			
+			//long double duration = (end-start).count();
+			//duration /= 1000000000;
+			
+			//std::cout << ChessBoardAnalysis::constructed << '/' << duration << ' ' << ChessBoardAnalysis::constructed / duration << std::endl;
 			
 			auto best = engine.getNextBestMove();
 			

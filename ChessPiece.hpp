@@ -18,6 +18,7 @@
 // white - odd
 // black - even
 const size_t KNOWN_CHESS_PIECE_COUNT = 19;
+/*
 enum ChessPiece
 {
 	EMPTY_CELL = 0,
@@ -40,6 +41,29 @@ enum ChessPiece
 	AMAZON_WHITE = 17,
 	AMAZON_BLACK = 18
 };
+*/
+typedef unsigned char ChessPiece;
+constexpr ChessPiece
+	EMPTY_CELL = 0,
+	PAWN_WHITE = 1,
+	PAWN_BLACK = 2,
+	ROOK_WHITE = 3,
+	ROOK_BLACK = 4,
+	KNIGHT_WHITE = 5,
+	KNIGHT_BLACK = 6,
+	BISHOP_WHITE = 7,
+	BISHOP_BLACK = 8,
+	KING_WHITE = 9,
+	KING_BLACK = 10,
+	QUEEN_WHITE = 11,
+	QUEEN_BLACK = 12,
+	PRINCESS_WHITE = 13,
+	PRINCESS_BLACK = 14,
+	EMPRESS_WHITE = 15,
+	EMPRESS_BLACK = 16,
+	AMAZON_WHITE = 17,
+	AMAZON_BLACK = 18;
+
 const std::string chessPieceStrings[] = 
 {
 	" ",

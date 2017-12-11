@@ -68,20 +68,20 @@ ChessBoard::~ChessBoard()
 	clearPossibleMoves();
 }
 
-size_t ChessBoard::getPos(const size_t &file, const size_t &rank) const
+ChessBoard::BoardPosition_t ChessBoard::getPos(const BoardPosition_t &file, const BoardPosition_t &rank) const
 {
 	return rank*width+file;
 }
 
-size_t ChessBoard::getCellCount() const
+ChessBoard::BoardPosition_t ChessBoard::getCellCount() const
 {
 	return cellCount;
 }
-size_t ChessBoard::getHeight() const
+ChessBoard::BoardPosition_t ChessBoard::getHeight() const
 {
 	return height;
 }
-size_t ChessBoard::getWidth() const
+ChessBoard::BoardPosition_t ChessBoard::getWidth() const
 {
 	return width;
 }
@@ -145,17 +145,17 @@ void ChessBoard::debugPrint() const
 		std::cout << "Black's turn" << std::endl;
 	}
 	std::cout << ' ';
-	for(size_t i=0; i<width; ++i)
+	for(BoardPosition_t i=0; i<width; ++i)
 	{
 		std::cout << ' ' << (char)('A'+i);
 	}
 	std::cout << std::endl;
 	{
 		ChessPiece c;
-		for(size_t rank=height; rank>0; --rank)
+		for(BoardPosition_t rank=height; rank>0; --rank)
 		{
 			std::cout << (int)rank;
-			for(size_t file=0; file<width; ++file)
+			for(BoardPosition_t file=0; file<width; ++file)
 			{
 				c = board[getPos(file, rank-1)];
 				if(getPos(file, rank-1)==enPassan)
@@ -182,12 +182,12 @@ void ChessBoard::placePiece(char file, int rank, ChessPiece piece)
 	//Log::info("placePiece called without pos");
 	this->placePiecePos(file-'A', rank-1, piece);
 }
-void ChessBoard::placePiecePos(size_t file, size_t rank, ChessPiece piece)
+void ChessBoard::placePiecePos(BoardPosition_t file, BoardPosition_t rank, ChessPiece piece)
 {
 	//Log::info("placePiecePos called without pos");
 	this->placePiecePos(getPos(file, rank), piece);
 }
-void ChessBoard::placePiecePos(size_t pos, ChessPiece piece)
+void ChessBoard::placePiecePos(BoardPosition_t pos, ChessPiece piece)
 {
 	board[pos] = piece;
 }
@@ -196,12 +196,12 @@ ChessPiece ChessBoard::getPiece(char file, int rank) const
 	//Log::info("getPiece called without pos");
 	return this->getPiecePos(file-'A', rank-1);
 }
-ChessPiece ChessBoard::getPiecePos(size_t file, size_t rank) const
+ChessPiece ChessBoard::getPiecePos(ChessBoard::BoardPosition_t file, ChessBoard::BoardPosition_t rank) const
 {
 	//Log::info("getPiecePos called without pos");
 	return getPiecePos(getPos(file, rank));
 }
-ChessPiece ChessBoard::getPiecePos(size_t pos) const
+ChessPiece ChessBoard::getPiecePos(ChessBoard::BoardPosition_t pos) const
 {
 	return board[pos];
 }
@@ -216,12 +216,12 @@ bool ChessBoard::isEmpty(char file, int rank) const
 	//Log::info("isEmpty called without pos");
 	return this->isEmptyPos(file-'A', rank-1);
 }
-bool ChessBoard::isEmptyPos(size_t file, size_t rank) const
+bool ChessBoard::isEmptyPos(ChessBoard::BoardPosition_t file, ChessBoard::BoardPosition_t rank) const
 {
 	//Log::info("isEmptyPos called without pos");
 	return isEmptyPos(getPos(file, rank));
 }
-bool ChessBoard::isEmptyPos(size_t pos) const
+bool ChessBoard::isEmptyPos(ChessBoard::BoardPosition_t pos) const
 {
 	return board[pos] == EMPTY_CELL;
 }

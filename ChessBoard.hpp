@@ -29,19 +29,21 @@ class ChessBoard
 public:
 	typedef std::shared_ptr<ChessBoard> ptr;
 	typedef std::weak_ptr<ChessBoard> wptr;
+	
+	typedef uint16_t BoardPosition_t;
 
 	static std::shared_ptr<std::vector<ChessPiece>> possiblePieces;
 	
 	static int chessBoardCount;
 private:
-	size_t cellCount;
-	size_t width, height;
+	BoardPosition_t cellCount;
+	BoardPosition_t width, height;
 	ChessPiece* board; // [rank*w+file]
-	size_t enPassan;
-	size_t whiteKingPos[3]; // position, file, rank
-	size_t blackKingPos[3]; // position, file, rank
-	size_t whiteCastling[2];
-	size_t blackCastling[2];
+	BoardPosition_t enPassan;
+	BoardPosition_t whiteKingPos[3]; // position, file, rank
+	BoardPosition_t blackKingPos[3]; // position, file, rank
+	BoardPosition_t whiteCastling[2];
+	BoardPosition_t blackCastling[2];
 	
 	ChessPlayerColour turn;
 	
@@ -57,23 +59,23 @@ private:
 public:
 	~ChessBoard();
 	
-	size_t getCellCount() const;
-	size_t getHeight() const;
-	size_t getWidth() const;
+	BoardPosition_t getCellCount() const;
+	BoardPosition_t getHeight() const;
+	BoardPosition_t getWidth() const;
 
 	bool isEmpty(char file, int rank) const;
-	bool isEmptyPos(size_t file, size_t rank) const;
-	bool isEmptyPos(size_t pos) const;
+	bool isEmptyPos(BoardPosition_t file, BoardPosition_t rank) const;
+	bool isEmptyPos(BoardPosition_t pos) const;
 	void placePiece(char file, int rank, ChessPiece piece);
-	void placePiecePos(size_t file, size_t rank, ChessPiece piece);
-	void placePiecePos(size_t pos, ChessPiece piece);
+	void placePiecePos(BoardPosition_t file, BoardPosition_t rank, ChessPiece piece);
+	void placePiecePos(BoardPosition_t pos, ChessPiece piece);
 	ChessPiece getPiece(char file, int rank) const;
-	ChessPiece getPiecePos(size_t file, size_t rank) const;
-	ChessPiece getPiecePos(size_t pos) const;
+	ChessPiece getPiecePos(BoardPosition_t file, BoardPosition_t rank) const;
+	ChessPiece getPiecePos(BoardPosition_t pos) const;
 	ChessPlayerColour getTurn() const;
 	std::shared_ptr<ChessMove> getMove() const; // ChessMove::ptr
 	
-	size_t getPos(const size_t &file, const size_t &rank) const;
+	BoardPosition_t getPos(const BoardPosition_t &file, const BoardPosition_t &rank) const;
 
 	void debugPrint() const;
 	

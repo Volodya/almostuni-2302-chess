@@ -14,6 +14,8 @@
 #include <new> // std::bad_alloc
 #include <cassert>
 
+#include "ChessBoardFactory.hpp" // temporary
+
 ChessEngineWorker::ChessEngineWorker()
 	: pleaseStop(false)
 {}
@@ -88,8 +90,8 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 		//Log::info("i found a checkmate!");
 		return analysis;
 	}
-	auto answers = analysis->getPossibleMoves();
-	if(answers->empty())
+	auto possibleMoves = analysis->getPossibleMoves();
+	if(possibleMoves->empty())
 	{
 		//Log::info("no possible moves");
 		return analysis;
@@ -124,11 +126,12 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 		};
 	}
 
-	for(auto it=answers->begin(), answersEnd=answers->end(); it!=answersEnd; ++it)
+	//for(auto it=possibleMoves->begin(), end=possibleMoves->end(); it!=end; ++it)
+	for(size_t i=0, end=possibleMoves->size(); i<end; ++i)
 	{
 		//Log::info("for-loop start");
 		// make new analysis
-		ChessBoardAnalysis::ptr analysis(new ChessBoardAnalysis(*it));
+		ChessBoardAnalysis::ptr analysis(new ChessBoardAnalysis(possibleMoves->at(i)));
 
 		// we are changing res only if v also changes
 		auto potentialRes = calculation(std::move(analysis), depth-1, alpha, beta, maximizingPlayer);
@@ -141,12 +144,18 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 			//Log::info("test for better v passed");
 			res = std::move(potentialRes);
 			v = potentialV;
+			
+			if(i) // if(i>0)
+			{
+				std::swap<ChessBoard::ptr>(possibleMoves->operator[](0), possibleMoves->operator[](i));
+			}
 		}
 		alpha = newAlpha(alpha, v);
 		beta = newBeta(beta, v);
 		if(beta <= alpha)
 		{
 			// remove unneeded part of the tree
+			possibleMoves->at(i)->clearPossibleMoves();
 			break;
 		}
 	}
@@ -208,17 +217,29 @@ void ChessEngine::makeMove(ChessBoard::ptr move)
 {
 	assert(move!=nullptr);
 
-	worker.stop();
+	worker.positionPreferences.resize(0);
+	
+	Log::info(std::string("Before clearPossibleMoves ")+std::to_string(ChessBoard::chessBoardCount)+std::string(" ")+std::to_string(ChessMove::chessMoveCount));
 	
 	curPos->clearPossibleMoves(move);
-	curPos = move;
 	
-	startNextMoveCalculation();
+	Log::info(std::string("After clearPossibleMoves ")+std::to_string(ChessBoard::chessBoardCount)+std::string(" ")+std::to_string(ChessMove::chessMoveCount));
+	
+	int i=0;
+	for(auto it=ChessBoardFactory::allBoards.begin(); it!=ChessBoardFactory::allBoards.end() && i<10; ++it)
+	{
+		if(auto cb=it->lock())
+		{
+			cb->debugPrint();	
+			++i;
+		}
+	}
+
+	curPos = move;
 }
 
 void ChessEngine::startNextMoveCalculation()
 {
-	worker.positionPreferences.resize(0);
 	worker.startNextMoveCalculation(curPos, START_DEPTH);
 }
 
@@ -230,7 +251,6 @@ ChessBoard::ptr ChessEngine::getNextBestMove()
 		return nullptr;
 	}
 	
-	Log::info(std::string("weight: ") + std::to_string(worker.positionPreferences.begin()->first/1000000));
 	ChessBoard::ptr result = worker.positionPreferences.begin()->second;
 	if(result==curPos) // nothing has been found since the previous time
 	{
@@ -255,6 +275,5 @@ ChessBoard::ptr ChessEngine::getNextBestMove()
 
 void ChessEngine::stop()
 {
-	worker.positionPreferences.resize(0);
 	worker.stop();
 }

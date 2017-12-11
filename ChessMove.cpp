@@ -13,7 +13,7 @@
 int ChessMove::chessMoveCount = 0;
 
 ChessMove::ChessMove()
-	: previous(false), from(nullptr), to(nullptr)
+	: from(nullptr), to(nullptr)
 {
 	++chessMoveCount;
 }
@@ -27,7 +27,7 @@ bool ChessMove::isMovePossible() const
 {
 	assert(to!=nullptr);
 
-	size_t *king = nullptr;
+	ChessBoard::BoardPosition_t *king = nullptr;
 	auto width = to->getWidth();
 	auto height = to->getHeight();
 	if(turn==ChessPlayerColour::BLACK)
@@ -55,8 +55,8 @@ bool ChessMove::isMovePossible() const
 		{
 			for(auto pos=dir->begin(); pos!=dir->end(); ++pos)
 			{
-				size_t file = (int)king[1] - (int)pos->first;
-				size_t rank = (int)king[2] - (int)pos->second;
+				ChessBoard::BoardPosition_t file = (int)king[1] - (int)pos->first;
+				ChessBoard::BoardPosition_t rank = (int)king[2] - (int)pos->second;
 				if(rank >= height || file >= width )
 				{
 					break;
@@ -80,7 +80,7 @@ bool ChessMove::isMovePossible() const
 
 bool ChessMove::hasPrevious() const
 {
-	return previous;
+	return (bool)from;
 }
 
 void ChessMove::setFrom(ChessBoard::ptr from_)
@@ -149,16 +149,16 @@ std::string ChessMove::getNotation() const
 void ChessMove::moveAttempts(
 	const ChessMoveRecordingFunction &recFunTake,
 	const ChessMoveRecordingFunction &recFunDefend,
-	const ChessBoard &cb, const size_t pos,
+	const ChessBoard &cb, const ChessBoard::BoardPosition_t pos,
 	const MoveTemplate& mt,
 	bool canTake, bool canMoveToEmpty)
 {
-	const size_t width = cb.getWidth();
+	const ChessBoard::BoardPosition_t width = cb.getWidth();
 	
-	const size_t rank = pos / width;
-	const size_t file = pos % width;
+	const ChessBoard::BoardPosition_t rank = pos / width;
+	const ChessBoard::BoardPosition_t file = pos % width;
 	
-	size_t newPos;
+	ChessBoard::BoardPosition_t newPos;
 	
 	//Log::info("starting to precess directions");
 	for(auto direction = mt.begin(), directionEnd=mt.end(); direction != directionEnd; ++direction)
@@ -169,8 +169,8 @@ void ChessMove::moveAttempts(
 			const int& rankShift = attempt->second;
 			const int& fileShift = attempt->first;
 			
-			size_t newFile = (int)file + fileShift;
-			size_t newRank = (int)rank + rankShift;
+			ChessBoard::BoardPosition_t newFile = (int)file + fileShift;
+			ChessBoard::BoardPosition_t newRank = (int)rank + rankShift;
 			
 			if( newFile >= width )
 			{

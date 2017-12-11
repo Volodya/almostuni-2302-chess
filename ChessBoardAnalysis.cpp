@@ -76,7 +76,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 	typedef ChessMove::ChessMoveRecordingFunction ChessMoveRecordingFunction;
 		// empty function
 	const static ChessMoveRecordingFunction emptyFunction =
-			[](size_t pos, size_t newPos) {};
+			[](ChessBoard::BoardPosition_t pos, ChessBoard::BoardPosition_t newPos) {};
 
 	
 		// take opponent's piece
@@ -87,7 +87,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		// white turn
 		{
 			//white
-			[this, &factory](size_t pos, size_t newPos) {
+			[this, &factory](ChessBoard::BoardPosition_t pos, ChessBoard::BoardPosition_t newPos) {
 				assert(this->board->getTurn()==ChessPlayerColour::WHITE);
 				
 				auto nextBoard = factory.createBoard(this->board, pos, newPos);
@@ -107,7 +107,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				}
 			},
 			//black
-			[this](size_t pos, size_t newPos) {
+			[this](ChessBoard::BoardPosition_t pos, ChessBoard::BoardPosition_t newPos) {
 				//assert(maybeMove->getTurn()==ChessPlayerColour::BLACK);
 				
 				if(this->board->getPiecePos(newPos)==KING_WHITE)
@@ -119,7 +119,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		// black turn
 		{
 			// white
-			[this](size_t pos, size_t newPos) {
+			[this](ChessBoard::BoardPosition_t pos, ChessBoard::BoardPosition_t newPos) {
 				assert(this->board->getTurn()==ChessPlayerColour::BLACK);
 				if(this->board->getPiecePos(newPos)==KING_BLACK)
 				{
@@ -127,7 +127,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				}
 			},
 			// black
-			[this, &factory](size_t pos, size_t newPos) {
+			[this, &factory](ChessBoard::BoardPosition_t pos, ChessBoard::BoardPosition_t newPos) {
 				assert(this->board->getTurn()==ChessPlayerColour::BLACK);
 
 				auto nextBoard = factory.createBoard(this->board, pos, newPos);
@@ -175,13 +175,13 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		// white's turn
 		{
 			// white
-			[this](size_t pos, size_t newPos) {
+			[this](ChessBoard::BoardPosition_t pos, ChessBoard::BoardPosition_t newPos) {
 				//assert(maybeMove->getTurn()==ChessPlayerColour::WHITE);
 				
 				++underAttackByWhite[newPos];
 			},
 			// black
-			[this](size_t pos, size_t newPos) {
+			[this](ChessBoard::BoardPosition_t pos, ChessBoard::BoardPosition_t newPos) {
 				//assert(maybeMove->getTurn()==ChessPlayerColour::BLACK);
 
 				++underAttackByWhite[newPos];
@@ -190,13 +190,13 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		// black's turn
 		{
 			// white
-			[this](size_t pos, size_t newPos) {
+			[this](ChessBoard::BoardPosition_t pos, ChessBoard::BoardPosition_t newPos) {
 				//assert(maybeMove->getTurn()==ChessPlayerColour::WHITE);
 				
 				++underAttackByBlack[newPos];
 			},
 			// black
-			[this](size_t pos, size_t newPos) {
+			[this](ChessBoard::BoardPosition_t pos, ChessBoard::BoardPosition_t newPos) {
 				//assert(maybeMove->getTurn()==ChessPlayerColour::BLACK);
 
 				++underAttackByBlack[newPos];
@@ -204,7 +204,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		}
 	};
 
-	for(size_t pos=0, end=board->getCellCount(); pos!=end; ++pos)
+	for(ChessBoard::BoardPosition_t pos=0, end=board->getCellCount(); pos!=end; ++pos)
 	{
 		auto curPiece = board->getPiecePos(pos);
 		if(curPiece == EMPTY_CELL) continue;
@@ -233,7 +233,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 	if(board->getTurn()==ChessPlayerColour::WHITE)
 	{
 		// process white pawns on first ranks
-		for(size_t pos = 0, end=board->getWidth()*2; pos<end; ++pos)
+		for(ChessBoard::BoardPosition_t pos = 0, end=board->getWidth()*2; pos<end; ++pos)
 		{
 			auto curPiece = board->getPiecePos(pos);
 			if(curPiece != PAWN_WHITE) continue;
@@ -319,7 +319,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				if(board->whiteKingPos[1] >=2) // farther than 2 files from the edge
 				{
 					bool allEmpty = true;
-					for(size_t cell = board->whiteCastling[0]+1; cell<board->whiteKingPos[0]; ++cell)
+					for(ChessBoard::BoardPosition_t cell = board->whiteCastling[0]+1; cell<board->whiteKingPos[0]; ++cell)
 					{
 						if(board->getPiecePos(cell)!=EMPTY_CELL)
 						{
@@ -366,7 +366,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				if(board->whiteKingPos[1] < board->width-2) // farther than 2 files from the edge
 				{
 					bool allEmpty = true;
-					for(size_t cell = board->whiteCastling[0]+1; cell<board->whiteKingPos[0]; ++cell)
+					for(ChessBoard::BoardPosition_t cell = board->whiteCastling[0]+1; cell<board->whiteKingPos[0]; ++cell)
 					{
 						if(board->getPiecePos(cell)!=EMPTY_CELL)
 						{
@@ -407,7 +407,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 	else // if ChessPlayerColour::Black
 	{
 		// process black pawns on first ranks
-		for(size_t pos = board->getCellCount()-1, end=board->getCellCount() - (board->getWidth()*2) -1; pos>=end; --pos)
+		for(ChessBoard::BoardPosition_t pos = board->getCellCount()-1, end=board->getCellCount() - (board->getWidth()*2) -1; pos>=end; --pos)
 		{
 			
 			auto curPiece = board->getPiecePos(pos);
@@ -494,7 +494,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				if(board->blackKingPos[1] >=2) // farther than 2 files from the edge
 				{
 					bool allEmpty = true;
-					for(size_t cell = board->blackCastling[0]+1; cell<board->blackKingPos[0]; ++cell)
+					for(ChessBoard::BoardPosition_t cell = board->blackCastling[0]+1; cell<board->blackKingPos[0]; ++cell)
 					{
 						if(board->getPiecePos(cell)!=EMPTY_CELL)
 						{
@@ -541,7 +541,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				if(board->blackKingPos[1] < board->width-2) // farther than 2 files from the edge
 				{
 					bool allEmpty = true;
-					for(size_t cell = board->blackCastling[0]+1; cell<board->blackKingPos[0]; ++cell)
+					for(ChessBoard::BoardPosition_t cell = board->blackCastling[0]+1; cell<board->blackKingPos[0]; ++cell)
 					{
 						if(board->getPiecePos(cell)!=EMPTY_CELL)
 						{
@@ -612,7 +612,7 @@ weight_type ChessBoardAnalysis::chessPositionWeight() const
 weight_type ChessBoardAnalysis::chessPiecesWeight() const
 {
 	int count[KNOWN_CHESS_PIECE_COUNT] = { 0 };
-	for(size_t pos=0, end=board->getCellCount(); pos!=end; ++pos)
+	for(ChessBoard::BoardPosition_t pos=0, end=board->getCellCount(); pos!=end; ++pos)
 	{
 		++count[board->getPiecePos(pos)]; // ChessPiece is a numerical constant
 	}
@@ -632,7 +632,7 @@ weight_type ChessBoardAnalysis::chessPieceAttackedWeight() const
 	weight_type result = 0;
 	
 	ChessPiece curPiece;
-	for(size_t pos=0, end=board->getCellCount(); pos!=end; ++pos)
+	for(ChessBoard::BoardPosition_t pos=0, end=board->getCellCount(); pos!=end; ++pos)
 	{
 		// get non-empty cells
 		curPiece = board->getPiecePos(pos);
@@ -671,7 +671,7 @@ weight_type ChessBoardAnalysis::chessCentreControlWeight() const
 	};
 	
 	weight_type result = 0;
-	for(size_t pos=0, end=board->getCellCount(); pos!=end; ++pos)
+	for(ChessBoard::BoardPosition_t pos=0, end=board->getCellCount(); pos!=end; ++pos)
 	{
 		result +=
 			domination(
@@ -723,7 +723,7 @@ bool ChessBoardAnalysis::isCheckMate() const
 }
 
 
-const std::vector<ChessBoard::ptr> * const ChessBoardAnalysis::getPossibleMoves() const
+std::vector<ChessBoard::ptr> * const ChessBoardAnalysis::getPossibleMoves() const
 {
 	return possibleMoves;
 }
