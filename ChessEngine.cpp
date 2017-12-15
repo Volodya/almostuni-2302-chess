@@ -219,12 +219,12 @@ void ChessEngine::makeMove(ChessBoard::ptr move)
 
 	worker.positionPreferences.resize(0);
 	
-	Log::info(std::string("Before clearPossibleMoves ")+std::to_string(ChessBoard::chessBoardCount)+std::string(" ")+std::to_string(ChessMove::chessMoveCount));
+	Log::info(std::string("Before clearPossibleMoves ")+std::to_string(ChessBoard::chessBoardCount));
 	
 	curPos->clearPossibleMoves(move);
 	
-	Log::info(std::string("After clearPossibleMoves ")+std::to_string(ChessBoard::chessBoardCount)+std::string(" ")+std::to_string(ChessMove::chessMoveCount));
-	
+	Log::info(std::string("After clearPossibleMoves ")+std::to_string(ChessBoard::chessBoardCount));
+/*	
 	int i=0;
 	for(auto it=ChessBoardFactory::allBoards.begin(); it!=ChessBoardFactory::allBoards.end() && i<10; ++it)
 	{
@@ -234,7 +234,7 @@ void ChessEngine::makeMove(ChessBoard::ptr move)
 			++i;
 		}
 	}
-
+*/
 	curPos = move;
 }
 
@@ -260,9 +260,7 @@ ChessBoard::ptr ChessEngine::getNextBestMove()
 	auto next = result;
 	for(;;)
 	{
-		auto move = next->getMove();
-		//Log::info(move->getNotation());
-		auto previous = move->getFrom();
+		auto previous = next->getFrom();
 		assert(previous!=nullptr);
 		if(previous==curPos)
 		{

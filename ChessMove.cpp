@@ -10,27 +10,14 @@
 #include <cassert>
 #include "Log.hpp"
 
-int ChessMove::chessMoveCount = 0;
-
-ChessMove::ChessMove()
-	: from(nullptr), to(nullptr)
-{
-	++chessMoveCount;
-}
-
-ChessMove::~ChessMove()
-{
-	--chessMoveCount;
-}
-
-bool ChessMove::isMovePossible() const
+bool ChessMove::isMovePossible(ChessBoard::ptr to)
 {
 	assert(to!=nullptr);
 
 	ChessBoard::BoardPosition_t *king = nullptr;
 	auto width = to->getWidth();
 	auto height = to->getHeight();
-	if(turn==ChessPlayerColour::BLACK)
+	if(to->turn==ChessPlayerColour::BLACK)
 	{
 		// if it's white to move, we are looking for a black king
 		king = to->blackKingPos;
@@ -46,7 +33,7 @@ bool ChessMove::isMovePossible() const
 		attackingPiece != end;
 		++attackingPiece )
 	{
-		if(*attackingPiece == EMPTY_CELL || getColour(*attackingPiece) == turn)
+		if(*attackingPiece == EMPTY_CELL || getColour(*attackingPiece) == to->turn)
 		{
 			continue;
 		}
@@ -77,39 +64,7 @@ bool ChessMove::isMovePossible() const
 	
 	return true;
 }
-
-bool ChessMove::hasPrevious() const
-{
-	return (bool)from;
-}
-
-void ChessMove::setFrom(ChessBoard::ptr from_)
-{
-	from = from_;
-}
-void ChessMove::setTo(ChessBoard::ptr to_)
-{
-	to = to_;
-	turn = !to_->getTurn();
-}
-
-ChessBoard::ptr ChessMove::getFrom() const
-{
-	return from;
-}
-ChessBoard::ptr ChessMove::getTo() const
-{
-	return to;
-}
-ChessPlayerColour ChessMove::getTurn() const
-{
-	return turn;
-}
-int ChessMove::getMoveNum() const
-{
-	return moveNum;
-}
-std::string ChessMove::getNotation() const
+std::string ChessMove::getNotation(ChessBoard::ptr from, ChessBoard::ptr to)
 {
 	std::string result ="";
 	
@@ -219,14 +174,14 @@ std::string ChessMove::generateCompleteMoveChain(ChessBoard::ptr finalBoard)
 		return std::string("");
 	}
 	
-	ptr move = finalBoard->getMove();
-	if(!move->from)
+	auto from = finalBoard->from;
+	if(from)
 	{
 		return std::string("");
 	}
 	
 	return
-		generateCompleteMoveChain(move->from) + 
-		std::to_string(move->moveNum) + std::string(" ") +
-		move->getNotation() + std::string(" | ");
+		generateCompleteMoveChain(from) + 
+		std::to_string(finalBoard->moveNum) + std::string(" ") +
+		getNotation(from, finalBoard) + std::string(" | ");
 }

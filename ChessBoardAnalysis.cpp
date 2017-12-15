@@ -47,18 +47,17 @@ unsigned long long ChessBoardAnalysis::constructed=0;
 // class functions
 
 ChessBoardAnalysis::ChessBoardAnalysis(ChessBoard::ptr board_)
-	: board(std::move(board_)), possibleMoves(nullptr), check(false)
+	: board(std::move(board_)), possibleMoves(nullptr), check(false),
+		underAttackByWhite(nullptr), underAttackByBlack(nullptr)
 {
 	assert(board!=nullptr);
-	underAttackByBlack = new int8_t[size_t(board->getWidth())*board->getHeight()]{};
-	underAttackByWhite = new int8_t[size_t(board->getWidth())*board->getHeight()]{};
 	++constructed;
 }
 
 ChessBoardAnalysis::~ChessBoardAnalysis()
 {
-	delete[] underAttackByBlack;
-	delete[] underAttackByWhite;
+	if(underAttackByWhite) delete[] underAttackByWhite;
+	if(underAttackByBlack) delete[] underAttackByBlack;
 }
 
 void ChessBoardAnalysis::calculatePossibleMoves()
@@ -69,6 +68,9 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		check=board->knownCheck;
 		return;
 	}
+
+	underAttackByBlack = new int8_t[size_t(board->getWidth())*board->getHeight()]{};
+	underAttackByWhite = new int8_t[size_t(board->getWidth())*board->getHeight()]{};
 
 	possibleMoves=new std::vector<ChessBoard::ptr>();
 
@@ -91,18 +93,15 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				assert(this->board->getTurn()==ChessPlayerColour::WHITE);
 				
 				auto nextBoard = factory.createBoard(this->board, pos, newPos);
-				auto maybeMove = nextBoard->getMove();
 				
 				assert(nextBoard->getTurn()==ChessPlayerColour::BLACK);
-				assert(maybeMove->getTurn()==ChessPlayerColour::WHITE);
 				
-				if(maybeMove->isMovePossible())
+				if(ChessMove::isMovePossible(nextBoard))
 				{
 					this->possibleMoves->push_back(nextBoard);
 				}
 				else
 				{
-					nextBoard->move.reset();
 					nextBoard.reset();
 				}
 			},
@@ -131,18 +130,15 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				assert(this->board->getTurn()==ChessPlayerColour::BLACK);
 
 				auto nextBoard = factory.createBoard(this->board, pos, newPos);
-				auto maybeMove = nextBoard->getMove();
 				
 				assert(nextBoard->getTurn()==ChessPlayerColour::WHITE);
-				assert(maybeMove->getTurn()==ChessPlayerColour::BLACK);
 				
-				if(maybeMove->isMovePossible())
+				if(ChessMove::isMovePossible(nextBoard))
 				{
 					this->possibleMoves->push_back(nextBoard);
 				}
 				else
 				{
-					nextBoard->move.reset();
 					nextBoard.reset();
 				}
 			}
@@ -245,16 +241,14 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				if(board->getPiecePos(newPos)==EMPTY_CELL)
 				{
 					auto nextBoard = factory.createBoard(this->board, pos, newPos);
-					auto maybeMove = nextBoard->getMove();
 					
-					if(maybeMove->isMovePossible())
+					if(ChessMove::isMovePossible(nextBoard))
 					{
 						nextBoard->enPassan=enPassan;
 						this->possibleMoves->push_back(nextBoard);
 					}
 					else
 					{
-						nextBoard->move.reset();
 						nextBoard.reset();
 					}
 				}
@@ -270,9 +264,8 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				if(board->getPiecePos(pos)==PAWN_WHITE)
 				{
 					auto nextBoard = factory.createBoard(this->board, pos, board->enPassan);
-					auto maybeMove = nextBoard->getMove();
 					
-					if(maybeMove->isMovePossible())
+					if(ChessMove::isMovePossible(nextBoard))
 					{
 						++underAttackByWhite[pos+1];
 						nextBoard->placePiecePos(pos+1, EMPTY_CELL);
@@ -280,7 +273,6 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 					}
 					else
 					{
-						nextBoard->move.reset();
 						nextBoard.reset();
 					}
 				}
@@ -292,9 +284,8 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				if(board->getPiecePos(pos)==PAWN_WHITE)
 				{
 					auto nextBoard = factory.createBoard(this->board, pos, board->enPassan);
-					auto maybeMove = nextBoard->getMove();
 					
-					if(maybeMove->isMovePossible())
+					if(ChessMove::isMovePossible(nextBoard))
 					{
 						++underAttackByWhite[pos-1];
 						nextBoard->placePiecePos(pos-1, EMPTY_CELL);
@@ -302,7 +293,6 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 					}
 					else
 					{
-						nextBoard->move.reset();
 						nextBoard.reset();
 					}
 				}
@@ -333,13 +323,12 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 							board->whiteKingPos[0], board->whiteKingPos[0]-2, // move king
 							board->whiteCastling[0], board->whiteKingPos[0]-1 // move rook
 							);
-						if(nextBoard->getMove()->isMovePossible())
+						if(ChessMove::isMovePossible(nextBoard))
 						{
 							this->possibleMoves->push_back(nextBoard);
 						}
 						else
 						{
-							nextBoard->move.reset();
 							nextBoard.reset();
 						}
 					}
@@ -380,13 +369,12 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 							board->whiteKingPos[0], board->whiteKingPos[0]+2, // move king
 							board->whiteCastling[1], board->whiteKingPos[0]+1 // move rook
 							);
-						if(nextBoard->getMove()->isMovePossible())
+						if(ChessMove::isMovePossible(nextBoard))
 						{
 							this->possibleMoves->push_back(nextBoard);
 						}
 						else
 						{
-							nextBoard->move.reset();
 							nextBoard.reset();
 						}
 					}
@@ -420,16 +408,14 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				if(board->getPiecePos(newPos)==EMPTY_CELL)
 				{
 					auto nextBoard = factory.createBoard(this->board, pos, newPos);
-					auto maybeMove = nextBoard->getMove();
 					
-					if(maybeMove->isMovePossible())
+					if(ChessMove::isMovePossible(nextBoard))
 					{
 						nextBoard->enPassan=enPassan;
 						this->possibleMoves->push_back(nextBoard);
 					}
 					else
 					{
-						nextBoard->move.reset();
 						nextBoard.reset();
 					}
 				}
@@ -444,9 +430,8 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				if(board->getPiecePos(pos)==PAWN_BLACK)
 				{
 					auto nextBoard = factory.createBoard(this->board, pos, board->enPassan);
-					auto maybeMove = nextBoard->getMove();
 					
-					if(maybeMove->isMovePossible())
+					if(ChessMove::isMovePossible(nextBoard))
 					{
 						++underAttackByBlack[pos+1];
 						nextBoard->placePiecePos(pos+1, EMPTY_CELL);
@@ -454,7 +439,6 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 					}
 					else
 					{
-						nextBoard->move.reset();
 						nextBoard.reset();
 					}
 				}
@@ -467,9 +451,8 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				if(board->getPiecePos(pos)==PAWN_BLACK)
 				{
 					auto nextBoard = factory.createBoard(this->board, pos, board->enPassan);
-					auto maybeMove = nextBoard->getMove();
 					
-					if(maybeMove->isMovePossible())
+					if(ChessMove::isMovePossible(nextBoard))
 					{
 						++underAttackByBlack[pos-1];
 						nextBoard->placePiecePos(pos-1, EMPTY_CELL);
@@ -477,7 +460,6 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 					}
 					else
 					{
-						nextBoard->move.reset();
 						nextBoard.reset();
 					}
 				}
@@ -508,13 +490,12 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 							board->blackKingPos[0], board->blackKingPos[0]-2, // move king
 							board->blackCastling[0], board->blackKingPos[0]-1 // move rook
 							);
-						if(nextBoard->getMove()->isMovePossible())
+						if(ChessMove::isMovePossible(nextBoard))
 						{
 							this->possibleMoves->push_back(nextBoard);
 						}
 						else
 						{
-							nextBoard->move.reset();
 							nextBoard.reset();
 						}
 					}
@@ -555,13 +536,12 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 							board->blackKingPos[0], board->blackKingPos[0]+2, // move king
 							board->blackCastling[1], board->blackKingPos[0]+1 // move rook
 							);
-						if(nextBoard->getMove()->isMovePossible())
+						if(ChessMove::isMovePossible(nextBoard))
 						{
 							this->possibleMoves->push_back(nextBoard);
 						}
 						else
 						{
-							nextBoard->move.reset();
 							nextBoard.reset();
 						}
 					}
@@ -579,6 +559,15 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 			}
 		}
 	}
+	
+	std::sort(possibleMoves->begin(), possibleMoves->end(),
+			[](ChessBoard::ptr &l, ChessBoard::ptr &r) -> bool {
+				return ChessBoardAnalysis(l).chessPiecesWeight() < ChessBoardAnalysis(r).chessPiecesWeight();
+			}
+		);
+	
+	possibleMoves->shrink_to_fit();
+	
 	board->knownPossibleMoves = possibleMoves;
 	board->knownCheck = check;
 }
@@ -588,7 +577,7 @@ weight_type ChessBoardAnalysis::chessPositionWeight() const
 	if(isCheckMate())
 	{
 		weight_type wIsCheckMate = getWeightMultiplier(board->getTurn()) * CHECKMATE_WEIGHT;
-		weight_type wMoveNum = getWeightMultiplier(board->getTurn())*board->getMove()->getMoveNum();
+		weight_type wMoveNum = getWeightMultiplier(board->getTurn())*board->getMoveNum();
 		
 		return wIsCheckMate + wMoveNum;
 	}
@@ -691,29 +680,6 @@ bool ChessBoardAnalysis::isCheck() const
 
 bool ChessBoardAnalysis::isCheckMate() const
 {
-	/*
-	int count=0;
-	if(board->getTurn()==ChessPlayerColour::BLACK)
-	{
-		// count white pieces
-		count=std::count_if(board->begin(), board->end(), [](ChessPiece onBoard) {
-			return getColour(onBoard)==ChessPlayerColour::WHITE;
-		});
-	}
-	else
-	{
-		// count black pieces
-		count=std::count_if(board->begin(), board->end(), [](ChessPiece onBoard) {
-			return getColour(onBoard)==ChessPlayerColour::BLACK;
-		});
-	}
-
-	if(count==0)
-	{
-		return true;
-	}
-	*/
-	
 	if(isCheck())
 	{
 		return possibleMoves->empty();

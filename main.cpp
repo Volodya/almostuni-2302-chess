@@ -79,8 +79,8 @@ int main()
 
 		//return 0;
 		
-		assert(cb->getMove()->hasPrevious()==false);
-		assert(cb->getMove()->getFrom()==nullptr);
+		//assert(cb->hasPrevious()==false);
+		//assert(cb->getFrom()==nullptr);
 		
 		ChessEngine engine;
 		engine.setCurPos(cb);
@@ -98,6 +98,8 @@ int main()
 			//duration /= 1000000000;
 			
 			//std::cout << ChessBoardAnalysis::constructed << '/' << duration << ' ' << ChessBoardAnalysis::constructed / duration << std::endl;
+			
+			std::cout << "Number of made ChessBoard-s: " << ChessBoard::chessBoardCount << std::endl;
 			
 			auto best = engine.getNextBestMove();
 			

@@ -17,40 +17,12 @@
 #include <functional>
 
 
-class ChessMove;
-
 class ChessMove
 {
 public:
-	typedef std::shared_ptr<ChessMove> ptr;
-	static int chessMoveCount;
-private:
-	ChessBoard::ptr from;
-	ChessBoard::ptr to;
-	
-	ChessPlayerColour turn;
-	
-	//std::string notation;
-	int moveNum;
-	// for initialisation in the factory
-	ChessMove();
-	void setFrom(ChessBoard::ptr from_);
-	void setTo(ChessBoard::ptr to_);
-public:
-	~ChessMove();
-
-	bool isMovePossible() const;
-	bool hasPrevious() const;
-	
-	ChessBoard::ptr getFrom() const;
-	ChessBoard::ptr getTo() const;
-	int getMoveNum() const;
-	ChessPlayerColour getTurn() const;
-	std::string getNotation() const;
-	
-	friend class ChessBoardFactory;
-
 	typedef std::function<void(ChessBoard::BoardPosition_t, ChessBoard::BoardPosition_t)> ChessMoveRecordingFunction;
+	
+	static bool isMovePossible(ChessBoard::ptr to);
 	static void moveAttempts(
 		const ChessMoveRecordingFunction &recFunTake,
 		const ChessMoveRecordingFunction &recFunDefend,
@@ -58,10 +30,8 @@ public:
 		const MoveTemplate& mt,
 		bool canTake=true, bool canMoveToEmpty=true);
 	
+	static std::string getNotation(ChessBoard::ptr from, ChessBoard::ptr to);	
 	static std::string generateCompleteMoveChain(ChessBoard::ptr finalBoard);
-
 };
-
-
 
 #endif

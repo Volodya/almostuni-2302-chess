@@ -39,23 +39,24 @@ private:
 	BoardPosition_t cellCount;
 	BoardPosition_t width, height;
 	ChessPiece* board; // [rank*w+file]
+
 	BoardPosition_t enPassan;
 	BoardPosition_t whiteKingPos[3]; // position, file, rank
 	BoardPosition_t blackKingPos[3]; // position, file, rank
 	BoardPosition_t whiteCastling[2];
 	BoardPosition_t blackCastling[2];
 	
+	uint16_t moveNum;
 	ChessPlayerColour turn;
 	
-	std::shared_ptr<ChessMove> move; // ChessMove::ptr
-	
+	ChessBoard::ptr from;
 	std::vector<ChessBoard::ptr>* knownPossibleMoves;
 	bool knownCheck;	
 	
 	ChessBoard() = delete;
 	ChessBoard(const ChessBoard& that) = delete;
 	ChessBoard(ChessGameParameters::ptr param_);
-	ChessBoard(const ChessBoard& that, std::shared_ptr<ChessMove> move_);
+	ChessBoard(const ptr& that);
 public:
 	~ChessBoard();
 	
@@ -72,8 +73,9 @@ public:
 	ChessPiece getPiece(char file, int rank) const;
 	ChessPiece getPiecePos(BoardPosition_t file, BoardPosition_t rank) const;
 	ChessPiece getPiecePos(BoardPosition_t pos) const;
+	ptr getFrom() const;
 	ChessPlayerColour getTurn() const;
-	std::shared_ptr<ChessMove> getMove() const; // ChessMove::ptr
+	uint16_t getMoveNum() const;
 	
 	BoardPosition_t getPos(const BoardPosition_t &file, const BoardPosition_t &rank) const;
 

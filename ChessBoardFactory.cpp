@@ -12,62 +12,7 @@
 
 #include "Log.hpp"
 
-std::vector<std::weak_ptr<ChessBoard>> ChessBoardFactory::allBoards;
-
-ChessBoard::ptr ChessBoardFactory::createBoard()
-{
-	ChessGameParameters::ptr param(new ChessGameParameters());
-	param->setDimentions(8, 8);
-	param->addPossiblePieces(STANDARD_GAME_PIECES);
-	
-	ChessBoard::ptr cb(new ChessBoard(param));
-	
-	// standard chess board
-	cb->placePiece('A', 2, PAWN_WHITE);
-	cb->placePiece('B', 2, PAWN_WHITE);
-	cb->placePiece('C', 2, PAWN_WHITE);
-	cb->placePiece('D', 2, PAWN_WHITE);
-	cb->placePiece('E', 2, PAWN_WHITE);
-	cb->placePiece('F', 2, PAWN_WHITE);
-	cb->placePiece('G', 2, PAWN_WHITE);
-	cb->placePiece('H', 2, PAWN_WHITE);
-	cb->placePiece('A', 1, ROOK_WHITE);
-	cb->placePiece('B', 1, KNIGHT_WHITE);
-	cb->placePiece('C', 1, BISHOP_WHITE);
-	cb->placePiece('D', 1, QUEEN_WHITE);
-	cb->placePiece('E', 1, KING_WHITE);
-	cb->placePiece('F', 1, BISHOP_WHITE);
-	cb->placePiece('G', 1, KNIGHT_WHITE);
-	cb->placePiece('H', 1, ROOK_WHITE);
-	cb->placePiece('A', 7, PAWN_BLACK);
-	cb->placePiece('B', 7, PAWN_BLACK);
-	cb->placePiece('C', 7, PAWN_BLACK);
-	cb->placePiece('D', 7, PAWN_BLACK);
-	cb->placePiece('E', 7, PAWN_BLACK);
-	cb->placePiece('F', 7, PAWN_BLACK);
-	cb->placePiece('G', 7, PAWN_BLACK);
-	cb->placePiece('H', 7, PAWN_BLACK);
-	cb->placePiece('A', 8, ROOK_BLACK);
-	cb->placePiece('B', 8, KNIGHT_BLACK);
-	cb->placePiece('C', 8, BISHOP_BLACK);
-	cb->placePiece('D', 8, QUEEN_BLACK);
-	cb->placePiece('E', 8, KING_BLACK);
-	cb->placePiece('F', 8, BISHOP_BLACK);
-	cb->placePiece('G', 8, KNIGHT_BLACK);
-	cb->placePiece('H', 8, ROOK_BLACK);
-
-	ChessMove::ptr cm(new ChessMove);
-	
-	cm->to=cb;
-	cm->moveNum=0;
-	cb->move=cm;
-	
-	assert(cb->getTurn()==ChessPlayerColour::WHITE);
-
-	allBoards.push_back(cb);
-
-	return cb;
-}
+//std::vector<std::weak_ptr<ChessBoard>> ChessBoardFactory::allBoards;
 
 	// starting position: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
@@ -140,13 +85,9 @@ ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
 		}
 	}
 	
-	ChessMove::ptr cm(new ChessMove);
+	cb->moveNum=0;
 	
-	cm->setTo(cb);
-	cm->moveNum=0;
-	cb->move=cm;
-	
-	allBoards.push_back(cb);
+	//allBoards.push_back(cb);
 		
 	return cb;
 }
@@ -154,22 +95,14 @@ ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
 ChessBoard::ptr ChessBoardFactory::createBoard
   (ChessBoard::ptr fromBoard)
 {
-	ChessMove::ptr curMove(new ChessMove);
+	ChessBoard::ptr toBoard(new ChessBoard(fromBoard));
 	
-	curMove->setFrom(fromBoard);
-
-	ChessBoard::ptr toBoard(new ChessBoard(*fromBoard, curMove));
-	
-	toBoard->turn=!fromBoard->getTurn();
-	
-	curMove->setTo(toBoard);
-	curMove->moveNum=fromBoard->getMove()->moveNum+1;
-	toBoard->move=curMove;
+	toBoard->turn=!fromBoard->turn;
+	toBoard->moveNum=fromBoard->moveNum+1;
 	
 	assert(fromBoard->getTurn()!=toBoard->getTurn());
-	assert(fromBoard->getTurn()==curMove->getTurn());
 	
-	allBoards.push_back(toBoard);
+	//allBoards.push_back(toBoard);
 	
 	return toBoard;
 }

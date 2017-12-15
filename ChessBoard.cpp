@@ -28,7 +28,7 @@ ChessBoard::ChessBoard(ChessGameParameters::ptr param)
 	  width(param->getWidth()), height(param->getHeight()),
 	  board(new ChessPiece[cellCount]),
 	  enPassan(cellCount),
-	  turn(ChessPlayerColour::WHITE), move(nullptr),
+	  turn(ChessPlayerColour::WHITE), moveNum(0),
 	  knownPossibleMoves(nullptr)
 {
 	++chessBoardCount;
@@ -41,23 +41,24 @@ ChessBoard::ChessBoard(ChessGameParameters::ptr param)
 	
 	whiteCastling[0] = whiteCastling[1] = blackCastling[0] = blackCastling[1] = cellCount;
 }
-ChessBoard::ChessBoard(const ChessBoard& that, ChessMove::ptr move_)
-	: cellCount(that.cellCount),
-	  width(that.width), height(that.height),
+ChessBoard::ChessBoard(const ChessBoard::ptr& that)
+	: cellCount(that->cellCount),
+	  width(that->width), height(that->height),
 	  board(new ChessPiece[cellCount]),
 	  enPassan(cellCount),
-	  turn(that.turn), move(move_),
+	  turn(that->turn), moveNum(that->moveNum),
+	  from(that),
 	  knownPossibleMoves(nullptr)
 {
 	++chessBoardCount;
 	
-	std::copy(that.board, that.board+cellCount, this->board);
+	std::copy(that->board, that->board+cellCount, this->board);
 
-	std::copy(that.whiteKingPos, that.whiteKingPos+3, this->whiteKingPos);
-	std::copy(that.blackKingPos, that.blackKingPos+3, this->blackKingPos);
+	std::copy(that->whiteKingPos, that->whiteKingPos+3, this->whiteKingPos);
+	std::copy(that->blackKingPos, that->blackKingPos+3, this->blackKingPos);
 
-	std::copy(that.whiteCastling, that.whiteCastling+2, this->whiteCastling);
-	std::copy(that.blackCastling, that.blackCastling+2, this->blackCastling);
+	std::copy(that->whiteCastling, that->whiteCastling+2, this->whiteCastling);
+	std::copy(that->blackCastling, that->blackCastling+2, this->blackCastling);
 }
 
 ChessBoard::~ChessBoard()
@@ -172,6 +173,11 @@ void ChessBoard::debugPrint() const
 	}
 }
 
+ChessBoard::ptr ChessBoard::getFrom() const
+{
+	return from;
+}
+
 ChessPlayerColour ChessBoard::getTurn() const
 {
 	return turn;
@@ -206,9 +212,9 @@ ChessPiece ChessBoard::getPiecePos(ChessBoard::BoardPosition_t pos) const
 	return board[pos];
 }
 
-ChessMove::ptr ChessBoard::getMove() const
+uint16_t ChessBoard::getMoveNum() const
 {
-	return move;
+	return moveNum;
 }
 
 bool ChessBoard::isEmpty(char file, int rank) const
@@ -233,7 +239,7 @@ void ChessBoard::clearPossibleMoves(ChessBoard::ptr toKeep)
 	{
 		if(*it != toKeep)
 		{
-			(*it)->move.reset();
+			(*it)->from.reset();
 			(*it)->clearPossibleMoves();
 		}
 	}
