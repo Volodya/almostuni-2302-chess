@@ -20,6 +20,13 @@ ChessEngineWorker::ChessEngineWorker()
 	: pleaseStop(false)
 {}
 
+ChessEngineWorker::Functions_t::Functions_t
+	(ChessEngineWorker::Functions_t::TestBetterV_t testBetterV_,
+	 ChessEngineWorker::Functions_t::NewAlphaBeta_t newAlpha_,
+	 ChessEngineWorker::Functions_t::NewAlphaBeta_t newBeta_)
+	: testBetterV(testBetterV_), newAlpha(newAlpha_), newBeta(newBeta_)
+{}
+
 void ChessEngineWorker::stop()
 {
 	pleaseStop=true;
@@ -70,6 +77,19 @@ void ChessEngineWorker::startNextMoveCalculation(ChessBoard::ptr original, int s
 	thread = std::thread( &ChessEngineWorker::startNextMoveCalculationInternal, this, original, startDepth);
 }
 
+ChessEngineWorker::Functions_t ChessEngineWorker::functions[2] = 
+	{
+		ChessEngineWorker::Functions_t(
+			std::greater<weight_type>(),
+			[](weight_type alpha, weight_type v) { return std::max(alpha, v); },
+			[](weight_type beta, weight_type v) { return beta; }
+		),
+		ChessEngineWorker::Functions_t(
+			std::less<weight_type>(),
+			[](weight_type alpha, weight_type v) { return alpha; },
+			[](weight_type beta, weight_type v) { return std::min(beta, v); }
+		)
+	};
 ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr analysis, int depth,
 		weight_type alpha, weight_type beta, ChessPlayerColour maximizingPlayer)
 {
@@ -99,31 +119,19 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 	ChessBoardAnalysis::ptr res=nullptr;
 	
 	weight_type v;
-	std::function<bool(weight_type, weight_type)> testBetterV;
-	std::function<weight_type(weight_type, weight_type)> newAlpha, newBeta;
+	size_t functionsNum;
+	
 	if(maximizingPlayer == analysis->getBoard()->getTurn())
 	{
 		//Log::info("first set");
 		v = ChessBoardAnalysis::MIN_WEIGHT;
-		testBetterV = std::greater<weight_type>();
-		newAlpha = [](weight_type alpha, weight_type v) {
-			return std::max(alpha, v);
-		};
-		newBeta = [](weight_type beta, weight_type v) {
-			return beta;
-		};
+		functionsNum = 0;
 	}
 	else
 	{
 		//Log::info("second set");
 		v = ChessBoardAnalysis::MAX_WEIGHT;
-		testBetterV = std::less<weight_type>();
-		newAlpha = [](weight_type alpha, weight_type v) {
-			return alpha;
-		};
-		newBeta = [](weight_type beta, weight_type v) {
-			return std::min(beta, v);
-		};
+		functionsNum = 1;
 	}
 
 	//for(auto it=possibleMoves->begin(), end=possibleMoves->end(); it!=end; ++it)
@@ -139,7 +147,7 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 		//Log::info(std::string("welcome back with the v=")+std::to_string(potentialV));
 		
 		//Log::info(std::string("test ")+std::to_string(potentialV)+std::string(" ")+std::to_string(v)+std::string(" ")+std::to_string(testBetterV(potentialV, v)));
-		if(testBetterV(potentialV, v))
+		if(functions[functionsNum].testBetterV(potentialV, v))
 		{
 			//Log::info("test for better v passed");
 			res = std::move(potentialRes);
@@ -150,8 +158,8 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 				std::swap<ChessBoard::ptr>(possibleMoves->operator[](0), possibleMoves->operator[](i));
 			}
 		}
-		alpha = newAlpha(alpha, v);
-		beta = newBeta(beta, v);
+		alpha = functions[functionsNum].newAlpha(alpha, v);
+		beta = functions[functionsNum].newBeta(beta, v);
 		if(beta <= alpha)
 		{
 			// remove unneeded part of the tree

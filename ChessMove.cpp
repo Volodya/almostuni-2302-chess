@@ -15,8 +15,8 @@ bool ChessMove::isMovePossible(ChessBoard::ptr to)
 	assert(to!=nullptr);
 
 	ChessBoard::BoardPosition_t *king = nullptr;
-	auto width = to->getWidth();
-	auto height = to->getHeight();
+	auto & width = ChessBoard::param.width;
+	auto & height = ChessBoard::param.height;
 	if(to->turn==ChessPlayerColour::BLACK)
 	{
 		// if it's white to move, we are looking for a black king
@@ -27,9 +27,9 @@ bool ChessMove::isMovePossible(ChessBoard::ptr to)
 		king = to->whiteKingPos;
 	}
 	
-	auto possiblePieces = ChessBoard::possiblePieces;
+	auto & possiblePieces = ChessBoard::ChessBoard::param.possiblePieces;
 	for(
-		auto attackingPiece = possiblePieces->begin(), end=possiblePieces->end();
+		auto attackingPiece = possiblePieces.begin(), end=possiblePieces.end();
 		attackingPiece != end;
 		++attackingPiece )
 	{
@@ -108,7 +108,7 @@ void ChessMove::moveAttempts(
 	const MoveTemplate& mt,
 	bool canTake, bool canMoveToEmpty)
 {
-	const ChessBoard::BoardPosition_t width = cb.getWidth();
+	const ChessBoard::BoardPosition_t & width = ChessBoard::param.width;
 	
 	const ChessBoard::BoardPosition_t rank = pos / width;
 	const ChessBoard::BoardPosition_t file = pos % width;
@@ -134,7 +134,7 @@ void ChessMove::moveAttempts(
 			
 			newPos = cb.getPos(newFile, newRank);
 			
-			if( newPos >= cb.getCellCount() )
+			if( newPos >= ChessBoard::param.cellCount )
 			{
 				break;
 			}

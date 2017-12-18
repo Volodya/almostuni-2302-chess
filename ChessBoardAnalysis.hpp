@@ -28,13 +28,12 @@ public:
 private:
 	ChessBoard::ptr board;
 	
-	int8_t *underAttackByWhite; // [rank*w+file]
-	int8_t *underAttackByBlack; // [rank*w+file]
-
 	std::vector<ChessBoard::ptr>* possibleMoves;
 	
 	bool check;
-	bool calculated;
+
+	int8_t *underAttackByWhite; // [rank*w+file]
+	int8_t *underAttackByBlack; // [rank*w+file]
 public:
 	ChessBoardAnalysis(ChessBoard::ptr board_);
 	~ChessBoardAnalysis();

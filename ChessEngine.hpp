@@ -20,6 +20,20 @@ class ChessEngine;
 
 class ChessEngineWorker
 {
+	struct Functions_t
+	{
+		typedef ChessBoardAnalysis::weight_type weight_type;
+
+		typedef std::function<bool(weight_type, weight_type)> TestBetterV_t;
+		typedef std::function<weight_type(weight_type, weight_type)> NewAlphaBeta_t;
+
+		TestBetterV_t testBetterV;
+		NewAlphaBeta_t newAlpha, newBeta;
+		
+		Functions_t(TestBetterV_t testBetterV_, NewAlphaBeta_t newAlpha_, NewAlphaBeta_t newBeta_);
+	};
+	static Functions_t functions[2];
+
 	friend class ChessEngine;
 	
 	typedef ChessBoardAnalysis::weight_type weight_type;

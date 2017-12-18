@@ -11,20 +11,20 @@
 
 ChessBoardIterator ChessBoard::begin()
 {
-	return ChessBoardIterator(this, width, 0);
+	return ChessBoardIterator(this, param.width, 0);
 }
 ChessBoardConstIterator ChessBoard::begin() const
 {
-	return ChessBoardConstIterator(this, width, 0);
+	return ChessBoardConstIterator(this, param.width, 0);
 }
 
 ChessBoardIterator ChessBoard::end()
 {
-	return ChessBoardIterator(this, width, cellCount);
+	return ChessBoardIterator(this, param.width, param.cellCount);
 }
 ChessBoardConstIterator ChessBoard::end() const
 {
-	return ChessBoardConstIterator(this, width, cellCount);
+	return ChessBoardConstIterator(this, param.width, param.cellCount);
 }
 
 ChessBoardIterator::ChessBoardIterator(ChessBoard* cb_, size_t boardWidth_, size_t pos_)

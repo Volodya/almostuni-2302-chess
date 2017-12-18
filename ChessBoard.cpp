@@ -17,42 +17,36 @@
 
 // static data members
 
-std::shared_ptr<std::vector<ChessPiece>> ChessBoard::possiblePieces = nullptr;
+ChessGameParameters ChessBoard::param;
 
 int ChessBoard::chessBoardCount = 0;
 
 // class functions
 
-ChessBoard::ChessBoard(ChessGameParameters::ptr param)
-	: cellCount(param->getCellCount()),
-	  width(param->getWidth()), height(param->getHeight()),
-	  board(new ChessPiece[cellCount]),
-	  enPassan(cellCount),
-	  turn(ChessPlayerColour::WHITE), moveNum(0),
+ChessBoard::ChessBoard()
+	: board(new ChessPiece[param.cellCount]),
+	  enPassan(param.cellCount),
+	  moveNum(0), turn(ChessPlayerColour::WHITE),
 	  knownPossibleMoves(nullptr)
 {
 	++chessBoardCount;
 	
-	possiblePieces = param->getPossiblePieces();
+	std::fill(board, board+param.cellCount, EMPTY_CELL);
+	std::fill(whiteKingPos, whiteKingPos+3, param.cellCount);
+	std::fill(blackKingPos, blackKingPos+3, param.cellCount);
 	
-	std::fill(board, board+cellCount, EMPTY_CELL);
-	std::fill(whiteKingPos, whiteKingPos+3, cellCount);
-	std::fill(blackKingPos, blackKingPos+3, cellCount);
-	
-	whiteCastling[0] = whiteCastling[1] = blackCastling[0] = blackCastling[1] = cellCount;
+	whiteCastling[0] = whiteCastling[1] = blackCastling[0] = blackCastling[1] = param.cellCount;
 }
 ChessBoard::ChessBoard(const ChessBoard::ptr& that)
-	: cellCount(that->cellCount),
-	  width(that->width), height(that->height),
-	  board(new ChessPiece[cellCount]),
-	  enPassan(cellCount),
-	  turn(that->turn), moveNum(that->moveNum),
+	: board(new ChessPiece[param.cellCount]),
+	  enPassan(param.cellCount),
+	  moveNum(that->moveNum), turn(that->turn),
 	  from(that),
 	  knownPossibleMoves(nullptr)
 {
 	++chessBoardCount;
 	
-	std::copy(that->board, that->board+cellCount, this->board);
+	std::copy(that->board, that->board+param.cellCount, this->board);
 
 	std::copy(that->whiteKingPos, that->whiteKingPos+3, this->whiteKingPos);
 	std::copy(that->blackKingPos, that->blackKingPos+3, this->blackKingPos);
@@ -71,22 +65,8 @@ ChessBoard::~ChessBoard()
 
 ChessBoard::BoardPosition_t ChessBoard::getPos(const BoardPosition_t &file, const BoardPosition_t &rank) const
 {
-	return rank*width+file;
+	return rank*param.width+file;
 }
-
-ChessBoard::BoardPosition_t ChessBoard::getCellCount() const
-{
-	return cellCount;
-}
-ChessBoard::BoardPosition_t ChessBoard::getHeight() const
-{
-	return height;
-}
-ChessBoard::BoardPosition_t ChessBoard::getWidth() const
-{
-	return width;
-}
-
 
 std::string ChessBoard::toFEN() const
 {
@@ -146,17 +126,17 @@ void ChessBoard::debugPrint() const
 		std::cout << "Black's turn" << std::endl;
 	}
 	std::cout << ' ';
-	for(BoardPosition_t i=0; i<width; ++i)
+	for(BoardPosition_t i=0; i<param.width; ++i)
 	{
 		std::cout << ' ' << (char)('A'+i);
 	}
 	std::cout << std::endl;
 	{
 		ChessPiece c;
-		for(BoardPosition_t rank=height; rank>0; --rank)
+		for(BoardPosition_t rank=param.height; rank>0; --rank)
 		{
 			std::cout << (int)rank;
-			for(BoardPosition_t file=0; file<width; ++file)
+			for(BoardPosition_t file=0; file<param.width; ++file)
 			{
 				c = board[getPos(file, rank-1)];
 				if(getPos(file, rank-1)==enPassan)

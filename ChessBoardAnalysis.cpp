@@ -69,8 +69,8 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		return;
 	}
 
-	underAttackByBlack = new int8_t[size_t(board->getWidth())*board->getHeight()]{};
-	underAttackByWhite = new int8_t[size_t(board->getWidth())*board->getHeight()]{};
+	underAttackByBlack = new int8_t[ChessBoard::param.cellCount]{};
+	underAttackByWhite = new int8_t[ChessBoard::param.cellCount]{};
 
 	possibleMoves=new std::vector<ChessBoard::ptr>();
 
@@ -200,7 +200,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		}
 	};
 
-	for(ChessBoard::BoardPosition_t pos=0, end=board->getCellCount(); pos!=end; ++pos)
+	for(ChessBoard::BoardPosition_t pos=0, end=ChessBoard::param.cellCount; pos!=end; ++pos)
 	{
 		auto curPiece = board->getPiecePos(pos);
 		if(curPiece == EMPTY_CELL) continue;
@@ -229,15 +229,15 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 	if(board->getTurn()==ChessPlayerColour::WHITE)
 	{
 		// process white pawns on first ranks
-		for(ChessBoard::BoardPosition_t pos = 0, end=board->getWidth()*2; pos<end; ++pos)
+		for(ChessBoard::BoardPosition_t pos = 0, end=ChessBoard::param.width*2; pos<end; ++pos)
 		{
 			auto curPiece = board->getPiecePos(pos);
 			if(curPiece != PAWN_WHITE) continue;
 			
-			auto enPassan=pos+board->getWidth();
+			auto enPassan=pos+ChessBoard::param.width;
 			if(board->getPiecePos(enPassan) == EMPTY_CELL)
 			{
-				auto newPos = pos+2*board->getWidth();
+				auto newPos = pos+2*ChessBoard::param.width;
 				if(board->getPiecePos(newPos)==EMPTY_CELL)
 				{
 					auto nextBoard = factory.createBoard(this->board, pos, newPos);
@@ -255,12 +255,12 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 			}
 		}
 		// process en passan rules
-		if(board->enPassan!=board->cellCount)
+		if(board->enPassan!=ChessBoard::param.cellCount)
 		{
 			// test left
-			if(board->enPassan % board->width != 0)
+			if(board->enPassan % ChessBoard::param.width != 0)
 			{
-				auto pos = board->enPassan - board->width - 1;
+				auto pos = board->enPassan - ChessBoard::param.width - 1;
 				if(board->getPiecePos(pos)==PAWN_WHITE)
 				{
 					auto nextBoard = factory.createBoard(this->board, pos, board->enPassan);
@@ -278,9 +278,9 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				}
 			}
 			// test right
-			if(board->enPassan % board->width != board->width-1)
+			if(board->enPassan % ChessBoard::param.width != ChessBoard::param.width-1)
 			{
-				auto pos = board->enPassan - board->width + 1;
+				auto pos = board->enPassan - ChessBoard::param.width + 1;
 				if(board->getPiecePos(pos)==PAWN_WHITE)
 				{
 					auto nextBoard = factory.createBoard(this->board, pos, board->enPassan);
@@ -299,7 +299,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 			}
 		}
 		// process castling rules
-		if(board->whiteCastling[0]!=board->cellCount) // if can castle left
+		if(board->whiteCastling[0]!=ChessBoard::param.cellCount) // if can castle left
 		{
 			assert(board->getPiecePos(board->whiteCastling[0])==ROOK_WHITE);
 			if(
@@ -345,14 +345,14 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				}
 			}
 		}
-		if(board->whiteCastling[1]!=board->cellCount) // if can castle right
+		if(board->whiteCastling[1]!=ChessBoard::param.cellCount) // if can castle right
 		{
 			assert(board->getPiecePos(board->whiteCastling[1])==ROOK_WHITE);
 			if(
 				underAttackByBlack[board->whiteKingPos[0]] == 0 &&
 				underAttackByBlack[board->whiteKingPos[0]+1] == 0)
 			{
-				if(board->whiteKingPos[1] < board->width-2) // farther than 2 files from the edge
+				if(board->whiteKingPos[1] < ChessBoard::param.width-2) // farther than 2 files from the edge
 				{
 					bool allEmpty = true;
 					for(ChessBoard::BoardPosition_t cell = board->whiteCastling[0]+1; cell<board->whiteKingPos[0]; ++cell)
@@ -395,16 +395,16 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 	else // if ChessPlayerColour::Black
 	{
 		// process black pawns on first ranks
-		for(ChessBoard::BoardPosition_t pos = board->getCellCount()-1, end=board->getCellCount() - (board->getWidth()*2) -1; pos>=end; --pos)
+		for(ChessBoard::BoardPosition_t pos = ChessBoard::param.cellCount-1, end=ChessBoard::param.cellCount - (ChessBoard::param.width*2) -1; pos>=end; --pos)
 		{
 			
 			auto curPiece = board->getPiecePos(pos);
 			if(curPiece != PAWN_BLACK) continue;
 			
-			auto enPassan=pos-board->getWidth();
+			auto enPassan=pos-ChessBoard::param.width;
 			if(board->getPiecePos(enPassan) == EMPTY_CELL)
 			{
-				auto newPos = pos-2*board->getWidth();
+				auto newPos = pos-2*ChessBoard::param.width;
 				if(board->getPiecePos(newPos)==EMPTY_CELL)
 				{
 					auto nextBoard = factory.createBoard(this->board, pos, newPos);
@@ -421,12 +421,12 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				}
 			}
 		}
-		if(board->enPassan!=board->cellCount)
+		if(board->enPassan!=ChessBoard::param.cellCount)
 		{
 			// test left
-			if(board->enPassan % board->width != 0)
+			if(board->enPassan % ChessBoard::param.width != 0)
 			{
-				auto pos = board->enPassan + board->width - 1;
+				auto pos = board->enPassan + ChessBoard::param.width - 1;
 				if(board->getPiecePos(pos)==PAWN_BLACK)
 				{
 					auto nextBoard = factory.createBoard(this->board, pos, board->enPassan);
@@ -444,9 +444,9 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				}
 			}
 			// test right
-			if(board->enPassan % board->width != board->width-1)
+			if(board->enPassan % ChessBoard::param.width != ChessBoard::param.width-1)
 			{
-				auto pos = board->enPassan + board->width + 1;
+				auto pos = board->enPassan + ChessBoard::param.width + 1;
 
 				if(board->getPiecePos(pos)==PAWN_BLACK)
 				{
@@ -466,7 +466,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 			}
 		}
 		// process castling rules
-		if(board->blackCastling[0]!=board->cellCount) // if can castle left
+		if(board->blackCastling[0]!=ChessBoard::param.cellCount) // if can castle left
 		{
 			assert(board->getPiecePos(board->blackCastling[0])==ROOK_BLACK);
 			if(
@@ -512,14 +512,14 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				}
 			}
 		}
-		if(board->blackCastling[1]!=board->cellCount) // if can castle right
+		if(board->blackCastling[1]!=ChessBoard::param.cellCount) // if can castle right
 		{
 			assert(board->getPiecePos(board->blackCastling[1])==ROOK_BLACK);
 			if(
 				underAttackByWhite[board->blackKingPos[0]] == 0 &&
 				underAttackByWhite[board->blackKingPos[0]+1] == 0)
 			{
-				if(board->blackKingPos[1] < board->width-2) // farther than 2 files from the edge
+				if(board->blackKingPos[1] < ChessBoard::param.width-2) // farther than 2 files from the edge
 				{
 					bool allEmpty = true;
 					for(ChessBoard::BoardPosition_t cell = board->blackCastling[0]+1; cell<board->blackKingPos[0]; ++cell)
@@ -601,7 +601,7 @@ weight_type ChessBoardAnalysis::chessPositionWeight() const
 weight_type ChessBoardAnalysis::chessPiecesWeight() const
 {
 	int count[KNOWN_CHESS_PIECE_COUNT] = { 0 };
-	for(ChessBoard::BoardPosition_t pos=0, end=board->getCellCount(); pos!=end; ++pos)
+	for(ChessBoard::BoardPosition_t pos=0, end=ChessBoard::param.cellCount; pos!=end; ++pos)
 	{
 		++count[board->getPiecePos(pos)]; // ChessPiece is a numerical constant
 	}
@@ -621,7 +621,7 @@ weight_type ChessBoardAnalysis::chessPieceAttackedWeight() const
 	weight_type result = 0;
 	
 	ChessPiece curPiece;
-	for(ChessBoard::BoardPosition_t pos=0, end=board->getCellCount(); pos!=end; ++pos)
+	for(ChessBoard::BoardPosition_t pos=0, end=ChessBoard::param.cellCount; pos!=end; ++pos)
 	{
 		// get non-empty cells
 		curPiece = board->getPiecePos(pos);
@@ -660,7 +660,7 @@ weight_type ChessBoardAnalysis::chessCentreControlWeight() const
 	};
 	
 	weight_type result = 0;
-	for(ChessBoard::BoardPosition_t pos=0, end=board->getCellCount(); pos!=end; ++pos)
+	for(ChessBoard::BoardPosition_t pos=0, end=ChessBoard::param.cellCount; pos!=end; ++pos)
 	{
 		result +=
 			domination(

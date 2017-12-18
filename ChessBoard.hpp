@@ -19,7 +19,6 @@
 #include "ChessPiece.hpp"
 #include "ChessGameParameters.hpp"
 
-class ChessMove;
 class ChessBoardAnalysis;
 
 class ChessBoard;
@@ -30,14 +29,12 @@ public:
 	typedef std::shared_ptr<ChessBoard> ptr;
 	typedef std::weak_ptr<ChessBoard> wptr;
 	
-	typedef uint16_t BoardPosition_t;
+	typedef ChessGameParameters::BoardPosition_t BoardPosition_t;
 
-	static std::shared_ptr<std::vector<ChessPiece>> possiblePieces;
-	
+	static ChessGameParameters param;
+		
 	static int chessBoardCount;
 private:
-	BoardPosition_t cellCount;
-	BoardPosition_t width, height;
 	ChessPiece* board; // [rank*w+file]
 
 	BoardPosition_t enPassan;
@@ -53,17 +50,12 @@ private:
 	std::vector<ChessBoard::ptr>* knownPossibleMoves;
 	bool knownCheck;	
 	
-	ChessBoard() = delete;
+	ChessBoard();
 	ChessBoard(const ChessBoard& that) = delete;
-	ChessBoard(ChessGameParameters::ptr param_);
 	ChessBoard(const ptr& that);
 public:
 	~ChessBoard();
 	
-	BoardPosition_t getCellCount() const;
-	BoardPosition_t getHeight() const;
-	BoardPosition_t getWidth() const;
-
 	bool isEmpty(char file, int rank) const;
 	bool isEmptyPos(BoardPosition_t file, BoardPosition_t rank) const;
 	bool isEmptyPos(BoardPosition_t pos) const;
