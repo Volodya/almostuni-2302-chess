@@ -47,9 +47,9 @@ private:
 	ChessPlayerColour turn;
 	
 	ChessBoard::ptr from;
-	std::vector<ChessBoard::ptr>* knownPossibleMoves;
-	bool knownCheck;	
 	
+	ChessBoardAnalysis* analysis;
+
 	ChessBoard();
 	ChessBoard(const ChessBoard& that) = delete;
 	ChessBoard(const ptr& that);
@@ -79,6 +79,8 @@ public:
 	ChessBoardConstIterator begin() const;
 	ChessBoardIterator end();
 	ChessBoardConstIterator end() const;
+	
+	static ChessBoardAnalysis* getAnalysis(ChessBoard::ptr& self);
 	
 	void clearPossibleMoves(ChessBoard::ptr toKeep = nullptr);
 	

@@ -90,7 +90,7 @@ ChessEngineWorker::Functions_t ChessEngineWorker::functions[2] =
 			[](weight_type beta, weight_type v) { return std::min(beta, v); }
 		)
 	};
-ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr analysis, int depth,
+ChessBoardAnalysis* ChessEngineWorker::calculation(ChessBoardAnalysis* analysis, int depth,
 		weight_type alpha, weight_type beta, ChessPlayerColour maximizingPlayer)
 {
 	//Log::info(std::string("start calculation. depth=") + std::to_string(depth) + std::string(" player=") + std::to_string((int)maximizingPlayer));
@@ -116,7 +116,7 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 		//Log::info("no possible moves");
 		return analysis;
 	}
-	ChessBoardAnalysis::ptr res=nullptr;
+	ChessBoardAnalysis* res=nullptr;
 	
 	weight_type v;
 	size_t functionsNum;
@@ -139,7 +139,7 @@ ChessBoardAnalysis::ptr ChessEngineWorker::calculation(ChessBoardAnalysis::ptr a
 	{
 		//Log::info("for-loop start");
 		// make new analysis
-		ChessBoardAnalysis::ptr analysis(new ChessBoardAnalysis(possibleMoves->at(i)));
+		ChessBoardAnalysis* analysis = ChessBoard::getAnalysis(possibleMoves->at(i));
 
 		// we are changing res only if v also changes
 		auto potentialRes = calculation(std::move(analysis), depth-1, alpha, beta, maximizingPlayer);
@@ -179,13 +179,13 @@ void ChessEngineWorker::startNextMoveCalculationInternal(ChessBoard::ptr origina
 	try
 	{
 		int depth = startDepth;
-		auto originalAnalysis = ChessBoardAnalysis::ptr(new ChessBoardAnalysis(original));
+		auto originalAnalysis = ChessBoard::getAnalysis(original);
 		
 		do
 		{
 			try
 			{
-				ChessBoardAnalysis::ptr best = calculation(originalAnalysis, depth,
+				ChessBoardAnalysis* best = calculation(originalAnalysis, depth,
 					ChessBoardAnalysis::MIN_WEIGHT, ChessBoardAnalysis::MAX_WEIGHT,
 					original->getTurn());
 

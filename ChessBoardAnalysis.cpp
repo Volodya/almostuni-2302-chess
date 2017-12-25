@@ -56,16 +56,19 @@ ChessBoardAnalysis::ChessBoardAnalysis(ChessBoard::ptr board_)
 
 ChessBoardAnalysis::~ChessBoardAnalysis()
 {
+}
+
+void ChessBoardAnalysis::reset()
+{
+	if(possibleMoves) delete possibleMoves;
 	if(underAttackByWhite) delete[] underAttackByWhite;
 	if(underAttackByBlack) delete[] underAttackByBlack;
 }
 
 void ChessBoardAnalysis::calculatePossibleMoves()
 {
-	if(board->knownPossibleMoves != nullptr)
+	if(possibleMoves != nullptr)
 	{
-		possibleMoves=board->knownPossibleMoves;
-		check=board->knownCheck;
 		return;
 	}
 
@@ -567,9 +570,6 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		);
 	
 	possibleMoves->shrink_to_fit();
-	
-	board->knownPossibleMoves = possibleMoves;
-	board->knownCheck = check;
 }
 
 weight_type ChessBoardAnalysis::chessPositionWeight() const
@@ -618,6 +618,7 @@ weight_type ChessBoardAnalysis::chessPiecesWeight() const
 }
 weight_type ChessBoardAnalysis::chessPieceAttackedWeight() const
 {
+	assert(board);
 	weight_type result = 0;
 	
 	ChessPiece curPiece;
@@ -628,6 +629,7 @@ weight_type ChessBoardAnalysis::chessPieceAttackedWeight() const
 		if(curPiece == EMPTY_CELL) continue;
 		
 		auto multiplierColour = getWeightMultiplier(getColour(curPiece));
+		//Log::info("5 " + std::to_string(pos));
 		auto dominator = domination( // who has more attacks -1 (black); 0 (neutral); 1 (white)
 			underAttackByWhite[pos],
 			underAttackByBlack[pos]
@@ -688,6 +690,28 @@ bool ChessBoardAnalysis::isCheckMate() const
 	return false;
 }
 
+void ChessBoardAnalysis::clearPossibleMoves(ChessBoard::ptr toKeep)
+{
+	if(!possibleMoves) return;
+	for(auto it=possibleMoves->begin(), end=possibleMoves->end(); it!=end; ++it)
+	{
+		if(*it != toKeep)
+		{
+			(*it)->from.reset();
+			(*it)->clearPossibleMoves();
+		}
+	}
+	if(toKeep)
+	{
+		possibleMoves->resize(1);
+		(*possibleMoves)[0]=toKeep;
+	}
+	else
+	{
+		delete possibleMoves;
+		possibleMoves=nullptr;
+	}
+}
 
 std::vector<ChessBoard::ptr> * const ChessBoardAnalysis::getPossibleMoves() const
 {

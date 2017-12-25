@@ -34,9 +34,11 @@ private:
 
 	int8_t *underAttackByWhite; // [rank*w+file]
 	int8_t *underAttackByBlack; // [rank*w+file]
+	
 public:
 	ChessBoardAnalysis(ChessBoard::ptr board_);
 	~ChessBoardAnalysis();
+	void reset();
 
 	bool isCheckMate() const;  // call to this function is underfined without calculatePossibleMoves()
 	bool isCheck() const; // call to this function is underfined without calculatePossibleMoves()
@@ -49,6 +51,8 @@ public:
 	
 	void calculatePossibleMoves();
 	std::vector<ChessBoard::ptr> * const getPossibleMoves() const; // call to this function is underfined without calculatePossibleMoves()
+	void clearPossibleMoves(ChessBoard::ptr toKeep = nullptr);
+
 	
 	ChessBoard::ptr getBoard() const;
 };

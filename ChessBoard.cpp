@@ -5,6 +5,7 @@
  * GNU GPL v 3.0
  */
 
+#include "ChessBoardAnalysis.hpp"
 #include "ChessBoard.hpp"
 #include "ChessMove.hpp" // because it is not included in ChessBoard.hpp due to the circular dep
 
@@ -27,7 +28,7 @@ ChessBoard::ChessBoard()
 	: board(new ChessPiece[param.cellCount]),
 	  enPassan(param.cellCount),
 	  moveNum(0), turn(ChessPlayerColour::WHITE),
-	  knownPossibleMoves(nullptr)
+	  analysis(nullptr)
 {
 	++chessBoardCount;
 	
@@ -42,7 +43,7 @@ ChessBoard::ChessBoard(const ChessBoard::ptr& that)
 	  enPassan(param.cellCount),
 	  moveNum(that->moveNum), turn(that->turn),
 	  from(that),
-	  knownPossibleMoves(nullptr)
+	  analysis(nullptr)
 {
 	++chessBoardCount;
 	
@@ -60,7 +61,11 @@ ChessBoard::~ChessBoard()
 	--chessBoardCount;
 	
 	delete[] board;
-	clearPossibleMoves();
+	if(analysis)
+	{
+		analysis->reset();
+		delete analysis;
+	}
 }
 
 ChessBoard::BoardPosition_t ChessBoard::getPos(const BoardPosition_t &file, const BoardPosition_t &rank) const
@@ -214,23 +219,15 @@ bool ChessBoard::isEmptyPos(ChessBoard::BoardPosition_t pos) const
 
 void ChessBoard::clearPossibleMoves(ChessBoard::ptr toKeep)
 {
-	if(!knownPossibleMoves) return;
-	for(auto it=knownPossibleMoves->begin(), end=knownPossibleMoves->end(); it!=end; ++it)
+	if(!analysis) return;
+	analysis->clearPossibleMoves(toKeep);
+}
+
+ChessBoardAnalysis* ChessBoard::getAnalysis(ChessBoard::ptr& self)
+{
+	if(self->analysis==nullptr)
 	{
-		if(*it != toKeep)
-		{
-			(*it)->from.reset();
-			(*it)->clearPossibleMoves();
-		}
+		self->analysis = new ChessBoardAnalysis(self);
 	}
-	if(toKeep)
-	{
-		knownPossibleMoves->resize(1);
-		(*knownPossibleMoves)[0]=toKeep;
-	}
-	else
-	{
-		delete knownPossibleMoves;
-		knownPossibleMoves=nullptr;
-	}
+	return self->analysis;
 }
