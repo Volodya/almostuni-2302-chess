@@ -6,7 +6,6 @@
  */
 
 #include "ChessBoardAnalysis.hpp"
-#include "ChessBoardFactory.hpp"
 #include "ChessBoardIterator.hpp"
 #include "ChessPlayerColour.hpp"
 #include <cassert>
@@ -65,19 +64,8 @@ void ChessBoardAnalysis::reset()
 	if(underAttackByBlack) delete[] underAttackByBlack;
 }
 
-void ChessBoardAnalysis::calculatePossibleMoves()
+void ChessBoardAnalysis::calculatePossibleMoves_common(ChessBoardFactory &factory)
 {
-	if(possibleMoves != nullptr)
-	{
-		return;
-	}
-
-	underAttackByBlack = new int8_t[ChessBoard::param.cellCount]{};
-	underAttackByWhite = new int8_t[ChessBoard::param.cellCount]{};
-
-	possibleMoves=new std::vector<ChessBoard::ptr>();
-
-	ChessBoardFactory factory;
 	typedef ChessMove::ChessMoveRecordingFunction ChessMoveRecordingFunction;
 		// empty function
 	const static ChessMoveRecordingFunction emptyFunction =
@@ -203,6 +191,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 		}
 	};
 
+	// main common moves
 	for(ChessBoard::BoardPosition_t pos=0, end=ChessBoard::param.cellCount; pos!=end; ++pos)
 	{
 		auto curPiece = board->getPiecePos(pos);
@@ -229,6 +218,9 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				*board, pos, *pieceParam->anyMove, true);
 		}
 	}
+}
+void ChessBoardAnalysis::calculatePossibleMoves_pawnfirst(ChessBoardFactory &factory)
+{
 	if(board->getTurn()==ChessPlayerColour::WHITE)
 	{
 		// process white pawns on first ranks
@@ -257,6 +249,43 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				}
 			}
 		}
+	}
+	else // if ChessPlayerColour::Black
+	{
+		// process black pawns on first ranks
+		for(ChessBoard::BoardPosition_t pos = ChessBoard::param.cellCount-1, end=ChessBoard::param.cellCount - (ChessBoard::param.width*2) -1; pos>=end; --pos)
+		{
+			
+			auto curPiece = board->getPiecePos(pos);
+			if(curPiece != PAWN_BLACK) continue;
+			
+			auto enPassan=pos-ChessBoard::param.width;
+			if(board->getPiecePos(enPassan) == EMPTY_CELL)
+			{
+				auto newPos = pos-2*ChessBoard::param.width;
+				if(board->getPiecePos(newPos)==EMPTY_CELL)
+				{
+					auto nextBoard = factory.createBoard(this->board, pos, newPos);
+					
+					if(ChessMove::isMovePossible(nextBoard))
+					{
+						nextBoard->enPassan=enPassan;
+						this->possibleMoves->push_back(nextBoard);
+					}
+					else
+					{
+						nextBoard.reset();
+					}
+				}
+			}
+		}
+	}
+}
+
+void ChessBoardAnalysis::calculatePossibleMoves_enpassan(ChessBoardFactory &factory)
+{
+	if(board->getTurn()==ChessPlayerColour::WHITE)
+	{
 		// process en passan rules
 		if(board->enPassan!=ChessBoard::param.cellCount)
 		{
@@ -301,6 +330,60 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 				}
 			}
 		}
+	}
+	else // if ChessPlayerColour::Black
+	{
+		if(board->enPassan!=ChessBoard::param.cellCount)
+		{
+			// test left
+			if(board->enPassan % ChessBoard::param.width != 0)
+			{
+				auto pos = board->enPassan + ChessBoard::param.width - 1;
+				if(board->getPiecePos(pos)==PAWN_BLACK)
+				{
+					auto nextBoard = factory.createBoard(this->board, pos, board->enPassan);
+					
+					if(ChessMove::isMovePossible(nextBoard))
+					{
+						++underAttackByBlack[pos+1];
+						nextBoard->placePiecePos(pos+1, EMPTY_CELL);
+						this->possibleMoves->push_back(nextBoard);
+					}
+					else
+					{
+						nextBoard.reset();
+					}
+				}
+			}
+			// test right
+			if(board->enPassan % ChessBoard::param.width != ChessBoard::param.width-1)
+			{
+				auto pos = board->enPassan + ChessBoard::param.width + 1;
+
+				if(board->getPiecePos(pos)==PAWN_BLACK)
+				{
+					auto nextBoard = factory.createBoard(this->board, pos, board->enPassan);
+					
+					if(ChessMove::isMovePossible(nextBoard))
+					{
+						++underAttackByBlack[pos-1];
+						nextBoard->placePiecePos(pos-1, EMPTY_CELL);
+						this->possibleMoves->push_back(nextBoard);
+					}
+					else
+					{
+						nextBoard.reset();
+					}
+				}
+			}
+		}
+	}
+}
+
+void ChessBoardAnalysis::calculatePossibleMoves_castling(ChessBoardFactory &factory)
+{
+	if(board->getTurn()==ChessPlayerColour::WHITE)
+	{
 		// process castling rules
 		if(board->whiteCastling[0]!=ChessBoard::param.cellCount) // if can castle left
 		{
@@ -397,77 +480,6 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 	}
 	else // if ChessPlayerColour::Black
 	{
-		// process black pawns on first ranks
-		for(ChessBoard::BoardPosition_t pos = ChessBoard::param.cellCount-1, end=ChessBoard::param.cellCount - (ChessBoard::param.width*2) -1; pos>=end; --pos)
-		{
-			
-			auto curPiece = board->getPiecePos(pos);
-			if(curPiece != PAWN_BLACK) continue;
-			
-			auto enPassan=pos-ChessBoard::param.width;
-			if(board->getPiecePos(enPassan) == EMPTY_CELL)
-			{
-				auto newPos = pos-2*ChessBoard::param.width;
-				if(board->getPiecePos(newPos)==EMPTY_CELL)
-				{
-					auto nextBoard = factory.createBoard(this->board, pos, newPos);
-					
-					if(ChessMove::isMovePossible(nextBoard))
-					{
-						nextBoard->enPassan=enPassan;
-						this->possibleMoves->push_back(nextBoard);
-					}
-					else
-					{
-						nextBoard.reset();
-					}
-				}
-			}
-		}
-		if(board->enPassan!=ChessBoard::param.cellCount)
-		{
-			// test left
-			if(board->enPassan % ChessBoard::param.width != 0)
-			{
-				auto pos = board->enPassan + ChessBoard::param.width - 1;
-				if(board->getPiecePos(pos)==PAWN_BLACK)
-				{
-					auto nextBoard = factory.createBoard(this->board, pos, board->enPassan);
-					
-					if(ChessMove::isMovePossible(nextBoard))
-					{
-						++underAttackByBlack[pos+1];
-						nextBoard->placePiecePos(pos+1, EMPTY_CELL);
-						this->possibleMoves->push_back(nextBoard);
-					}
-					else
-					{
-						nextBoard.reset();
-					}
-				}
-			}
-			// test right
-			if(board->enPassan % ChessBoard::param.width != ChessBoard::param.width-1)
-			{
-				auto pos = board->enPassan + ChessBoard::param.width + 1;
-
-				if(board->getPiecePos(pos)==PAWN_BLACK)
-				{
-					auto nextBoard = factory.createBoard(this->board, pos, board->enPassan);
-					
-					if(ChessMove::isMovePossible(nextBoard))
-					{
-						++underAttackByBlack[pos-1];
-						nextBoard->placePiecePos(pos-1, EMPTY_CELL);
-						this->possibleMoves->push_back(nextBoard);
-					}
-					else
-					{
-						nextBoard.reset();
-					}
-				}
-			}
-		}
 		// process castling rules
 		if(board->blackCastling[0]!=ChessBoard::param.cellCount) // if can castle left
 		{
@@ -562,6 +574,25 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 			}
 		}
 	}
+}
+
+void ChessBoardAnalysis::calculatePossibleMoves()
+{
+	ChessBoardFactory factory;
+	if(possibleMoves != nullptr)
+	{
+		return;
+	}
+
+	underAttackByBlack = new int8_t[ChessBoard::param.cellCount]{};
+	underAttackByWhite = new int8_t[ChessBoard::param.cellCount]{};
+
+	possibleMoves=new std::vector<ChessBoard::ptr>();
+
+	calculatePossibleMoves_common(factory);
+	calculatePossibleMoves_pawnfirst(factory);
+	calculatePossibleMoves_enpassan(factory);
+	calculatePossibleMoves_castling(factory);
 	
 	std::sort(possibleMoves->begin(), possibleMoves->end(),
 			[](ChessBoard::ptr &l, ChessBoard::ptr &r) -> bool {
@@ -574,7 +605,13 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 
 weight_type ChessBoardAnalysis::chessPositionWeight() const
 {
-	if(isCheckMate())
+	/*if(!possibleMoves)
+	{
+		weight_type wChessPieces = this->chessPiecesWeight();	// count pieces
+		
+		return wChessPieces;
+	}
+	else */if(isCheckMate())
 	{
 		weight_type wIsCheckMate = getWeightMultiplier(board->getTurn()) * CHECKMATE_WEIGHT;
 		weight_type wMoveNum = getWeightMultiplier(board->getTurn())*board->getMoveNum();
@@ -587,13 +624,6 @@ weight_type ChessBoardAnalysis::chessPositionWeight() const
 		weight_type wChessPieceAttacked = this->chessPieceAttackedWeight(); // count attacked pieces
 		weight_type wChessCentreControl = this->chessCentreControlWeight(); // control of the centre of the board
 
-/*	
-	Log::info(std::string("wIsCheckMate: ")+std::to_string(wIsCheckMate));
-	Log::info(std::string("wChessPieces: ")+std::to_string(wChessPieces));
-	Log::info(std::string("wChessPieceAttacked: ")+std::to_string(wChessPieceAttacked));
-	Log::info(std::string("wChessCentreControl: ")+std::to_string(wChessCentreControl));
-	Log::info(std::string("wMoveNum: ")+std::to_string(wMoveNum));
-*/
 		return wChessPieces + wChessPieceAttacked + wChessCentreControl;
 	}
 }
@@ -629,7 +659,6 @@ weight_type ChessBoardAnalysis::chessPieceAttackedWeight() const
 		if(curPiece == EMPTY_CELL) continue;
 		
 		auto multiplierColour = getWeightMultiplier(getColour(curPiece));
-		//Log::info("5 " + std::to_string(pos));
 		auto dominator = domination( // who has more attacks -1 (black); 0 (neutral); 1 (white)
 			underAttackByWhite[pos],
 			underAttackByBlack[pos]

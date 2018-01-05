@@ -24,7 +24,6 @@ int main()
 	{
 		ChessBoardFactory factory;
 		auto cb = factory.createBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-		//auto cb = factory.createBoard("7k/8/8/6Pp/8/8/8/7K b KQkq - 0 1");
 		//auto cb = factory.createBoard("4k3/8/8/8/8/8/8/qR4K1 w KQkq - 0 1");
 		cb->debugPrint();
 		

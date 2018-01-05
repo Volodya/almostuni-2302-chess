@@ -12,6 +12,9 @@
 
 #include "ChessBoard.hpp"
 #include "ChessMove.hpp"
+#include "ChessBoardFactory.hpp"
+
+
 
 #include <limits>
 
@@ -34,6 +37,11 @@ private:
 
 	int8_t *underAttackByWhite; // [rank*w+file]
 	int8_t *underAttackByBlack; // [rank*w+file]
+	
+	void calculatePossibleMoves_common(ChessBoardFactory &factory);
+	void calculatePossibleMoves_pawnfirst(ChessBoardFactory &factory);
+	void calculatePossibleMoves_enpassan(ChessBoardFactory &factory);
+	void calculatePossibleMoves_castling(ChessBoardFactory &factory);
 	
 public:
 	ChessBoardAnalysis(ChessBoard::ptr board_);

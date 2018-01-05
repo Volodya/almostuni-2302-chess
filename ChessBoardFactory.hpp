@@ -19,7 +19,7 @@ class ChessBoardFactory
 {
 	ChessBoard::ptr createBoard(ChessBoard::ptr fromBoard);
 public:
-	static std::vector<std::weak_ptr<ChessBoard>> allBoards;
+	//static std::vector<std::weak_ptr<ChessBoard>> allBoards;
 	ChessBoard::ptr createBoard();
 	ChessBoard::ptr createBoard(std::string fen);
 	ChessBoard::ptr createBoard(

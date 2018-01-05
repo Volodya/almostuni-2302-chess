@@ -102,18 +102,15 @@ ChessBoardAnalysis* ChessEngineWorker::calculation(ChessBoardAnalysis* analysis,
 	analysis->calculatePossibleMoves(); // must be first, even before depth check
 	if(depth==0)
 	{
-		//Log::info("depth 0");
 		return analysis;
 	}
 	if(analysis->isCheckMate() /* || node.isDraw() */)
 	{
-		//Log::info("i found a checkmate!");
 		return analysis;
 	}
 	auto possibleMoves = analysis->getPossibleMoves();
 	if(possibleMoves->empty())
 	{
-		//Log::info("no possible moves");
 		return analysis;
 	}
 	ChessBoardAnalysis* res=nullptr;
@@ -134,7 +131,6 @@ ChessBoardAnalysis* ChessEngineWorker::calculation(ChessBoardAnalysis* analysis,
 		functionsNum = 1;
 	}
 
-	//for(auto it=possibleMoves->begin(), end=possibleMoves->end(); it!=end; ++it)
 	for(size_t i=0, end=possibleMoves->size(); i<end; ++i)
 	{
 		//Log::info("for-loop start");

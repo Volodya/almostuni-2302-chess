@@ -19,14 +19,13 @@ bool ChessMove::isMovePossible(ChessBoard::ptr to)
 	auto & height = ChessBoard::param.height;
 	if(to->turn==ChessPlayerColour::BLACK)
 	{
-		// if it's white to move, we are looking for a black king
 		king = to->blackKingPos;
 	}
 	else
 	{
 		king = to->whiteKingPos;
 	}
-	
+/*	
 	auto & possiblePieces = ChessBoard::ChessBoard::param.possiblePieces;
 	for(
 		auto attackingPiece = possiblePieces.begin(), end=possiblePieces.end();
@@ -61,7 +60,144 @@ bool ChessMove::isMovePossible(ChessBoard::ptr to)
 			}
 		}
 	}
+*/
+	for(auto dir=bishopMove.begin(); dir!=bishopMove.end(); ++dir)
+	{
+		for(auto pos=dir->begin(); pos!=dir->end(); ++pos)
+		{
+			ChessBoard::BoardPosition_t file = (int)king[1] - (int)pos->first;
+			ChessBoard::BoardPosition_t rank = (int)king[2] - (int)pos->second;
+			if(rank >= height || file >= width )
+			{
+				break;
+			}
+			auto piece = to->getPiecePos(file, rank);
+			if(
+				( to->turn==ChessPlayerColour::WHITE && (piece==BISHOP_BLACK || piece==QUEEN_BLACK) )
+				||
+				( to->turn==ChessPlayerColour::BLACK && (piece==BISHOP_WHITE || piece==QUEEN_WHITE) )
+			)
+			{
+				return false;
+			}
+
+			if(piece!=EMPTY_CELL)
+			{
+				break;
+			}
+		}
+	}
+
+	for(auto dir=rookMove.begin(), dirEnd=rookMove.end(); dir!=dirEnd; ++dir)
+	{
+		for(auto pos=dir->begin(), posEnd=dir->end(); pos!=posEnd; ++pos)
+		{
+			ChessBoard::BoardPosition_t file = (int)king[1] - (int)pos->first;
+			ChessBoard::BoardPosition_t rank = (int)king[2] - (int)pos->second;
+			if(rank >= height || file >= width )
+			{
+				break;
+			}
+			auto piece = to->getPiecePos(file, rank);
+			if(
+				( to->turn==ChessPlayerColour::WHITE && (piece==ROOK_BLACK || piece==QUEEN_BLACK) )
+				||
+				( to->turn==ChessPlayerColour::BLACK && (piece==ROOK_WHITE || piece==QUEEN_WHITE) )
+			)
+			{
+				return false;
+			}
+
+			if(piece!=EMPTY_CELL)
+			{
+				break;
+			}
+		}
+	}
 	
+	for(auto dir=knightMove.begin(), dirEnd=knightMove.end(); dir!=dirEnd; ++dir)
+	{
+		for(auto pos=dir->begin(), posEnd=dir->end(); pos!=posEnd; ++pos)
+		{
+			ChessBoard::BoardPosition_t file = (int)king[1] - (int)pos->first;
+			ChessBoard::BoardPosition_t rank = (int)king[2] - (int)pos->second;
+			if(rank >= height || file >= width )
+			{
+				break;
+			}
+			auto piece = to->getPiecePos(file, rank);
+			if(
+				( to->turn==ChessPlayerColour::WHITE && (piece==KNIGHT_BLACK) )
+				||
+				( to->turn==ChessPlayerColour::BLACK && (piece==KNIGHT_WHITE) )
+			)
+			{
+				return false;
+			}
+
+			if(piece!=EMPTY_CELL)
+			{
+				break;
+			}
+		}
+	}
+	
+	auto dirStart = to->turn==ChessPlayerColour::WHITE ? pawnBlackMoveTake.begin() : pawnWhiteMoveTake.begin();
+	auto dirEnd = to->turn==ChessPlayerColour::WHITE ? pawnBlackMoveTake.end() : pawnWhiteMoveTake.end();
+	for(auto dir=dirStart; dir!=dirEnd; ++dir)
+	{
+		for(auto pos=dir->begin(), posEnd=dir->end(); pos!=posEnd; ++pos)
+		{
+			ChessBoard::BoardPosition_t file = (int)king[1] - (int)pos->first;
+			ChessBoard::BoardPosition_t rank = (int)king[2] - (int)pos->second;
+			if(rank >= height || file >= width )
+			{
+				break;
+			}
+			auto piece = to->getPiecePos(file, rank);
+			if(
+				( to->turn==ChessPlayerColour::WHITE && (piece==PAWN_BLACK) )
+				||
+				( to->turn==ChessPlayerColour::BLACK && (piece==PAWN_WHITE) )
+			)
+			{
+				return false;
+			}
+
+			if(piece!=EMPTY_CELL)
+			{
+				break;
+			}
+		}
+	}
+
+	for(auto dir=kingMove.begin(), dirEnd=kingMove.end(); dir!=dirEnd; ++dir)
+	{
+		for(auto pos=dir->begin(), posEnd=dir->end(); pos!=posEnd; ++pos)
+		{
+			ChessBoard::BoardPosition_t file = (int)king[1] - (int)pos->first;
+			ChessBoard::BoardPosition_t rank = (int)king[2] - (int)pos->second;
+			if(rank >= height || file >= width )
+			{
+				break;
+			}
+			auto piece = to->getPiecePos(file, rank);
+			if(
+				( to->turn==ChessPlayerColour::WHITE && (piece==KING_BLACK) )
+				||
+				( to->turn==ChessPlayerColour::BLACK && (piece==KING_WHITE) )
+			)
+			{
+				return false;
+			}
+
+			if(piece!=EMPTY_CELL)
+			{
+				break;
+			}
+		}
+	}
+
 	return true;
 }
 std::string ChessMove::getNotation(ChessBoard::ptr from, ChessBoard::ptr to)
