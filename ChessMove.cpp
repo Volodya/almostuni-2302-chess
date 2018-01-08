@@ -15,55 +15,21 @@ bool ChessMove::isMovePossible(ChessBoard::ptr to)
 	assert(to!=nullptr);
 
 	ChessBoard::BoardPosition_t *king = nullptr;
-	auto & width = ChessBoard::param.width;
-	auto & height = ChessBoard::param.height;
-	if(to->turn==ChessPlayerColour::BLACK)
-	{
-		king = to->blackKingPos;
-	}
-	else
+	const auto & width = ChessBoard::param.width;
+	const auto & height = ChessBoard::param.height;
+	const bool whiteTurn = (to->turn==ChessPlayerColour::WHITE);
+	if(whiteTurn)
 	{
 		king = to->whiteKingPos;
 	}
-/*	
-	auto & possiblePieces = ChessBoard::ChessBoard::param.possiblePieces;
-	for(
-		auto attackingPiece = possiblePieces.begin(), end=possiblePieces.end();
-		attackingPiece != end;
-		++attackingPiece )
+	else
 	{
-		if(*attackingPiece == EMPTY_CELL || getColour(*attackingPiece) == to->turn)
-		{
-			continue;
-		}
-		const MoveTemplate* takeMove = moveParameters.at(*attackingPiece)->takeMove;
-		for(auto dir=takeMove->begin(); dir!=takeMove->end(); ++dir)
-		{
-			for(auto pos=dir->begin(); pos!=dir->end(); ++pos)
-			{
-				ChessBoard::BoardPosition_t file = (int)king[1] - (int)pos->first;
-				ChessBoard::BoardPosition_t rank = (int)king[2] - (int)pos->second;
-				if(rank >= height || file >= width )
-				{
-					break;
-				}
-				auto piece = to->getPiecePos(file, rank);
-				if(piece==*attackingPiece)
-				{
-					return false;
-				}
-
-				if(piece!=EMPTY_CELL)
-				{
-					break;
-				}
-			}
-		}
+		king = to->blackKingPos;
 	}
-*/
-	for(auto dir=bishopMove.begin(); dir!=bishopMove.end(); ++dir)
+
+	for(auto dir=bishopMove.begin(), dirEnd=bishopMove.end(); dir!=dirEnd; ++dir)
 	{
-		for(auto pos=dir->begin(); pos!=dir->end(); ++pos)
+		for(auto pos=dir->begin(), posEnd=dir->end(); pos!=posEnd; ++pos)
 		{
 			ChessBoard::BoardPosition_t file = (int)king[1] - (int)pos->first;
 			ChessBoard::BoardPosition_t rank = (int)king[2] - (int)pos->second;
@@ -73,9 +39,9 @@ bool ChessMove::isMovePossible(ChessBoard::ptr to)
 			}
 			auto piece = to->getPiecePos(file, rank);
 			if(
-				( to->turn==ChessPlayerColour::WHITE && (piece==BISHOP_BLACK || piece==QUEEN_BLACK) )
+				(  whiteTurn && (piece==BISHOP_BLACK || piece==QUEEN_BLACK) )
 				||
-				( to->turn==ChessPlayerColour::BLACK && (piece==BISHOP_WHITE || piece==QUEEN_WHITE) )
+				( !whiteTurn && (piece==BISHOP_WHITE || piece==QUEEN_WHITE) )
 			)
 			{
 				return false;
@@ -100,9 +66,9 @@ bool ChessMove::isMovePossible(ChessBoard::ptr to)
 			}
 			auto piece = to->getPiecePos(file, rank);
 			if(
-				( to->turn==ChessPlayerColour::WHITE && (piece==ROOK_BLACK || piece==QUEEN_BLACK) )
+				(  whiteTurn && (piece==ROOK_BLACK || piece==QUEEN_BLACK) )
 				||
-				( to->turn==ChessPlayerColour::BLACK && (piece==ROOK_WHITE || piece==QUEEN_WHITE) )
+				( !whiteTurn && (piece==ROOK_WHITE || piece==QUEEN_WHITE) )
 			)
 			{
 				return false;
@@ -127,9 +93,9 @@ bool ChessMove::isMovePossible(ChessBoard::ptr to)
 			}
 			auto piece = to->getPiecePos(file, rank);
 			if(
-				( to->turn==ChessPlayerColour::WHITE && (piece==KNIGHT_BLACK) )
+				(  whiteTurn && (piece==KNIGHT_BLACK) )
 				||
-				( to->turn==ChessPlayerColour::BLACK && (piece==KNIGHT_WHITE) )
+				( !whiteTurn && (piece==KNIGHT_WHITE) )
 			)
 			{
 				return false;
@@ -156,9 +122,9 @@ bool ChessMove::isMovePossible(ChessBoard::ptr to)
 			}
 			auto piece = to->getPiecePos(file, rank);
 			if(
-				( to->turn==ChessPlayerColour::WHITE && (piece==PAWN_BLACK) )
+				(  whiteTurn && (piece==PAWN_BLACK) )
 				||
-				( to->turn==ChessPlayerColour::BLACK && (piece==PAWN_WHITE) )
+				( !whiteTurn && (piece==PAWN_WHITE) )
 			)
 			{
 				return false;
@@ -311,7 +277,7 @@ std::string ChessMove::generateCompleteMoveChain(ChessBoard::ptr finalBoard)
 	}
 	
 	auto from = finalBoard->from;
-	if(from)
+	if(!from)
 	{
 		return std::string("");
 	}

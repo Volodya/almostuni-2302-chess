@@ -38,11 +38,12 @@ private:
 	int8_t *underAttackByWhite; // [rank*w+file]
 	int8_t *underAttackByBlack; // [rank*w+file]
 	
-	void calculatePossibleMoves_common(ChessBoardFactory &factory);
-	void calculatePossibleMoves_pawnfirst(ChessBoardFactory &factory);
-	void calculatePossibleMoves_enpassan(ChessBoardFactory &factory);
-	void calculatePossibleMoves_castling(ChessBoardFactory &factory);
+	void calculatePossibleMoves_common();
+	void calculatePossibleMoves_pawnfirst();
+	void calculatePossibleMoves_enpassan();
+	void calculatePossibleMoves_castling();
 	
+	static ChessBoardFactory factory;
 public:
 	ChessBoardAnalysis(ChessBoard::ptr board_);
 	~ChessBoardAnalysis();
@@ -52,7 +53,7 @@ public:
 	bool isCheck() const; // call to this function is underfined without calculatePossibleMoves()
 
 	weight_type chessPiecesWeight() const; // simple piece count (can be shown to user)
-	weight_type chessPositionWeight() const; // analise the position, but not the tree
+	weight_type chessPositionWeight(bool log=false) const; // analise the position, but not the tree
 	
 	weight_type chessPieceAttackedWeight() const;
 	weight_type chessCentreControlWeight() const;
@@ -66,13 +67,14 @@ public:
 };
 
 constexpr ChessBoardAnalysis::weight_type
-	CHECKMATE_WEIGHT=-100000000000, // mate is always more important
-	BOARD_PAWN_WEIGHT=100000,
-	BOARD_KNIGHT_WEIGHT=300000,
-	BOARD_BISHOP_WEIGHT=300000,
-	BOARD_ROOK_WEIGHT=500000,
-	BOARD_QUEEN_WEIGHT=700000,
-	BOARD_KING_WEIGHT=400000,
+	PIECE_WEIGHT_MULTIPLIER=1000000,
+	CHECKMATE_WEIGHT=-100000*PIECE_WEIGHT_MULTIPLIER, // mate is always more important
+	BOARD_PAWN_WEIGHT=1*PIECE_WEIGHT_MULTIPLIER,
+	BOARD_KNIGHT_WEIGHT=3*PIECE_WEIGHT_MULTIPLIER,
+	BOARD_BISHOP_WEIGHT=3*PIECE_WEIGHT_MULTIPLIER,
+	BOARD_ROOK_WEIGHT=5*PIECE_WEIGHT_MULTIPLIER,
+	BOARD_QUEEN_WEIGHT=7*PIECE_WEIGHT_MULTIPLIER,
+	BOARD_KING_WEIGHT=4*PIECE_WEIGHT_MULTIPLIER,
 	
 	PIECE_ATTACK_MULTIPLIER=-4,
 	PIECE_DEFENCE_MUTIPLIER=1,

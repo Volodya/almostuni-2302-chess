@@ -17,6 +17,10 @@
 
 typedef ChessBoardAnalysis::weight_type weight_type;
 
+// static variables
+
+ChessBoardFactory ChessBoardAnalysis::factory;
+
 // helper
 
 inline constexpr weight_type domination(int8_t white, int8_t black)
@@ -64,7 +68,7 @@ void ChessBoardAnalysis::reset()
 	if(underAttackByBlack) delete[] underAttackByBlack;
 }
 
-void ChessBoardAnalysis::calculatePossibleMoves_common(ChessBoardFactory &factory)
+void ChessBoardAnalysis::calculatePossibleMoves_common()
 {
 	typedef ChessMove::ChessMoveRecordingFunction ChessMoveRecordingFunction;
 		// empty function
@@ -80,10 +84,10 @@ void ChessBoardAnalysis::calculatePossibleMoves_common(ChessBoardFactory &factor
 		// white turn
 		{
 			//white
-			[this, &factory](ChessBoard::BoardPosition_t pos, ChessBoard::BoardPosition_t newPos) {
+			[this](ChessBoard::BoardPosition_t pos, ChessBoard::BoardPosition_t newPos) {
 				assert(this->board->getTurn()==ChessPlayerColour::WHITE);
 				
-				auto nextBoard = factory.createBoard(this->board, pos, newPos);
+				auto nextBoard = ChessBoardAnalysis::factory.createBoard(this->board, pos, newPos);
 				
 				assert(nextBoard->getTurn()==ChessPlayerColour::BLACK);
 				
@@ -117,10 +121,10 @@ void ChessBoardAnalysis::calculatePossibleMoves_common(ChessBoardFactory &factor
 				}
 			},
 			// black
-			[this, &factory](ChessBoard::BoardPosition_t pos, ChessBoard::BoardPosition_t newPos) {
+			[this](ChessBoard::BoardPosition_t pos, ChessBoard::BoardPosition_t newPos) {
 				assert(this->board->getTurn()==ChessPlayerColour::BLACK);
 
-				auto nextBoard = factory.createBoard(this->board, pos, newPos);
+				auto nextBoard = ChessBoardAnalysis::factory.createBoard(this->board, pos, newPos);
 				
 				assert(nextBoard->getTurn()==ChessPlayerColour::WHITE);
 				
@@ -219,7 +223,7 @@ void ChessBoardAnalysis::calculatePossibleMoves_common(ChessBoardFactory &factor
 		}
 	}
 }
-void ChessBoardAnalysis::calculatePossibleMoves_pawnfirst(ChessBoardFactory &factory)
+void ChessBoardAnalysis::calculatePossibleMoves_pawnfirst()
 {
 	if(board->getTurn()==ChessPlayerColour::WHITE)
 	{
@@ -282,7 +286,7 @@ void ChessBoardAnalysis::calculatePossibleMoves_pawnfirst(ChessBoardFactory &fac
 	}
 }
 
-void ChessBoardAnalysis::calculatePossibleMoves_enpassan(ChessBoardFactory &factory)
+void ChessBoardAnalysis::calculatePossibleMoves_enpassan()
 {
 	if(board->getTurn()==ChessPlayerColour::WHITE)
 	{
@@ -380,7 +384,7 @@ void ChessBoardAnalysis::calculatePossibleMoves_enpassan(ChessBoardFactory &fact
 	}
 }
 
-void ChessBoardAnalysis::calculatePossibleMoves_castling(ChessBoardFactory &factory)
+void ChessBoardAnalysis::calculatePossibleMoves_castling()
 {
 	if(board->getTurn()==ChessPlayerColour::WHITE)
 	{
@@ -578,7 +582,6 @@ void ChessBoardAnalysis::calculatePossibleMoves_castling(ChessBoardFactory &fact
 
 void ChessBoardAnalysis::calculatePossibleMoves()
 {
-	ChessBoardFactory factory;
 	if(possibleMoves != nullptr)
 	{
 		return;
@@ -589,10 +592,10 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 
 	possibleMoves=new std::vector<ChessBoard::ptr>();
 
-	calculatePossibleMoves_common(factory);
-	calculatePossibleMoves_pawnfirst(factory);
-	calculatePossibleMoves_enpassan(factory);
-	calculatePossibleMoves_castling(factory);
+	calculatePossibleMoves_common();
+	calculatePossibleMoves_pawnfirst();
+	calculatePossibleMoves_enpassan();
+	calculatePossibleMoves_castling();
 	
 	std::sort(possibleMoves->begin(), possibleMoves->end(),
 			[](ChessBoard::ptr &l, ChessBoard::ptr &r) -> bool {
@@ -603,7 +606,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 	possibleMoves->shrink_to_fit();
 }
 
-weight_type ChessBoardAnalysis::chessPositionWeight() const
+weight_type ChessBoardAnalysis::chessPositionWeight(bool log) const
 {
 	/*if(!possibleMoves)
 	{
@@ -624,6 +627,13 @@ weight_type ChessBoardAnalysis::chessPositionWeight() const
 		weight_type wChessPieceAttacked = this->chessPieceAttackedWeight(); // count attacked pieces
 		weight_type wChessCentreControl = this->chessCentreControlWeight(); // control of the centre of the board
 
+		if(log)
+		{
+			Log::info(std::string("wChessPieces: ")+std::to_string(wChessPieces));
+			Log::info(std::string("wChessPieceAttacked: ")+std::to_string(wChessPieceAttacked));
+			Log::info(std::string("wChessPieceAttacked: ")+std::to_string(wChessPieceAttacked));
+			Log::info(std::string("wChessCentreControl: ")+std::to_string(wChessCentreControl));
+		}
 		return wChessPieces + wChessPieceAttacked + wChessCentreControl;
 	}
 }

@@ -187,7 +187,7 @@ void ChessEngineWorker::startNextMoveCalculationInternal(ChessBoard::ptr origina
 
 				Log::info(std::string("found best move. depth=")+std::to_string(depth));
 				Log::info(ChessMove::generateCompleteMoveChain(best->getBoard()));
-				Log::info(std::to_string(best->chessPositionWeight()));
+				Log::info(std::to_string(best->chessPositionWeight()/(double)(PIECE_WEIGHT_MULTIPLIER*PIECE_PRESENT_MILTIPLIER)));
 
 				positionPreferences.emplace_front(best->chessPositionWeight(), best->getBoard());
 				++depth;
