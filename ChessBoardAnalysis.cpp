@@ -23,7 +23,7 @@ ChessBoardFactory ChessBoardAnalysis::factory;
 
 // helper
 
-inline constexpr weight_type domination(int8_t white, int8_t black)
+inline constexpr weight_type domination(const int8_t &white, const int8_t &black)
 {
 	return
 		white==black ? 0 :
@@ -59,6 +59,7 @@ ChessBoardAnalysis::ChessBoardAnalysis(ChessBoard::ptr board_)
 
 ChessBoardAnalysis::~ChessBoardAnalysis()
 {
+	this->reset();
 }
 
 void ChessBoardAnalysis::reset()
@@ -66,6 +67,9 @@ void ChessBoardAnalysis::reset()
 	if(possibleMoves) delete possibleMoves;
 	if(underAttackByWhite) delete[] underAttackByWhite;
 	if(underAttackByBlack) delete[] underAttackByBlack;
+	
+	possibleMoves = nullptr;
+	underAttackByWhite = underAttackByBlack = nullptr;
 }
 
 void ChessBoardAnalysis::calculatePossibleMoves_common()
@@ -740,15 +744,12 @@ void ChessBoardAnalysis::clearPossibleMoves(ChessBoard::ptr toKeep)
 			(*it)->clearPossibleMoves();
 		}
 	}
+	this->reset();
 	if(toKeep)
 	{
-		possibleMoves->resize(1);
-		(*possibleMoves)[0]=toKeep;
-	}
-	else
-	{
-		delete possibleMoves;
-		possibleMoves=nullptr;
+		possibleMoves = new std::vector<ChessBoard::ptr>(1);
+		(*possibleMoves)[0]=std::move(toKeep);
+		possibleMoves->shrink_to_fit();
 	}
 }
 

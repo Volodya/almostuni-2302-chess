@@ -159,7 +159,7 @@ ChessBoardAnalysis* ChessEngineWorker::calculation(ChessBoardAnalysis* analysis,
 		if(beta <= alpha)
 		{
 			// remove unneeded part of the tree
-			possibleMoves->at(i)->clearPossibleMoves();
+			//possibleMoves->at(i)->clearPossibleMoves();
 			break;
 		}
 	}

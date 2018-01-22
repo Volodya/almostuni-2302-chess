@@ -23,8 +23,8 @@ int main()
 	try
 	{
 		ChessBoardFactory factory;
-		//auto cb = factory.createBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-		auto cb = factory.createBoard("4k3/8/8/8/8/8/8/qR4K1 w KQkq - 0 1");
+		auto cb = factory.createBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+		//auto cb = factory.createBoard("4k3/8/8/8/8/8/8/qR4K1 w KQkq - 0 1");
 		cb->debugPrint();
 		
 		ChessBoardAnalysis analysis(cb);

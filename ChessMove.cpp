@@ -223,8 +223,8 @@ void ChessMove::moveAttempts(
 		//Log::info("starting to process attempts");
 		for(auto attempt = direction->begin(), attemptEnd=direction->end(); attempt != attemptEnd; ++attempt)
 		{
-			const int& rankShift = attempt->second;
 			const int& fileShift = attempt->first;
+			const int& rankShift = attempt->second;
 			
 			ChessBoard::BoardPosition_t newFile = (int)file + fileShift;
 			ChessBoard::BoardPosition_t newRank = (int)rank + rankShift;

@@ -56,15 +56,15 @@ private:
 public:
 	~ChessBoard();
 	
-	bool isEmpty(char file, int rank) const;
-	bool isEmptyPos(BoardPosition_t file, BoardPosition_t rank) const;
-	bool isEmptyPos(BoardPosition_t pos) const;
-	void placePiece(char file, int rank, ChessPiece piece);
-	void placePiecePos(BoardPosition_t file, BoardPosition_t rank, ChessPiece piece);
-	void placePiecePos(BoardPosition_t pos, ChessPiece piece);
-	ChessPiece getPiece(char file, int rank) const;
-	ChessPiece getPiecePos(BoardPosition_t file, BoardPosition_t rank) const;
-	ChessPiece getPiecePos(BoardPosition_t pos) const;
+	bool isEmpty(const char &file, const int &rank) const;
+	bool isEmptyPos(const BoardPosition_t &file, const BoardPosition_t &rank) const;
+	bool isEmptyPos(const BoardPosition_t &pos) const;
+	void placePiece(const char &file, const int &rank, ChessPiece piece);
+	void placePiecePos(const BoardPosition_t &file, const BoardPosition_t &rank, ChessPiece piece);
+	void placePiecePos(const BoardPosition_t &pos, ChessPiece piece);
+	ChessPiece getPiece(const char &file, const int &rank) const;
+	ChessPiece getPiecePos(const BoardPosition_t &file, const BoardPosition_t &rank) const;
+	ChessPiece getPiecePos(const BoardPosition_t &pos) const;
 	ptr getFrom() const;
 	ChessPlayerColour getTurn() const;
 	uint16_t getMoveNum() const;

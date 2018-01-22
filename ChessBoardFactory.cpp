@@ -107,7 +107,7 @@ ChessBoard::ptr ChessBoardFactory::createBoard
 }
 
 ChessBoard::ptr ChessBoardFactory::createBoard
-  (ChessBoard::ptr fromBoard, size_t posFrom, size_t posTo)
+  (ChessBoard::ptr fromBoard, const size_t &posFrom, const size_t &posTo)
 {
 	ChessBoard::ptr toBoard = this->createBoard(fromBoard);
 	
@@ -161,7 +161,8 @@ ChessBoard::ptr ChessBoardFactory::createBoard
 }
 
 ChessBoard::ptr ChessBoardFactory::createBoard
-  (ChessBoard::ptr fromBoard, size_t posFrom1, size_t posTo1, size_t posFrom2, size_t posTo2)
+  (ChessBoard::ptr fromBoard, const size_t &posFrom1, const size_t &posTo1,
+  const size_t &posFrom2, const size_t &posTo2)
 {
 	ChessBoard::ptr toBoard = this->createBoard(fromBoard);
 	
