@@ -26,9 +26,8 @@ int main()
 		auto cb = factory.createBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 		//auto cb = factory.createBoard("4k3/8/8/8/8/8/8/qR4K1 w KQkq - 0 1");
 		cb->debugPrint();
-		
-		ChessBoardAnalysis analysis(cb);
-		analysis.calculatePossibleMoves();
+		//ChessBoardAnalysis analysis(cb);
+		//analysis.calculatePossibleMoves();
 		//std::cout << std::boolalpha << "isCheck " << analysis.isCheck() << std::endl;
 		//std::cout << std::boolalpha << "isCheckMate " << analysis.isCheckMate() << std::endl;
 		//std::cout << "Chess Pieces Weight " << analysis.chessPiecesWeight() << std::endl;
@@ -99,6 +98,10 @@ int main()
 			//std::cout << ChessBoardAnalysis::constructed << '/' << duration << ' ' << ChessBoardAnalysis::constructed / duration << std::endl;
 			
 			std::cout << "Number of made ChessBoard-s: " << ChessBoard::chessBoardCount << std::endl;
+			
+			std::cout << "Number of array creations: " << ChessBoard::chessBoardArrayCreateCount << std::endl;
+			std::cout << "Number of array recreations: " << ChessBoard::chessBoardArrayRecreateAttemptCount << std::endl;
+			std::cout << "Number of array deletions: " << ChessBoard::chessBoardArrayDeleteCount << std::endl;
 			
 			auto best = engine.getNextBestMove();
 			

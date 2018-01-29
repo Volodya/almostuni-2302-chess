@@ -13,6 +13,10 @@
 bool ChessMove::isMovePossible(ChessBoard::ptr to)
 {
 	assert(to!=nullptr);
+	
+	to->makeIFrame(); // rolling out the memory
+	// note it is not necessary here to free that memory
+	// we have two situations: board is deleted or board is tested
 
 	ChessBoard::BoardPosition_t *king = nullptr;
 	const auto & width = ChessBoard::param.width;

@@ -55,7 +55,7 @@ ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
 		{
 			auto piece = charToChessPiece(*it);
 			auto pos = cb->getPos(file, rank);
-			cb->placePiecePos(pos, piece);
+			cb->board[pos] = piece;
 			
 			// TODO: find how to realise this in FEN to make random chess work
 			if(piece==ROOK_WHITE && rank==0)

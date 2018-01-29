@@ -133,26 +133,35 @@ ChessBoardAnalysis* ChessEngineWorker::calculation(ChessBoardAnalysis* analysis,
 
 	for(size_t i=0, end=possibleMoves->size(); i<end; ++i)
 	{
-		//Log::info("for-loop start");
+		// take up memory
+		possibleMoves->at(i)->makeIFrame();
+		
 		// make new analysis
 		ChessBoardAnalysis* analysis = ChessBoard::getAnalysis(possibleMoves->at(i));
 
 		// we are changing res only if v also changes
 		auto potentialRes = calculation(std::move(analysis), depth-1, alpha, beta, maximizingPlayer);
 		auto potentialV = potentialRes->chessPositionWeight()*getWeightMultiplier(maximizingPlayer);
-		//Log::info(std::string("welcome back with the v=")+std::to_string(potentialV));
 		
 		//Log::info(std::string("test ")+std::to_string(potentialV)+std::string(" ")+std::to_string(v)+std::string(" ")+std::to_string(testBetterV(potentialV, v)));
 		if(functions[functionsNum].testBetterV(potentialV, v))
-		{
+		{			
 			//Log::info("test for better v passed");
 			res = std::move(potentialRes);
 			v = potentialV;
 			
 			if(i) // if(i>0)
 			{
+				// releasing memory of old best
+				possibleMoves->at(0)->makePFrame();
+				
 				std::swap<ChessBoard::ptr>(possibleMoves->operator[](0), possibleMoves->operator[](i));
 			}
+		}
+		else
+		{
+			// release memory
+			possibleMoves->at(i)->makePFrame();
 		}
 		alpha = functions[functionsNum].newAlpha(alpha, v);
 		beta = functions[functionsNum].newBeta(beta, v);

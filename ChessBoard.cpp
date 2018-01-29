@@ -21,6 +21,9 @@
 ChessGameParameters ChessBoard::param;
 
 int ChessBoard::chessBoardCount = 0;
+int ChessBoard::chessBoardArrayCreateCount = 0;
+int ChessBoard::chessBoardArrayRecreateAttemptCount = 0;
+int ChessBoard::chessBoardArrayDeleteCount = 0;
 
 // class functions
 
@@ -33,13 +36,14 @@ ChessBoard::ChessBoard()
 	++chessBoardCount;
 	
 	std::fill(board, board+param.cellCount, EMPTY_CELL);
+	std::fill(changes, changes+4, ChessBoardChange(param.cellCount, EMPTY_CELL));
 	std::fill(whiteKingPos, whiteKingPos+3, param.cellCount);
 	std::fill(blackKingPos, blackKingPos+3, param.cellCount);
 	
 	whiteCastling[0] = whiteCastling[1] = blackCastling[0] = blackCastling[1] = param.cellCount;
 }
 ChessBoard::ChessBoard(const ChessBoard::ptr& that)
-	: board(new ChessPiece[param.cellCount]),
+	: board(nullptr),
 	  enPassan(param.cellCount),
 	  moveNum(that->moveNum), turn(that->turn),
 	  from(that),
@@ -47,7 +51,7 @@ ChessBoard::ChessBoard(const ChessBoard::ptr& that)
 {
 	++chessBoardCount;
 	
-	std::copy(that->board, that->board+param.cellCount, this->board);
+	std::fill(changes, changes+4, ChessBoardChange(param.cellCount, EMPTY_CELL));
 
 	std::copy(that->whiteKingPos, that->whiteKingPos+3, this->whiteKingPos);
 	std::copy(that->blackKingPos, that->blackKingPos+3, this->blackKingPos);
@@ -60,10 +64,45 @@ ChessBoard::~ChessBoard()
 {
 	--chessBoardCount;
 	
-	delete[] board;
+	if(board)
+	{
+		delete[] board;
+	}
 	if(analysis)
 	{
 		delete analysis;
+	}
+}
+
+void ChessBoard::makeIFrame()
+{
+	if(!board)
+	{
+		++chessBoardArrayCreateCount;
+		board = new ChessPiece[param.cellCount];
+		std::copy(from->board, from->board+param.cellCount, board);
+		for(size_t i=0; i<4; ++i)
+		{
+			if(changes[i].pos==param.cellCount)
+			{
+				break;
+			}
+			board[changes[i].pos] = changes[i].piece;
+		}
+	}
+	else
+	{
+		++chessBoardArrayRecreateAttemptCount;
+	}
+}
+
+void ChessBoard::makePFrame()
+{
+	if(board)
+	{
+		++chessBoardArrayDeleteCount;
+		delete[] board;
+		board=nullptr;
 	}
 }
 
@@ -179,7 +218,20 @@ void ChessBoard::placePiecePos(const BoardPosition_t &file, const BoardPosition_
 }
 void ChessBoard::placePiecePos(const BoardPosition_t &pos, ChessPiece piece)
 {
-	board[pos] = std::move(piece);
+	if(board)
+	{
+		board[pos] = std::move(piece);
+	}
+	for(size_t i=0; i<4; ++i)
+	{
+		if(changes[i].pos==param.cellCount)
+		{
+			changes[i].pos = pos;
+			changes[i].piece = piece;
+			break;
+		}
+		assert(i!=3); // array has filled up (we have more than 3 changes)
+	}
 }
 ChessPiece ChessBoard::getPiece(const char &file, const int &rank) const
 {
@@ -193,6 +245,7 @@ ChessPiece ChessBoard::getPiecePos(const ChessBoard::BoardPosition_t &file, cons
 }
 ChessPiece ChessBoard::getPiecePos(const ChessBoard::BoardPosition_t &pos) const
 {
+	assert(board!=nullptr);
 	return board[pos];
 }
 

@@ -21,6 +21,16 @@
 
 class ChessBoardAnalysis;
 
+struct ChessBoardChange
+{
+	ChessGameParameters::BoardPosition_t pos;
+	ChessPiece piece;
+	
+	ChessBoardChange(ChessGameParameters::BoardPosition_t pos_=-1, ChessPiece piece_=EMPTY_CELL)
+	:pos(pos_), piece(piece_)
+	{}
+};
+
 class ChessBoard;
 
 class ChessBoard
@@ -34,7 +44,12 @@ public:
 	static ChessGameParameters param;
 		
 	static int chessBoardCount;
+	
+	static int chessBoardArrayCreateCount;
+	static int chessBoardArrayRecreateAttemptCount;
+	static int chessBoardArrayDeleteCount;
 private:
+	ChessBoardChange changes[4]; // maximum 4 changes allowed
 	ChessPiece* board; // [rank*w+file]
 
 	BoardPosition_t enPassan;
@@ -55,6 +70,9 @@ private:
 	ChessBoard(const ptr& that);
 public:
 	~ChessBoard();
+	
+	void makeIFrame(); // roll out, making easier to process
+	void makePFrame(); // release the memory keeping only the differences
 	
 	bool isEmpty(const char &file, const int &rank) const;
 	bool isEmptyPos(const BoardPosition_t &file, const BoardPosition_t &rank) const;
