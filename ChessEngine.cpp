@@ -117,22 +117,40 @@ ChessBoardAnalysis* ChessEngineWorker::calculation(ChessBoardAnalysis* analysis,
 	
 	weight_type v;
 	size_t functionsNum;
+	const int depthDecrements[2][3] = {{ 1, 2, 5 }, {5, 2, 1}};
+	const int * depthDec;
 	
 	if(maximizingPlayer == analysis->getBoard()->getTurn())
 	{
 		//Log::info("first set");
 		v = ChessBoardAnalysis::MIN_WEIGHT;
 		functionsNum = 0;
+		depthDec = depthDecrements[0];
 	}
 	else
 	{
 		//Log::info("second set");
 		v = ChessBoardAnalysis::MAX_WEIGHT;
 		functionsNum = 1;
+		depthDec = depthDecrements[1];
 	}
-
+	
+	int depthDecrement;
 	for(size_t i=0, end=possibleMoves->size(); i<end; ++i)
 	{
+		if(i<end/3)
+		{
+			depthDecrement=depthDec[0];
+		}
+		else if(i>end-end/3)
+		{
+			depthDecrement=depthDec[2];
+		}
+		else
+		{
+			depthDecrement=depthDec[1];
+		}
+		
 		// take up memory
 		possibleMoves->at(i)->makeIFrame();
 		
@@ -140,7 +158,7 @@ ChessBoardAnalysis* ChessEngineWorker::calculation(ChessBoardAnalysis* analysis,
 		ChessBoardAnalysis* analysis = ChessBoard::getAnalysis(possibleMoves->at(i));
 
 		// we are changing res only if v also changes
-		auto potentialRes = calculation(std::move(analysis), depth-1, alpha, beta, maximizingPlayer);
+		auto potentialRes = calculation(std::move(analysis), depth-depthDecrement, alpha, beta, maximizingPlayer);
 		auto potentialV = potentialRes->chessPositionWeight()*getWeightMultiplier(maximizingPlayer);
 		
 		//Log::info(std::string("test ")+std::to_string(potentialV)+std::string(" ")+std::to_string(v)+std::string(" ")+std::to_string(testBetterV(potentialV, v)));

@@ -17,16 +17,16 @@
 
 class ChessBoardFactory
 {
-	ChessBoard::ptr createBoard(ChessBoard::ptr fromBoard);
+	ChessBoard::ptr createBoard(const ChessBoard::ptr &fromBoard);
 public:
 	//static std::vector<std::weak_ptr<ChessBoard>> allBoards;
 	ChessBoard::ptr createBoard();
 	ChessBoard::ptr createBoard(std::string fen);
 	ChessBoard::ptr createBoard(
-		ChessBoard::ptr fromBoard,
+		const ChessBoard::ptr &fromBoard,
 		const size_t &posFrom, const size_t &posTo);
 	ChessBoard::ptr createBoard(
-		ChessBoard::ptr fromBoard,
+		const ChessBoard::ptr &fromBoard,
 		const size_t &posFrom1, const size_t &posTo1,
 		const size_t &posFrom2, const size_t &posTo2);
 };

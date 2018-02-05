@@ -12,6 +12,8 @@
 
 #include "Log.hpp"
 
+#include <iostream>
+
 //std::vector<std::weak_ptr<ChessBoard>> ChessBoardFactory::allBoards;
 
 	// starting position: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
@@ -92,9 +94,10 @@ ChessBoard::ptr ChessBoardFactory::createBoard(std::string fen)
 }
 
 ChessBoard::ptr ChessBoardFactory::createBoard
-  (ChessBoard::ptr fromBoard)
+  (const ChessBoard::ptr &fromBoard)
 {
-	ChessBoard::ptr toBoard(new ChessBoard(fromBoard));
+	auto tmp = new ChessBoard(fromBoard);
+	ChessBoard::ptr toBoard(tmp);
 	
 	toBoard->turn=!fromBoard->turn;
 	toBoard->moveNum=fromBoard->moveNum+1;
@@ -107,10 +110,9 @@ ChessBoard::ptr ChessBoardFactory::createBoard
 }
 
 ChessBoard::ptr ChessBoardFactory::createBoard
-  (ChessBoard::ptr fromBoard, const size_t &posFrom, const size_t &posTo)
+  (const ChessBoard::ptr &fromBoard, const size_t &posFrom, const size_t &posTo)
 {
 	ChessBoard::ptr toBoard = this->createBoard(fromBoard);
-	
 	// moving one of the pieces to the new position
 	assert(posFrom!=posTo);
 	auto piece = fromBoard->getPiecePos(posFrom);
@@ -161,7 +163,7 @@ ChessBoard::ptr ChessBoardFactory::createBoard
 }
 
 ChessBoard::ptr ChessBoardFactory::createBoard
-  (ChessBoard::ptr fromBoard, const size_t &posFrom1, const size_t &posTo1,
+  (const ChessBoard::ptr &fromBoard, const size_t &posFrom1, const size_t &posTo1,
   const size_t &posFrom2, const size_t &posTo2)
 {
 	ChessBoard::ptr toBoard = this->createBoard(fromBoard);
