@@ -53,8 +53,14 @@ ChessBoard::ChessBoard(const ChessBoard::ptr& that)
 	
 	std::fill(changes, changes+4, ChessBoardChange(param.cellCount, EMPTY_CELL));
 
-	std::copy(that->whiteKingPos, that->whiteKingPos+3, this->whiteKingPos);
-	std::copy(that->blackKingPos, that->blackKingPos+3, this->blackKingPos);
+	//std::copy(that->whiteKingPos, that->whiteKingPos+3, this->whiteKingPos);
+	//std::copy(that->blackKingPos, that->blackKingPos+3, this->blackKingPos);
+	whiteKingPos[0] = that->whiteKingPos[0];
+	whiteKingPos[1] = that->whiteKingPos[1];
+	whiteKingPos[2] = that->whiteKingPos[2];
+	blackKingPos[0] = that->blackKingPos[0];
+	blackKingPos[1] = that->blackKingPos[1];
+	blackKingPos[2] = that->blackKingPos[2];
 
 	std::copy(that->whiteCastling, that->whiteCastling+2, this->whiteCastling);
 	std::copy(that->blackCastling, that->blackCastling+2, this->blackCastling);

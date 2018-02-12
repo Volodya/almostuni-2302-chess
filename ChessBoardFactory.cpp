@@ -12,8 +12,6 @@
 
 #include "Log.hpp"
 
-#include <iostream>
-
 //std::vector<std::weak_ptr<ChessBoard>> ChessBoardFactory::allBoards;
 
 	// starting position: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
