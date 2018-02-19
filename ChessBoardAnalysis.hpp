@@ -17,7 +17,14 @@
 
 
 #include <limits>
+#include <array>
 
+enum class ChessGamePart
+{
+	BEGINNING,
+	MIDDLE,
+	ENDING
+};
 class ChessBoardAnalysis;
 class ChessBoardAnalysis
 {
@@ -52,11 +59,16 @@ public:
 	bool isCheckMate() const;  // call to this function is underfined without calculatePossibleMoves()
 	bool isCheck() const; // call to this function is underfined without calculatePossibleMoves()
 
-	weight_type chessPiecesWeight() const; // simple piece count (can be shown to user)
+	std::array<int16_t, KNOWN_CHESS_PIECE_COUNT> chessPiecesCount() const;
+	
+	weight_type chessPiecesWeight(const std::array<int16_t, KNOWN_CHESS_PIECE_COUNT> &count) const; // simple piece count (can be shown to user)
 	weight_type chessPositionWeight(bool log=false) const; // analise the position, but not the tree
 	
 	weight_type chessPieceAttackedWeight() const;
 	weight_type chessCentreControlWeight() const;
+	
+	ChessGamePart chessGamePart(const std::array<int16_t, KNOWN_CHESS_PIECE_COUNT> &count) const;
+	weight_type chessKingPositionWeight(ChessGamePart gamePart) const;
 	
 	void calculatePossibleMoves();
 	std::vector<ChessBoard::ptr> * const getPossibleMoves() const; // call to this function is underfined without calculatePossibleMoves()

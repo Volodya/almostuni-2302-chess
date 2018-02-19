@@ -21,7 +21,7 @@ bool ChessMove::isMovePossible(ChessBoard::ptr to)
 	ChessBoard::BoardPosition_t *king = nullptr;
 	const auto & width = ChessBoard::param.width;
 	const auto & height = ChessBoard::param.height;
-	const bool whiteTurn = (to->turn==ChessPlayerColour::WHITE);
+	const bool whiteTurn = (to->turn==ChessPlayerColour::BLACK);
 	if(whiteTurn)
 	{
 		king = to->whiteKingPos;
@@ -112,8 +112,8 @@ bool ChessMove::isMovePossible(ChessBoard::ptr to)
 		}
 	}
 	
-	auto dirStart = to->turn==ChessPlayerColour::WHITE ? pawnBlackMoveTake.begin() : pawnWhiteMoveTake.begin();
-	auto dirEnd = to->turn==ChessPlayerColour::WHITE ? pawnBlackMoveTake.end() : pawnWhiteMoveTake.end();
+	auto dirStart = whiteTurn ? pawnBlackMoveTake.begin() : pawnWhiteMoveTake.begin();
+	auto dirEnd = whiteTurn ? pawnBlackMoveTake.end() : pawnWhiteMoveTake.end();
 	for(auto dir=dirStart; dir!=dirEnd; ++dir)
 	{
 		for(auto pos=dir->begin(), posEnd=dir->end(); pos!=posEnd; ++pos)

@@ -612,13 +612,7 @@ void ChessBoardAnalysis::calculatePossibleMoves()
 
 weight_type ChessBoardAnalysis::chessPositionWeight(bool log) const
 {
-	/*if(!possibleMoves)
-	{
-		weight_type wChessPieces = this->chessPiecesWeight();	// count pieces
-		
-		return wChessPieces;
-	}
-	else */if(isCheckMate())
+	if(isCheckMate())
 	{
 		weight_type wIsCheckMate = getWeightMultiplier(board->getTurn()) * CHECKMATE_WEIGHT;
 		weight_type wMoveNum = getWeightMultiplier(board->getTurn())*board->getMoveNum();
@@ -627,7 +621,8 @@ weight_type ChessBoardAnalysis::chessPositionWeight(bool log) const
 	}
 	else
 	{
-		weight_type wChessPieces = this->chessPiecesWeight();	// count pieces
+		auto count = this->chessPiecesCount();
+		weight_type wChessPieces = this->chessPiecesWeight(count);	// count pieces weights
 		weight_type wChessPieceAttacked = this->chessPieceAttackedWeight(); // count attacked pieces
 		weight_type wChessCentreControl = this->chessCentreControlWeight(); // control of the centre of the board
 
@@ -642,14 +637,20 @@ weight_type ChessBoardAnalysis::chessPositionWeight(bool log) const
 	}
 }
 
-weight_type ChessBoardAnalysis::chessPiecesWeight() const
+std::array<int16_t, KNOWN_CHESS_PIECE_COUNT> ChessBoardAnalysis::chessPiecesCount() const
 {
-	int count[KNOWN_CHESS_PIECE_COUNT] = { 0 };
+	std::array<int16_t, KNOWN_CHESS_PIECE_COUNT> count{0};
+	
 	for(ChessBoard::BoardPosition_t pos=0, end=ChessBoard::param.cellCount; pos!=end; ++pos)
 	{
 		++count[board->getPiecePos(pos)]; // ChessPiece is a numerical constant
 	}
 	
+	return count;
+}
+
+weight_type ChessBoardAnalysis::chessPiecesWeight(const std::array<int16_t, KNOWN_CHESS_PIECE_COUNT> &count) const
+{
 	return
 		PIECE_PRESENT_MILTIPLIER * (
 		BOARD_PAWN_WEIGHT   * (count[PAWN_WHITE]   - count[PAWN_BLACK]) +
@@ -716,6 +717,11 @@ weight_type ChessBoardAnalysis::chessCentreControlWeight() const
 			* CELL_WEIGHT_MULTIPLIER;
 	}
 	return result;
+}
+
+weight_type chessKingPositionWeight() const
+{
+	
 }
 
 bool ChessBoardAnalysis::isCheck() const

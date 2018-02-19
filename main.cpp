@@ -24,7 +24,7 @@ int main()
 	{
 		ChessBoardFactory factory;
 		auto cb = factory.createBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-		//auto cb = factory.createBoard("4k3/8/8/8/8/8/P7/4K3 w KQkq - 0 1");
+		//auto cb = factory.createBoard("4k3/8/8/8/8/8/3p4/4K3 b KQkq - 0 1");
 		cb->debugPrint();
 		//ChessBoardAnalysis analysis(cb);
 		//analysis.calculatePossibleMoves();
@@ -104,6 +104,8 @@ int main()
 			std::cout << "Number of array deletions: " << ChessBoard::chessBoardArrayDeleteCount << std::endl;
 			
 			auto best = engine.getNextBestMove();
+			
+			std::cout << "Is Move Possible: " << std::boolalpha  << ChessMove::isMovePossible(best) << std::endl;
 			
 			engine.makeMove(best);
 			

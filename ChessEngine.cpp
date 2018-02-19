@@ -91,7 +91,7 @@ ChessEngineWorker::Functions_t ChessEngineWorker::functions[2] =
 		)
 	};
 ChessBoardAnalysis* ChessEngineWorker::calculation(ChessBoardAnalysis* analysis, int depth,
-		weight_type alpha, weight_type beta, ChessPlayerColour maximizingPlayer)
+		weight_type alpha, weight_type beta, ChessPlayerColour maximizingPlayer, bool initial)
 {
 	//Log::info(std::string("start calculation. depth=") + std::to_string(depth) + std::string(" player=") + std::to_string((int)maximizingPlayer));
 	//Log::info(std::string("board turn=") + std::to_string((int)analysis->getBoard()->getTurn()));
@@ -102,7 +102,15 @@ ChessBoardAnalysis* ChessEngineWorker::calculation(ChessBoardAnalysis* analysis,
 	analysis->calculatePossibleMoves(); // must be first, even before depth check
 	if(depth<=0)
 	{
-		return analysis;
+		if(initial)
+		{
+			return calculation(analysis, ADDITIONAL_CALCULATION_DEPTH, alpha, beta,
+				maximizingPlayer, false);
+		}
+		else
+		{
+			return analysis;
+		}
 	}
 	if(analysis->isCheckMate() /* || node.isDraw() */)
 	{
@@ -140,7 +148,7 @@ ChessBoardAnalysis* ChessEngineWorker::calculation(ChessBoardAnalysis* analysis,
 		ChessBoardAnalysis* analysis = ChessBoard::getAnalysis(possibleMoves->at(i));
 
 		// we are changing res only if v also changes
-		auto potentialRes = calculation(std::move(analysis), depth-1, alpha, beta, maximizingPlayer);
+		auto potentialRes = calculation(std::move(analysis), depth-1, alpha, beta, maximizingPlayer, initial);
 		auto potentialV = potentialRes->chessPositionWeight()*getWeightMultiplier(maximizingPlayer);
 		
 		//Log::info(std::string("test ")+std::to_string(potentialV)+std::string(" ")+std::to_string(v)+std::string(" ")+std::to_string(testBetterV(potentialV, v)));
@@ -169,6 +177,10 @@ ChessBoardAnalysis* ChessEngineWorker::calculation(ChessBoardAnalysis* analysis,
 		{
 			// remove unneeded part of the tree
 			//possibleMoves->at(i)->clearPossibleMoves();
+			break;
+		}
+		if(!initial && i>=ADDITIONAL_CALCULATION_WIDTH)
+		{
 			break;
 		}
 	}

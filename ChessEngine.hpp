@@ -20,6 +20,8 @@ class ChessEngine;
 
 class ChessEngineWorker
 {
+	static const size_t ADDITIONAL_CALCULATION_WIDTH = 2;
+	static const int ADDITIONAL_CALCULATION_DEPTH = 2;
 	struct Functions_t
 	{
 		typedef ChessBoardAnalysis::weight_type weight_type;
@@ -53,7 +55,7 @@ class ChessEngineWorker
 	void startNextMoveCalculationInternal(ChessBoard::ptr original, int startDepth); // this is what performs execution
 	
 	ChessBoardAnalysis* calculation(ChessBoardAnalysis* analysis, int depth,
-		weight_type alpha, weight_type beta, ChessPlayerColour maximizingPlayer);
+		weight_type alpha, weight_type beta, ChessPlayerColour maximizingPlayer, bool initial=true);
 };
 class ChessEngineWorkerInterruptedException
 {};
