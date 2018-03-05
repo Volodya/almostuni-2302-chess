@@ -21,9 +21,9 @@
 
 enum class ChessGamePart
 {
-	BEGINNING,
-	MIDDLE,
-	ENDING
+	OPENING,
+	MID_GAME,
+	END_GAME
 };
 class ChessBoardAnalysis;
 class ChessBoardAnalysis
@@ -61,6 +61,7 @@ public:
 
 	std::array<int16_t, KNOWN_CHESS_PIECE_COUNT> chessPiecesCount() const;
 	
+	weight_type chessPiecesWeight() const; // simple piece count (can be shown to user)
 	weight_type chessPiecesWeight(const std::array<int16_t, KNOWN_CHESS_PIECE_COUNT> &count) const; // simple piece count (can be shown to user)
 	weight_type chessPositionWeight(bool log=false) const; // analise the position, but not the tree
 	

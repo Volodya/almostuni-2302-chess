@@ -649,6 +649,40 @@ std::array<int16_t, KNOWN_CHESS_PIECE_COUNT> ChessBoardAnalysis::chessPiecesCoun
 	return count;
 }
 
+ChessGamePart ChessBoardAnalysis::chessGamePart(const std::array<int16_t, KNOWN_CHESS_PIECE_COUNT> &count) const
+{
+	int countFigures = 0;
+	for(size_t i=0; i<KNOWN_CHESS_PIECE_COUNT; ++i)
+	{
+		if(i==EMPTY_CELL ||
+			i==PAWN_WHITE || i==PAWN_BLACK ||
+			i==KING_WHITE || i==KING_BLACK
+		)
+		{
+			continue;
+		}
+		countFigures += count[i];
+	}
+	
+	if(countFigures <= 4)
+	{
+		return ChessGamePart::END_GAME;
+	}
+	else if(countFigures <= 10)
+	{
+		return ChessGamePart::MID_GAME;
+	}
+	else
+	{
+		return ChessGamePart::OPENING;
+	}
+}
+
+weight_type ChessBoardAnalysis::chessPiecesWeight() const
+{
+	return this->chessPiecesWeight(this->chessPiecesCount());
+}
+
 weight_type ChessBoardAnalysis::chessPiecesWeight(const std::array<int16_t, KNOWN_CHESS_PIECE_COUNT> &count) const
 {
 	return
@@ -719,9 +753,68 @@ weight_type ChessBoardAnalysis::chessCentreControlWeight() const
 	return result;
 }
 
-weight_type chessKingPositionWeight() const
+weight_type ChessBoardAnalysis::chessKingPositionWeight(ChessGamePart gamePart) const
 {
-	
+	if(gamePart==ChessGamePart::END_GAME)
+	{
+		int wh = ChessBoard::param.width - board->whiteKingPos[1];
+		int wv = ChessBoard::param.height - board->whiteKingPos[2];
+		int bh = ChessBoard::param.width - board->blackKingPos[1];
+		int bv = ChessBoard::param.height - board->blackKingPos[2];
+		wh = wh<0 ? -wh : wh;
+		wv = wv<0 ? -wv : wv;
+		bh = bh<0 ? -bh : bh;
+		bv = bv<0 ? -bv : bv;
+		
+		int wd = wh + wv;
+		int bd = bh + bv;
+		
+		return (wd - bd);
+	}
+	else//(gamePart==ChessGamePart::MID_GAME || gamePart==ChessGamePart::OPENING)
+	{
+		int res = 0;
+		const std::pair<int, int> neighbours[8] = {
+			std::pair<int, int>(-1, -1),
+			std::pair<int, int>(-1, 0),
+			std::pair<int, int>(-1, 1),
+			std::pair<int, int>(0, -1),
+			std::pair<int, int>(0, 1),
+			std::pair<int, int>(1, -1),
+			std::pair<int, int>(1, 0),
+			std::pair<int, int>(1, 1)
+		};
+		
+		size_t x, y;
+		for(auto p : neighbours)
+		{
+			x = board->whiteKingPos[1] + p.first;
+			y = board->whiteKingPos[2] + p.second;
+			
+			if(x >= ChessBoard::param.width || y >= ChessBoard::param.height)
+			{
+				++res;
+				continue;
+			}
+			
+			res+=domination(underAttackByWhite[y*ChessBoard::param.width+x], underAttackByBlack[y*ChessBoard::param.width+x]);
+		}
+		for(auto p : neighbours)
+		{
+			x = board->blackKingPos[1] + p.first;
+			y = board->blackKingPos[2] + p.second;
+			
+			if(x >= ChessBoard::param.width || y >= ChessBoard::param.height)
+			{
+				--res;
+				continue;
+			}
+			
+			res+=domination(underAttackByWhite[y*ChessBoard::param.width+x], underAttackByBlack[y*ChessBoard::param.width+x]);
+		}
+		
+		return res;
+	}
 }
 
 bool ChessBoardAnalysis::isCheck() const
